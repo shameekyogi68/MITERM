@@ -24,38 +24,39 @@ export default function AppShell({
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background mesh-bg dot-grid">
       {/* Premium ambient background gradient */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl" />
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute -top-40 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] animate-ambient" />
+        <div className="absolute top-1/3 right-10 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[100px] animate-ambient" style={{ animationDelay: '-4s' }} />
+        <div className="absolute -bottom-40 left-10 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px] animate-ambient" style={{ animationDelay: '-2s' }} />
       </div>
 
       {/* Gradient accent line at top */}
-      <div className="fixed top-0 left-0 right-0 z-[60] h-0.5 bg-gradient-to-r from-primary via-purple-500 to-primary bg-[length:200%_100%] animate-[border-flow_3s_linear_infinite]" />
+      <div className="fixed top-0 left-0 right-0 z-[60] h-1 bg-gradient-to-r from-primary via-purple-500 to-primary bg-[length:200%_100%] animate-[border-flow_3s_linear_infinite]" />
 
       <header
-        className={`sticky top-0.5 z-50 w-full border-b transition-all duration-300 ${
+        className={`sticky top-1.5 z-50 w-[calc(100%-2rem)] mx-auto border-b transition-all duration-300 rounded-2xl ${
           scrolled
-            ? "bg-background/90 backdrop-blur-2xl shadow-lg shadow-primary/5 border-primary/10"
-            : "bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60"
+            ? "bg-card/75 backdrop-blur-2xl shadow-2xl border-white/5"
+            : "bg-background/40 backdrop-blur-md border-primary/5"
         }`}
       >
         <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
           <div className="flex items-center gap-3">
             <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-purple-600 text-primary-foreground shadow-lg shadow-primary/20 animate-float">
-              <Car className="h-5 w-5" />
+              <Car className="h-5 w-5 text-white" />
               {/* Glow ring */}
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary to-purple-600 opacity-30 blur-md -z-10" />
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary to-purple-600 opacity-40 blur-md -z-10" />
             </div>
             <div className="flex items-center gap-3">
               <div>
                 <h1 className="text-lg font-bold tracking-tight flex items-center gap-1.5">
                   <span className="gradient-text">MITE</span>
-                  <span className="text-foreground">Ride Manager</span>
+                  <span className="text-foreground font-extrabold">Ride Manager</span>
                   <Sparkles className="h-3.5 w-3.5 text-primary/60 animate-pulse-soft" />
                 </h1>
-                <p className="text-[10px] leading-none text-muted-foreground tracking-wider uppercase font-medium">
+                <p className="text-[9px] leading-none text-muted-foreground tracking-widest uppercase font-semibold">
                   Expense Tracker
                 </p>
               </div>

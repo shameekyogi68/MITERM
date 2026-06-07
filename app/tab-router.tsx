@@ -133,8 +133,8 @@ export default function TabRouter({
   return (
     <div className="space-y-6 pb-28 md:pb-0 animate-fade-in">
       {/* Floating Bottom Tab Navigation on Mobile, original Top Navigation on Desktop */}
-      <div className="fixed bottom-4 left-4 right-4 z-50 md:relative md:bottom-auto md:left-auto md:right-auto bg-background/80 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none border border-primary/10 md:border-0 rounded-2xl md:rounded-none shadow-2xl md:shadow-none p-1 md:p-0 max-w-4xl mx-auto">
-        <div className="relative rounded-2xl glass-strong md:shadow-lg md:shadow-primary/5 p-1">
+      <div className="fixed bottom-6 left-4 right-4 z-50 md:relative md:bottom-auto md:left-auto md:right-auto bg-transparent border-0 rounded-2xl p-0 max-w-4xl mx-auto">
+        <div className="relative rounded-2xl glass-premium p-1.5 shadow-2xl">
           <div className="flex gap-1 relative z-10">
             {visibleTabs.map((tab) => {
               const Icon = tab.icon;
@@ -153,8 +153,8 @@ export default function TabRouter({
                       : "text-muted-foreground hover:text-foreground hover:bg-white/5"
                   }`}
                 >
-                  <Icon className={`h-4.5 w-4.5 shrink-0 transition-transform duration-300 ${isActive ? "scale-110" : ""}`} />
-                  <span className="text-[9px] xs:text-[10px] md:text-xs block md:hidden truncate max-w-full font-medium">{tab.shortLabel}</span>
+                  <Icon className={`h-4.5 w-4.5 shrink-0 transition-transform duration-300 ${isActive ? "scale-110 text-primary drop-shadow-[0_0_8px_rgba(244,63,94,0.5)]" : ""}`} />
+                  <span className="text-[9px] xs:text-[10px] md:text-xs block md:hidden truncate max-w-full font-semibold">{tab.shortLabel}</span>
                   <span className="text-xs font-semibold hidden md:block truncate max-w-full">{tab.label}</span>
                 </button>
               );
@@ -163,10 +163,11 @@ export default function TabRouter({
           {/* Animated sliding indicator */}
           {indicatorStyle.width > 0 && (
             <div
-              className="absolute bottom-1 top-1 rounded-xl bg-gradient-to-r from-primary to-purple-600 shadow-lg shadow-primary/30 transition-all duration-300 ease-out z-0"
+              className="absolute bottom-1.5 top-1.5 rounded-xl bg-gradient-to-r from-primary to-purple-600 shadow-xl shadow-primary/30 transition-all duration-300 ease-out z-0"
               style={{
                 left: indicatorStyle.left,
                 width: indicatorStyle.width,
+                boxShadow: "0 0 15px oklch(0.62 0.22 20 / 40%)",
               }}
             />
           )}
