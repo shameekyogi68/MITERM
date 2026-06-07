@@ -12,12 +12,28 @@ export async function GET(request: Request) {
   let source: PetrolSource = "API";
 
   try {
-    // Attempt external petrol price API (placeholder — replace with real API key)
-    // const res = await fetch(`https://api.data.gov.in/resource/...?api-key=${process.env.PETROL_API_KEY}&format=json`);
-    // const data = await res.json();
-    // price = data?.records?.[0]?.price;
-    throw new Error("No API configured — using fallback");
-  } catch {
+    if (!process.env.PETROL_API_KEY) {
+      throw new Error("PETROL_API_KEY is not configured.");
+    }
+    const res = await fetch(
+      "https://fuel.indianapi.in/live_fuel_price?fuel_type=petrol&location_type=city",
+      {
+        headers: {
+          "x-api-key": process.env.PETROL_API_KEY,
+        },
+      }
+    );
+    if (!res.ok) throw new Error(`API responded with status ${res.status}`);
+    const data = await res.json();
+    const udupiData = data.find((item: any) => item.city?.toLowerCase() === "udupi");
+    if (udupiData && udupiData.price) {
+      price = parseFloat(udupiData.price);
+      source = "API";
+    } else {
+      throw new Error("Udupi petrol price not found in API response");
+    }
+  } catch (err) {
+    console.warn("External petrol API failed, using fallback:", err);
     // Fallback: use previous day's price
     const yesterday = await prisma.petrolPrice.findFirst({
       orderBy: { date: "desc" },
