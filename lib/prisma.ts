@@ -11,7 +11,7 @@ if (typeof window === "undefined") {
   if (globalForPrisma.prisma) {
     prismaInstance = globalForPrisma.prisma;
   } else {
-    const connectionString = process.env.DATABASE_URL || "postgresql://dummy:dummy@localhost:5432/dummy";
+    const connectionString = process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL || "postgresql://dummy:dummy@localhost:5432/dummy";
     const pool = new Pool({ connectionString });
     const adapter = new PrismaPg(pool);
     prismaInstance = new PrismaClient({
