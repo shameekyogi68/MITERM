@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { exec } from "child_process";
 import path from "path";
+import { promisify } from "util";
+
+const execAsync = promisify(exec);
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request: Request) {
+export async function GET(request: Request): Promise<Response> {
   const { searchParams } = new URL(request.url);
   const action = searchParams.get("action") || "migrate";
 
@@ -21,17 +24,21 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   }
 
-  return new Promise((resolve) => {
-    exec(cmd, { env: { ...process.env } }, (error, stdout, stderr) => {
-      resolve(
-        NextResponse.json({
-          command: cmd,
-          success: !error,
-          error: error ? error.message : null,
-          stdout: stdout.toString(),
-          stderr: stderr.toString(),
-        })
-      );
+  try {
+    const { stdout, stderr } = await execAsync(cmd, { env: { ...process.env } });
+    return NextResponse.json({
+      command: cmd,
+      success: true,
+      stdout,
+      stderr,
     });
-  });
+  } catch (error: any) {
+    return NextResponse.json({
+      command: cmd,
+      success: false,
+      error: error.message,
+      stdout: error.stdout || "",
+      stderr: error.stderr || "",
+    });
+  }
 }
