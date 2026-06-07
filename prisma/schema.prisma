@@ -1,0 +1,140 @@
+generator client {
+  provider   = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ── Enums ────────────────────────────────────────────────────────────────────
+
+enum RideStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  VERIFICATION
+  PAID
+  OVERDUE
+}
+
+enum PaymentAction {
+  MARKED_PAID
+  MARKED_UNPAID
+  VERIFIED
+  CANCELLED
+}
+
+enum ExpenseType {
+  TOLL
+  PARKING
+  MAINTENANCE
+  FASTAG
+  OTHER
+}
+
+enum PetrolSource {
+  MANUAL
+  API
+  CACHE
+}
+
+// ── Models ───────────────────────────────────────────────────────────────────
+
+model Member {
+  id        String         @id @default(cuid())
+  name      String         @unique
+  distance  Float
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  rides     RideAttendee[]
+
+  @@index([name])
+}
+
+model Ride {
+  id           String         @id @default(cuid())
+  date         DateTime
+  petrolPrice  Float
+  fuelCost     Float
+  totalCost    Float
+  status       RideStatus     @default(ACTIVE)
+  notes        String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  attendees    RideAttendee[]
+  expenses     Expense[]
+
+  @@index([date])
+  @@index([status])
+}
+
+model RideAttendee {
+  id         String        @id @default(cuid())
+  rideId     String
+  memberId   String
+  weight     Float
+  share      Float
+  status     PaymentStatus @default(PENDING)
+  paidAt     DateTime?
+  verifiedAt DateTime?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  ride       Ride          @relation(fields: [rideId], references: [id], onDelete: Cascade)
+  member     Member        @relation(fields: [memberId], references: [id])
+
+  @@unique([rideId, memberId])
+  @@index([status])
+  @@index([memberId])
+  @@index([rideId, status])
+  @@index([memberId, status])
+}
+
+model Expense {
+  id          String      @id @default(cuid())
+  rideId      String
+  type        ExpenseType
+  amount      Float
+  description String?
+  createdAt   DateTime    @default(now())
+  ride        Ride        @relation(fields: [rideId], references: [id], onDelete: Cascade)
+
+  @@index([rideId])
+}
+
+model PaymentLog {
+  id          String        @id @default(cuid())
+  rideId      String
+  memberId    String
+  action      PaymentAction
+  performedBy String
+  metadata    Json?
+  createdAt   DateTime      @default(now())
+
+  @@index([rideId])
+  @@index([memberId])
+  @@index([rideId, memberId])
+  @@index([createdAt])
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
+model PetrolPrice {
+  id        String       @id @default(cuid())
+  price     Float
+  date      DateTime     @unique
+  source    PetrolSource
+  createdAt DateTime     @default(now())
+
+  @@index([date])
+}
