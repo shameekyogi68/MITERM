@@ -30,10 +30,14 @@ export async function updateSetting(
     }
 
     // Type-safe value validation for known settings
-    const numericSettings = ["mileage", "routeDistance"];
+    const numericSettings = ["mileage", "routeDistance", "petrolPriceOffset"];
     if (numericSettings.includes(key)) {
       const num = Number(value);
-      if (isNaN(num) || num <= 0 || num > 10000) {
+      if (key === "petrolPriceOffset") {
+        if (isNaN(num) || num < -100 || num > 100) {
+          return { success: false, error: "Petrol price offset must be between -100 and 100." };
+        }
+      } else if (isNaN(num) || num <= 0 || num > 10000) {
         return { success: false, error: "Invalid numeric value for this setting." };
       }
       value = num;
@@ -54,11 +58,16 @@ export async function updateSetting(
 
 // ── GET TODAY'S PETROL PRICE ─────────────────────────────────────────────────
 export async function getTodayPetrolPrice() {
-  const latest = await prisma.petrolPrice.findFirst({
-    orderBy: { date: "desc" },
-  });
+  const [latest, offsetSetting] = await Promise.all([
+    prisma.petrolPrice.findFirst({
+      orderBy: { date: "desc" },
+    }),
+    prisma.setting.findUnique({ where: { key: "petrolPriceOffset" } }),
+  ]);
+  const offset = offsetSetting?.value && typeof offsetSetting.value === "number" ? offsetSetting.value : 0;
+  const basePrice = latest?.price ?? 110;
   return {
-    price: latest?.price ?? 110,
+    price: basePrice + offset,
     source: (latest?.source ?? "CACHE") as string,
     lastUpdated: latest?.date ?? new Date(),
   };

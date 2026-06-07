@@ -4,12 +4,15 @@ import { prisma } from "@/lib/prisma";
 import { isOverdue } from "@/lib/utils";
 
 export async function getDashboardStats() {
-  const [allAttendees, petrolPrice] = await Promise.all([
+  const [allAttendees, petrolPrice, offsetSetting] = await Promise.all([
     prisma.rideAttendee.findMany({
       include: { member: true, ride: true },
     }),
     prisma.petrolPrice.findFirst({ orderBy: { date: "desc" } }),
+    prisma.setting.findUnique({ where: { key: "petrolPriceOffset" } }),
   ]);
+
+  const offset = offsetSetting?.value && typeof offsetSetting.value === "number" ? offsetSetting.value : 0;
 
   const pending = allAttendees.filter(
     (a: any) => a.status === "PENDING" || a.status === "VERIFICATION",
@@ -40,7 +43,7 @@ export async function getDashboardStats() {
     orderBy: { date: "asc" },
   });
 
-  const currentPrice = petrolPrice?.price ?? 110;
+  const currentPrice = (petrolPrice?.price ?? 110) + offset;
   const todayFuelCost = 15.75 * currentPrice;
   const totalRides = await prisma.ride.count();
 

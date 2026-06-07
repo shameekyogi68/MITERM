@@ -27,6 +27,7 @@ async function main() {
     { key: 'qrImageUrl', value: '' },
     { key: 'adminSecretUrl', value: 'mite-admin-2026' },
     { key: 'roundingRule', value: 'ADJUST_TO_ADMIN' },
+    { key: 'petrolPriceOffset', value: 8.39 },
   ];
 
   for (const s of settings) {

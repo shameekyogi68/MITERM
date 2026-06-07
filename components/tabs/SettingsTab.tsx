@@ -18,6 +18,7 @@ import {
   Copy,
   Save,
   Image,
+  IndianRupee,
 } from "lucide-react";
 import {
   getAllSettings,
@@ -188,6 +189,25 @@ export default function SettingsTab() {
                   className="w-20 rounded-xl border bg-card px-3 py-2 text-sm text-right transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
                 <span className="text-xs text-muted-foreground">km/L</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <IndianRupee className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">Petrol Price Offset</p>
+                  <p className="text-[10px] text-muted-foreground">Manual correction to API price</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={(settings.petrolPriceOffset as number) ?? 0}
+                  onChange={(e) => handleSaveSetting("petrolPriceOffset", Number(e.target.value))}
+                  className="w-20 rounded-xl border bg-card px-3 py-2 text-sm text-right transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+                />
+                <span className="text-xs text-muted-foreground">₹</span>
               </div>
             </div>
           </div>
