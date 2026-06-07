@@ -18,7 +18,7 @@ export const EXPENSE_TYPES = ['TOLL', 'PARKING', 'MAINTENANCE', 'FASTAG', 'OTHER
 export const OVERDUE_DAYS = 3;
 
 export const ADMIN_PARAM = 'admin';
-export const ADMIN_SECRET = process.env.ADMIN_SECRET ?? 'mite-admin-2026';
+export const ADMIN_SECRET = process.env.ADMIN_SECRET ?? 'shameekyogi68';
 
 export const MEMBER_WEIGHTS_6: Record<string, number> = {
   Shameek: 1.10,

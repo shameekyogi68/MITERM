@@ -25,7 +25,7 @@ async function main() {
     { key: 'mileage', value: 16 },
     { key: 'routeDistance', value: 252 },
     { key: 'qrImageUrl', value: '' },
-    { key: 'adminSecretUrl', value: 'mite-admin-2026' },
+    { key: 'adminSecretUrl', value: 'shameekyogi68' },
     { key: 'roundingRule', value: 'ADJUST_TO_ADMIN' },
     { key: 'petrolPriceOffset', value: 8.39 },
   ];

@@ -219,7 +219,7 @@ export default function SettingsTab() {
             <div className="rounded-xl bg-muted/30 p-4">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-1">Secret URL</p>
               <p className="text-sm font-mono text-primary break-all">
-                /?admin={String(settings.adminSecretUrl ?? "mite-admin-2026")}
+                /?admin={String(settings.adminSecretUrl ?? "shameekyogi68")}
               </p>
             </div>
             <div className="flex items-center gap-2 rounded-xl bg-destructive/10 px-4 py-2.5">

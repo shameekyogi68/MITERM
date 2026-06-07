@@ -8,7 +8,7 @@ export default async function Home({
   searchParams: Promise<{ admin?: string }>;
 }) {
   const params = await searchParams;
-  const adminSecret = process.env.ADMIN_SECRET || "mite-admin-2026";
+  const adminSecret = process.env.ADMIN_SECRET || "shameekyogi68";
   const isAdmin = params.admin === adminSecret;
 
   return (
