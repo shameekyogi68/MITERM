@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Upload, Check, QrCode, Loader2, ArrowRight, ShieldCheck } from "lucide-react";
+import { X, Upload, Check, QrCode, Loader2, ArrowRight, ShieldCheck, Download } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { markPayment, verifyPayment, adminMarkPaid } from "@/app/actions/payment.actions";
 import { getSetting } from "@/app/actions/settings.actions";
@@ -96,6 +96,16 @@ export default function PaymentDialog({
     }
   };
 
+  const handleDownloadQr = () => {
+    if (!qrImageUrl) return;
+    const a = document.createElement("a");
+    a.href = qrImageUrl;
+    a.download = `shameek-upi-qr-${memberName}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
@@ -154,17 +164,20 @@ export default function PaymentDialog({
             </div>
           ) : (
             <div className="space-y-5 px-6 pb-6">
-              {/* Amount Card */}
-              <div className="relative rounded-xl bg-gradient-to-br from-primary/5 to-purple-500/5 border border-primary/10 p-5 overflow-hidden">
-                <div className="absolute top-0 right-0 h-20 w-20 rounded-bl-full bg-gradient-to-br from-primary/5 to-transparent" />
+              {/* Amount Card (Receipt Style) */}
+              <div className="relative rounded-xl bg-gradient-to-br from-primary/5 via-purple-500/[0.02] to-card border border-primary/10 p-5 overflow-hidden">
+                {/* Decorative Ticket Notch holes on left & right borders */}
+                <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-background border-r border-primary/10 z-20" />
+                <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-background border-l border-primary/10 z-20" />
+                
                 <div className="relative flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-muted-foreground">Trip Date</p>
-                    <p className="text-sm font-medium">{formatDate(rideDate)}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Trip Date</p>
+                    <p className="text-sm font-semibold mt-0.5">{formatDate(rideDate)}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-muted-foreground">Amount Due</p>
-                    <p className="text-2xl font-bold gradient-text">{formatCurrency(amount)}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Share Due</p>
+                    <p className="text-2xl font-extrabold gradient-text mt-0.5">{formatCurrency(amount)}</p>
                   </div>
                 </div>
               </div>
@@ -172,12 +185,17 @@ export default function PaymentDialog({
               {/* QR Code */}
               <div className="flex flex-col items-center gap-3">
                 {qrImageUrl ? (
-                  <div className="rounded-2xl border-2 border-primary/20 bg-white p-4 shadow-lg shadow-primary/5">
+                  <div className="relative group rounded-2xl border border-primary/20 bg-white p-4 shadow-lg shadow-primary/5 transition-all duration-300 hover:shadow-xl">
                     <img
                       src={qrImageUrl}
                       alt="Payment QR Code"
-                      className="h-48 w-48 object-contain"
+                      className="h-48 w-48 object-contain relative z-10"
                     />
+                    {/* Custom scanner corner borders */}
+                    <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-primary rounded-tl" />
+                    <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-primary rounded-tr" />
+                    <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-primary rounded-bl" />
+                    <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-primary rounded-br" />
                   </div>
                 ) : (
                   <div className="flex h-48 w-48 items-center justify-center rounded-2xl border-2 border-dashed bg-muted/30">
@@ -188,9 +206,19 @@ export default function PaymentDialog({
                   </div>
                 )}
                 {qrImageUrl && (
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Scan to pay <span className="text-foreground font-semibold">{formatCurrency(amount)}</span>
-                  </p>
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="text-sm font-semibold text-muted-foreground">
+                      Scan to pay <span className="text-foreground font-extrabold">{formatCurrency(amount)}</span>
+                    </p>
+                    <button
+                      onClick={handleDownloadQr}
+                      type="button"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-purple-600 transition-colors cursor-pointer bg-primary/5 hover:bg-primary/10 px-3 py-1.5 rounded-full"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      Save QR Code
+                    </button>
+                  </div>
                 )}
               </div>
 

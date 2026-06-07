@@ -17,12 +17,12 @@ import RideHistoryTab from "@/components/tabs/RideHistoryTab";
 import SettingsTab from "@/components/tabs/SettingsTab";
 
 const tabs = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, adminOnly: false, color: "from-blue-500 to-blue-600" },
-  { id: "create", label: "Create Ride", icon: PlusCircle, adminOnly: true, color: "from-emerald-500 to-emerald-600" },
-  { id: "pending", label: "Pending", icon: Clock, adminOnly: false, color: "from-orange-500 to-orange-600" },
-  { id: "history", label: "History", icon: History, adminOnly: false, color: "from-purple-500 to-purple-600" },
-  { id: "rides", label: "Rides", icon: List, adminOnly: false, color: "from-pink-500 to-pink-600" },
-  { id: "settings", label: "Settings", icon: Settings, adminOnly: true, color: "from-slate-500 to-slate-600" },
+  { id: "dashboard", label: "Dashboard", shortLabel: "Home", icon: LayoutDashboard, adminOnly: false, color: "from-blue-500 to-blue-600" },
+  { id: "create", label: "Create Ride", shortLabel: "Create", icon: PlusCircle, adminOnly: true, color: "from-emerald-500 to-emerald-600" },
+  { id: "pending", label: "Pending", shortLabel: "Pending", icon: Clock, adminOnly: false, color: "from-orange-500 to-orange-600" },
+  { id: "history", label: "History", shortLabel: "Paid", icon: History, adminOnly: false, color: "from-purple-500 to-purple-600" },
+  { id: "rides", label: "Rides", shortLabel: "Rides", icon: List, adminOnly: false, color: "from-pink-500 to-pink-600" },
+  { id: "settings", label: "Settings", shortLabel: "Settings", icon: Settings, adminOnly: true, color: "from-slate-500 to-slate-600" },
 ];
 
 export default function TabRouter({
@@ -61,15 +61,27 @@ export default function TabRouter({
     };
   }, [isAdmin]);
 
-  // Update indicator position
+  // Update indicator position with resize and load checks
   useEffect(() => {
-    const el = tabRefs.current.get(activeTab);
-    if (el) {
-      setIndicatorStyle({
-        left: el.offsetLeft,
-        width: el.offsetWidth,
-      });
-    }
+    const updateIndicator = () => {
+      const el = tabRefs.current.get(activeTab);
+      if (el) {
+        setIndicatorStyle({
+          left: el.offsetLeft,
+          width: el.offsetWidth,
+        });
+      }
+    };
+
+    updateIndicator();
+    // Run after a small delay to make sure rendering and fonts are fully settled
+    const timer = setTimeout(updateIndicator, 50);
+
+    window.addEventListener("resize", updateIndicator);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", updateIndicator);
+    };
   }, [activeTab]);
 
   const visibleTabs = tabs.filter((t) => !t.adminOnly || isAdmin);
@@ -119,40 +131,46 @@ export default function TabRouter({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Premium Tab Navigation */}
-      <div className="relative rounded-2xl glass-strong shadow-lg shadow-primary/5 p-1.5">
-        <div className="flex gap-1">
-          {visibleTabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                ref={(el) => {
-                  if (el) tabRefs.current.set(tab.id, el);
-                }}
-                onClick={() => switchTab(tab.id)}
-                className={`relative flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-300 min-w-0 z-10 ${
-                  isActive
-                    ? "text-white"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-                }`}
-              >
-                <Icon className={`h-4 w-4 shrink-0 transition-transform duration-300 ${isActive ? "scale-110" : ""}`} />
-                <span className="hidden sm:inline">{tab.label}</span>
-              </button>
-            );
-          })}
+    <div className="space-y-6 pb-28 md:pb-0 animate-fade-in">
+      {/* Floating Bottom Tab Navigation on Mobile, original Top Navigation on Desktop */}
+      <div className="fixed bottom-4 left-4 right-4 z-50 md:relative md:bottom-auto md:left-auto md:right-auto bg-background/80 md:bg-transparent backdrop-blur-xl md:backdrop-blur-none border border-primary/10 md:border-0 rounded-2xl md:rounded-none shadow-2xl md:shadow-none p-1 md:p-0 max-w-4xl mx-auto">
+        <div className="relative rounded-2xl glass-strong md:shadow-lg md:shadow-primary/5 p-1">
+          <div className="flex gap-1 relative z-10">
+            {visibleTabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  ref={(el) => {
+                    if (el) tabRefs.current.set(tab.id, el);
+                  }}
+                  onClick={() => switchTab(tab.id)}
+                  style={indicatorStyle.width === 0 && isActive ? { background: "linear-gradient(to right, var(--color-primary), #7c3aed)" } : {}}
+                  className={`relative flex flex-col items-center justify-center gap-1 rounded-xl py-2 px-1 text-center transition-all duration-300 min-w-0 flex-1 z-10 select-none cursor-pointer ${
+                    isActive
+                      ? "text-white"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                  }`}
+                >
+                  <Icon className={`h-4.5 w-4.5 shrink-0 transition-transform duration-300 ${isActive ? "scale-110" : ""}`} />
+                  <span className="text-[9px] xs:text-[10px] md:text-xs block md:hidden truncate max-w-full font-medium">{tab.shortLabel}</span>
+                  <span className="text-xs font-semibold hidden md:block truncate max-w-full">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+          {/* Animated sliding indicator */}
+          {indicatorStyle.width > 0 && (
+            <div
+              className="absolute bottom-1 top-1 rounded-xl bg-gradient-to-r from-primary to-purple-600 shadow-lg shadow-primary/30 transition-all duration-300 ease-out z-0"
+              style={{
+                left: indicatorStyle.left,
+                width: indicatorStyle.width,
+              }}
+            />
+          )}
         </div>
-        {/* Animated sliding indicator */}
-        <div
-          className="absolute bottom-1.5 top-1.5 rounded-xl bg-gradient-to-r from-primary to-purple-600 shadow-lg shadow-primary/30 transition-all duration-300 ease-out"
-          style={{
-            left: indicatorStyle.left,
-            width: indicatorStyle.width,
-          }}
-        />
       </div>
 
       {/* Tab Content with animated transitions */}

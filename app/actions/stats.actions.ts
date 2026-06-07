@@ -4,15 +4,19 @@ import { prisma } from "@/lib/prisma";
 import { isOverdue } from "@/lib/utils";
 
 export async function getDashboardStats() {
-  const [allAttendees, petrolPrice, offsetSetting] = await Promise.all([
+  const [allAttendees, petrolPrice, offsetSetting, mileageSetting, routeDistanceSetting] = await Promise.all([
     prisma.rideAttendee.findMany({
       include: { member: true, ride: true },
     }),
     prisma.petrolPrice.findFirst({ orderBy: { date: "desc" } }),
     prisma.setting.findUnique({ where: { key: "petrolPriceOffset" } }),
+    prisma.setting.findUnique({ where: { key: "mileage" } }),
+    prisma.setting.findUnique({ where: { key: "routeDistance" } }),
   ]);
 
   const offset = offsetSetting?.value && typeof offsetSetting.value === "number" ? offsetSetting.value : 0;
+  const mileage = mileageSetting?.value && typeof mileageSetting.value === "number" ? mileageSetting.value : 16;
+  const routeDistance = routeDistanceSetting?.value && typeof routeDistanceSetting.value === "number" ? routeDistanceSetting.value : 252;
 
   const pending = allAttendees.filter(
     (a: any) => a.status === "PENDING" || a.status === "VERIFICATION",
@@ -44,7 +48,7 @@ export async function getDashboardStats() {
   });
 
   const currentPrice = (petrolPrice?.price ?? 110) + offset;
-  const todayFuelCost = 15.75 * currentPrice;
+  const todayFuelCost = (routeDistance / mileage) * currentPrice;
   const totalRides = await prisma.ride.count();
 
   const memberAttendance: Record<string, { attended: number; totalSpent: number }> = {};
@@ -78,6 +82,8 @@ export async function getDashboardStats() {
     todayPetrolPrice: currentPrice,
     todayFuelCost,
     memberAttendance,
+    mileage,
+    routeDistance,
   };
 }
 
