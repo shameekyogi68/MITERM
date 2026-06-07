@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Pool } from "pg";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -26,19 +27,35 @@ export async function GET() {
     try {
       const client = await pool.connect();
       const res = await client.query("SELECT 1 as test");
-      dbConnectionResult = `Success! Query result: ${JSON.stringify(res.rows)}`;
+      dbConnectionResult = `Success! Direct pg query result: ${JSON.stringify(res.rows)}`;
       client.release();
     } catch (err: any) {
+      dbConnectionResult = "Failed direct pg connection";
       dbConnectionError = {
         message: err.message,
         code: err.code,
-        stack: err.stack,
       };
     } finally {
       await pool.end();
     }
   } else {
     dbConnectionResult = "No database connection string available to test.";
+  }
+
+  let prismaQueryResult = "";
+  let prismaQueryError = null;
+
+  try {
+    const attendeesCount = await prisma.rideAttendee.count();
+    prismaQueryResult = `Success! Ride attendees count: ${attendeesCount}`;
+  } catch (err: any) {
+    prismaQueryResult = "Failed Prisma query";
+    prismaQueryError = {
+      message: err.message,
+      code: err.code,
+      meta: err.meta,
+      clientVersion: err.clientVersion,
+    };
   }
 
   return NextResponse.json({
@@ -49,5 +66,7 @@ export async function GET() {
     NODE_ENV: process.env.NODE_ENV,
     dbConnectionResult,
     dbConnectionError,
+    prismaQueryResult,
+    prismaQueryError,
   });
 }
