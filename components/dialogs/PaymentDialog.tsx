@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   X, Check, QrCode, Loader2, ArrowRight, ShieldCheck,
-  Download, Copy, AlertTriangle, Upload,
+  Download, Copy, Upload,
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { markPayment, verifyPayment, adminMarkPaid } from "@/app/actions/payment.actions";
@@ -39,7 +39,6 @@ export default function PaymentDialog({
   const [upiPhonePe, setUpiPhonePe]     = useState("7338603959@ybl");
   const [upiGPay, setUpiGPay]           = useState("shameekyogiofficial@oksbi");
   const [upiPaytm, setUpiPaytm]         = useState("7338603959@ptyes");
-  const [payeeNameState, setPayeeNameState] = useState("SHAMEEK YOGI");
   const [phonepeUrl, setPhonepeUrl]     = useState("");
   const [gpayUrl, setGpayUrl]           = useState("");
   const [paytmUrl, setPaytmUrl]         = useState("");
@@ -64,23 +63,21 @@ export default function PaymentDialog({
     const amountStr = amount.toFixed(2);
 
     (async () => {
-      const [ph, gp, pt, pn, qr] = await Promise.all([
+      const [ph, gp, pt, qr] = await Promise.all([
         getSetting("upiPhonePe"),
         getSetting("upiGPay"),
         getSetting("upiPaytm"),
-        getSetting("payeeName"),
         getSetting("qrImageUrl"),
       ]);
 
       const phonePe   = (ph as string) || "7338603959@ybl";
       const gPay      = (gp as string) || "shameekyogiofficial@oksbi";
       const paytm     = (pt as string) || "7338603959@ptyes";
-      const payeeName = (pn as string) || "SHAMEEK YOGI";
+      const payeeName = "SHAMEEK YOGI";
 
       setUpiPhonePe(phonePe);
       setUpiGPay(gPay);
       setUpiPaytm(paytm);
-      setPayeeNameState(payeeName);
       if (typeof qr === "string" && qr) setQrImageUrl(qr);
 
       const enc = encodeURIComponent(payeeName);
@@ -355,40 +352,6 @@ export default function PaymentDialog({
                         ? <Check className="h-4 w-4 text-success" />
                         : <Copy className="h-4 w-4 text-muted-foreground" />}
                     </button>
-                  </div>
-                </div>
-
-                {/* ── Self-payment notice ── */}
-                <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 flex gap-2.5">
-                  <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                  <div className="text-xs">
-                    <p className="font-bold text-amber-500">Self-Payment Restriction</p>
-                    <p className="text-muted-foreground mt-0.5 leading-relaxed">
-                      UPI apps block payments to your own UPI ID. Normal when testing on Shameek's device — works fine for other members.
-                    </p>
-                  </div>
-                </div>
-
-                {/* ── Payee info ── */}
-                <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-3.5 space-y-2">
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider text-center">Payee Details</p>
-                  <div className="space-y-1.5 text-[11px]">
-                    <div className="flex justify-between items-center border-b border-white/[0.05] pb-1.5">
-                      <span className="font-bold text-muted-foreground">Name</span>
-                      <span className="text-primary font-bold">{payeeNameState}</span>
-                    </div>
-                    <div className="flex justify-between items-center gap-2">
-                      <span className="text-muted-foreground font-mono shrink-0">PhonePe</span>
-                      <span className="text-white/80 font-mono text-right select-all break-all">{upiPhonePe}</span>
-                    </div>
-                    <div className="flex justify-between items-center gap-2">
-                      <span className="text-muted-foreground font-mono shrink-0">GPay</span>
-                      <span className="text-white/80 font-mono text-right select-all break-all">{upiGPay}</span>
-                    </div>
-                    <div className="flex justify-between items-center gap-2">
-                      <span className="text-muted-foreground font-mono shrink-0">Paytm</span>
-                      <span className="text-white/80 font-mono text-right select-all break-all">{upiPaytm}</span>
-                    </div>
                   </div>
                 </div>
 

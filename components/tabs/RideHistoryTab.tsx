@@ -11,7 +11,6 @@ import {
   Loader2,
   ArrowRight,
   Fuel,
-  Users,
   AlertTriangle,
   PlusCircle,
 } from "lucide-react";
@@ -219,9 +218,6 @@ export default function RideHistoryTab({ isAdmin }: { isAdmin: boolean }) {
             const isExpanded = expandedId === ride.id;
             const route = parseRoute(ride.notes);
             const rideDate = new Date(ride.date);
-            const perPerson = ride.attendees.length > 0
-              ? ride.totalCost / ride.attendees.length
-              : ride.totalCost;
 
             return (
               <div
@@ -297,12 +293,9 @@ export default function RideHistoryTab({ isAdmin }: { isAdmin: boolean }) {
 
                     {/* Cost block */}
                     <div className="text-right shrink-0">
-                      <p className="text-[10px] text-muted-foreground">per person</p>
-                      <p className="text-base font-bold" style={{ color: "#06b6d4" }}>
-                        {formatCurrency(perPerson)}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">
-                        total {formatCurrency(ride.totalCost)} <span style={{ color: "#7c3aed" }} className="font-semibold">●</span>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Total</p>
+                      <p className="text-base font-extrabold tabular-nums" style={{ color: "#06b6d4" }}>
+                        {formatCurrency(ride.totalCost)}
                       </p>
                     </div>
 
