@@ -38,6 +38,7 @@ export default function PaymentDialog({
   const [upiPhonePe, setUpiPhonePe] = useState("7338603959@ybl");
   const [upiGPay, setUpiGPay] = useState("shameekyogiofficial@oksbi");
   const [upiPaytm, setUpiPaytm] = useState("7338603959@ptyes");
+  const [payeeNameState, setPayeeNameState] = useState("SHAMEEK YOGI");
 
   // Deep Link URL states
   const [phonepeUrl, setPhonepeUrl] = useState<string>("");
@@ -62,24 +63,26 @@ export default function PaymentDialog({
     setStep("upload");
 
     const amountStr = amount.toFixed(2);
-    const payeeName = encodeURIComponent("MITE Ride Manager");
 
     const loadSettingsAndBuildLinks = async () => {
       // Fetch setting values in parallel
-      const [phSetting, gpSetting, ptSetting, qrSetting] = await Promise.all([
+      const [phSetting, gpSetting, ptSetting, pnSetting, qrSetting] = await Promise.all([
         getSetting("upiPhonePe"),
         getSetting("upiGPay"),
         getSetting("upiPaytm"),
+        getSetting("payeeName"),
         getSetting("qrImageUrl"),
       ]);
 
       const activePhonePe = (phSetting as string) || "7338603959@ybl";
       const activeGPay = (gpSetting as string) || "shameekyogiofficial@oksbi";
       const activePaytm = (ptSetting as string) || "7338603959@ptyes";
+      const activePayeeName = (pnSetting as string) || "SHAMEEK YOGI";
 
       setUpiPhonePe(activePhonePe);
       setUpiGPay(activeGPay);
       setUpiPaytm(activePaytm);
+      setPayeeNameState(activePayeeName);
 
       if (typeof qrSetting === "string" && qrSetting) {
         setQrImageUrl(qrSetting);
@@ -88,9 +91,10 @@ export default function PaymentDialog({
       const ua = navigator.userAgent.toLowerCase();
       const isAndroid = /android/.test(ua);
       const isIOS = /iphone|ipad|ipod/.test(ua);
+      const encodedPayeeName = encodeURIComponent(activePayeeName);
 
       // PhonePe Deep Link
-      const phonepeQuery = `pa=${activePhonePe}&pn=${payeeName}&am=${amountStr}&cu=INR`;
+      const phonepeQuery = `pa=${activePhonePe}&pn=${encodedPayeeName}&am=${amountStr}&cu=INR`;
       if (isAndroid) {
         setPhonepeUrl(`intent://pay?${phonepeQuery}#Intent;scheme=upi;package=com.phonepe.app;end`);
       } else if (isIOS) {
@@ -100,7 +104,7 @@ export default function PaymentDialog({
       }
 
       // Google Pay Deep Link
-      const gpayQuery = `pa=${activeGPay}&pn=${payeeName}&am=${amountStr}&cu=INR`;
+      const gpayQuery = `pa=${activeGPay}&pn=${encodedPayeeName}&am=${amountStr}&cu=INR`;
       if (isAndroid) {
         setGpayUrl(`intent://pay?${gpayQuery}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`);
       } else if (isIOS) {
@@ -110,7 +114,7 @@ export default function PaymentDialog({
       }
 
       // Paytm Deep Link
-      const paytmQuery = `pa=${activePaytm}&pn=${payeeName}&am=${amountStr}&cu=INR`;
+      const paytmQuery = `pa=${activePaytm}&pn=${encodedPayeeName}&am=${amountStr}&cu=INR`;
       if (isAndroid) {
         setPaytmUrl(`intent://pay?${paytmQuery}#Intent;scheme=upi;package=net.one97.paytm;end`);
       } else if (isIOS) {
@@ -335,9 +339,13 @@ export default function PaymentDialog({
                 </div>
 
                 {/* Address Verification Info */}
-                <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-3 text-xs space-y-1">
+                <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-3 text-xs space-y-1.5">
                   <p className="text-muted-foreground font-semibold text-center text-[10px] uppercase tracking-wider">Configured Payee Addresses</p>
                   <div className="space-y-1 font-mono text-[11px] text-muted-foreground">
+                    <div className="flex justify-between border-b border-white/5 pb-1 mb-1">
+                      <span className="font-sans text-muted-foreground font-bold">Account Name:</span>
+                      <span className="text-primary font-bold">{payeeNameState}</span>
+                    </div>
                     <div className="flex justify-between">
                       <span>PhonePe VPA:</span>
                       <span className="text-white/80 select-all">{upiPhonePe}</span>

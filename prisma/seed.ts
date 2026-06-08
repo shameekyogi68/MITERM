@@ -30,6 +30,7 @@ async function main() {
     { key: 'upiGPay', value: 'shameekyogiofficial@oksbi' },
     { key: 'upiPaytm', value: '7338603959@ptyes' },
     { key: 'adminPhone', value: '7338603959' },
+    { key: 'payeeName', value: 'SHAMEEK YOGI' },
   ];
 
   for (const s of settings) {

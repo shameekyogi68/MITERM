@@ -49,6 +49,7 @@ export default function SettingsTab() {
   const [upiGPay, setUpiGPay] = useState("");
   const [upiPaytm, setUpiPaytm] = useState("");
   const [adminPhone, setAdminPhone] = useState("");
+  const [payeeName, setPayeeName] = useState("");
 
   useEffect(() => {
     const load = async () => {
@@ -62,6 +63,7 @@ export default function SettingsTab() {
       setUpiGPay((s.upiGPay as string) || "shameekyogiofficial@oksbi");
       setUpiPaytm((s.upiPaytm as string) || "7338603959@ptyes");
       setAdminPhone((s.adminPhone as string) || "7338603959");
+      setPayeeName((s.payeeName as string) || "SHAMEEK YOGI");
 
       setIsLoading(false);
     };
@@ -330,6 +332,19 @@ export default function SettingsTab() {
               className="rounded-xl border bg-card px-3.5 py-2 text-sm transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
               placeholder="7338603959@ptyes"
             />
+          </div>
+
+          <div className="flex flex-col gap-1.5 md:col-span-2">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Payee Account Name</label>
+            <input
+              type="text"
+              value={payeeName}
+              onChange={(e) => setPayeeName(e.target.value)}
+              onBlur={() => handleSaveSetting("payeeName", payeeName)}
+              className="rounded-xl border bg-card px-3.5 py-2 text-sm transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+              placeholder="SHAMEEK YOGI"
+            />
+            <p className="text-[10px] text-muted-foreground">The actual account holder name registered at the bank. Crucial for Google Pay verification.</p>
           </div>
 
           <div className="flex flex-col gap-1.5 md:col-span-2">
