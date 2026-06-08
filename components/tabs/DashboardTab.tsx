@@ -262,7 +262,7 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
             <div className="space-y-1 min-w-0">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-violet-600/30 to-cyan-500/30 px-3 py-1 text-[10px] sm:text-xs font-extrabold text-cyan-400 border border-cyan-500/20 backdrop-blur-sm uppercase tracking-wider">
                 <Car className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                Hyundai Exter SUV
+                Hyundai Exter Micro-SUV
               </div>
               <h2 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-white">
                 Namma <span className="gradient-text bg-gradient-to-r from-violet-400 via-primary to-cyan-400 font-extrabold">Exter</span>
@@ -296,7 +296,7 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
             <div className="absolute bottom-4 w-[80%] h-12 bg-white/[0.02] border border-white/[0.05] rounded-full blur-[2px] shadow-[0_15px_30px_rgba(124,58,237,0.2),0_0_20px_rgba(6,182,212,0.1)] transform scale-y-[0.3] pointer-events-none" />
             <img
               src="/car-clean.png"
-              alt="Hyundai Exter SUV"
+              alt="Hyundai Exter Micro-SUV"
               className="relative z-10 w-full h-[85%] object-contain object-center transition-transform duration-700 hover:scale-[1.05] animate-float"
               style={{ filter: "drop-shadow(0 12px 36px rgba(124,58,237,0.5)) drop-shadow(0 0 10px rgba(6,182,212,0.25))" }}
             />
