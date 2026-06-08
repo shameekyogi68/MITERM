@@ -12,8 +12,8 @@ import { getTodayPetrolPrice } from "@/app/actions/settings.actions";
 export default function CreateRideTab() {
   const router = useRouter();
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [petrolPrice, setPetrolPrice] = useState<number>(110);
-  const [suggestedPrice, setSuggestedPrice] = useState<number>(110);
+  const [petrolPrice, setPetrolPrice] = useState<number>(0);
+  const [suggestedPrice, setSuggestedPrice] = useState<number>(0);
   const [attendees, setAttendees] = useState<string[]>(["Shameek"]);
   const [expenses, setExpenses] = useState<Array<{ type: "TOLL" | "PARKING" | "MAINTENANCE" | "FASTAG" | "OTHER"; amount: number; description: string }>>([]);
   const [notes, setNotes] = useState("");
