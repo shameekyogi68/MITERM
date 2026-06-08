@@ -272,7 +272,7 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
                 HYUNDAI EXTER SUV
               </div>
               <h2 className="text-3xl font-extrabold tracking-tight">
-                Shameek's <span className="gradient-text">Exter</span>
+                Namma <span className="gradient-text">Exter</span>
               </h2>
               <p className="text-sm text-muted-foreground font-medium">
                 The official ride powering our daily commute to MITE

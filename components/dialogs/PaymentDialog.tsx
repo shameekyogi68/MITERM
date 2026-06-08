@@ -185,20 +185,31 @@ export default function PaymentDialog({
               {/* Payment Options */}
               <div className="flex flex-col gap-3">
                 {/* UPI Payment Button */}
+                {/* Direct PhonePe Deep Link */}
                 <a
-                  href={`upi://pay?pa=7338603959@ybl&pn=MITE%20Ride%20Manager&am=${amount}&cu=INR`}
+                  href={`phonepe://pay?pa=7338603959@ybl&pn=MITE%20Ride%20Manager&am=${amount}&cu=INR`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-purple-500/25 transition-all hover:shadow-xl hover:shadow-purple-500/40 hover:-translate-y-0.5 cursor-pointer"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#5f259f] to-[#4c1d80] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-purple-900/20 transition-all hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
                 >
                   <span>Pay with PhonePe</span>
                   <ArrowRight className="h-4 w-4" />
                 </a>
 
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-px bg-white/10" />
-                  <span className="text-xs text-muted-foreground font-medium">OR</span>
-                  <div className="flex-1 h-px bg-white/10" />
+                {/* Generic UPI Deep Link */}
+                <a
+                  href={`upi://pay?pa=7338603959@ybl&pn=MITE%20Ride%20Manager&am=${amount}&cu=INR`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-xs font-bold text-white/80 transition-all hover:bg-white/10 hover:text-white hover:-translate-y-0.5 cursor-pointer"
+                >
+                  <span>Pay with other UPI App (GPay, Paytm)</span>
+                </a>
+
+                <div className="flex items-center gap-2 py-1">
+                  <div className="flex-1 h-px bg-white/5" />
+                  <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-bold">Or Scan QR Code</span>
+                  <div className="flex-1 h-px bg-white/5" />
                 </div>
 
                 {/* QR Code */}
