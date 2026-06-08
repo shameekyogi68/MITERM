@@ -156,7 +156,6 @@ function StatCard({
 export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
   const router = useRouter();
   const [stats, setStats] = useState<DashboardData | null>(null);
-  const [showQrModal, setShowQrModal] = useState(false);
   const [pendingPayments, setPendingPayments] = useState<
     Array<{
       rideId: string;
@@ -332,16 +331,7 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
               </div>
             </div>
 
-            {/* Buttons */}
-            <div className="flex flex-wrap items-center gap-2.5 pt-2">
-              <button
-                onClick={() => setShowQrModal(true)}
-                className="btn-magnetic inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-purple-600 px-5 py-3 text-xs font-bold text-white shadow-lg shadow-primary/30 transition-all hover:shadow-xl hover:shadow-primary/45 hover:-translate-y-0.5 active:scale-95 cursor-pointer overflow-hidden"
-              >
-                <QrCode className="h-4 w-4" />
-                View Payment QR
-              </button>
-            </div>
+
           </div>
 
           {/* Cinematic Image with Purple Rim-Light Glow */}
@@ -400,29 +390,6 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
         </div>
       </div>
 
-      {/* Standalone Payment QR Modal */}
-      {showQrModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setShowQrModal(false)} />
-          <div className="relative w-full max-w-sm animate-fade-in-scale rounded-2xl border bg-card p-6 shadow-2xl overflow-hidden">
-            <div className="h-1 bg-gradient-to-r from-primary via-purple-500 to-primary bg-[length:200%_100%] animate-[border-flow_3s_linear_infinite]" />
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold">Payment QR Code</h3>
-              <button onClick={() => setShowQrModal(false)} className="rounded-lg p-1.5 hover:bg-muted text-muted-foreground transition-colors cursor-pointer">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <div className="flex flex-col items-center gap-4 py-4">
-              <div className="rounded-2xl border-2 border-primary/20 bg-white p-4 shadow-lg shadow-primary/5">
-                <img src="/qr-code.png" alt="Payment QR" className="h-48 w-48 object-contain" />
-              </div>
-              <p className="text-xs text-muted-foreground text-center">
-                Scan this QR code using any UPI app (GPay, PhonePe, Paytm, etc.) to make payments directly to Shameek.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Payment Dialog */}
       <PaymentDialog
