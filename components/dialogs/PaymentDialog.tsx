@@ -29,7 +29,6 @@ export default function PaymentDialog({
   isAdmin,
   onSuccess,
 }: PaymentDialogProps) {
-  const [qrImageUrl, setQrImageUrl] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -42,26 +41,7 @@ export default function PaymentDialog({
     setUpiUrl(`upi://pay?${upiQuery}`);
     setPhonepeUrl(`phonepe://upi/pay?${upiQuery}`);
 
-    if (typeof window !== "undefined" && isOpen) {
-      const ua = navigator.userAgent.toLowerCase();
-      const isAndroid = /android/.test(ua);
-      const isIOS = /iphone|ipad|ipod/.test(ua);
-
-      if (isAndroid) {
-        setPhonepeUrl(`intent://pay?${upiQuery}#Intent;scheme=upi;package=com.phonepe.app;end`);
-      } else if (isIOS) {
-        setPhonepeUrl(`phonepe://upi/pay?${upiQuery}`);
-      } else {
-        setPhonepeUrl(`upi://pay?${upiQuery}`);
-      }
-    }
-
     if (isOpen) {
-      getSetting("qrImageUrl").then((url) => {
-        if (typeof url === "string" && url) {
-          setQrImageUrl(url);
-        }
-      });
       setError(null);
       setSuccess(false);
       setStep("upload");
@@ -116,15 +96,7 @@ export default function PaymentDialog({
     }
   };
 
-  const handleDownloadQr = () => {
-    if (!qrImageUrl) return;
-    const a = document.createElement("a");
-    a.href = qrImageUrl;
-    a.download = `shameek-upi-qr-${memberName}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
@@ -226,54 +198,8 @@ export default function PaymentDialog({
                   <span>Pay with other UPI App (GPay, Paytm)</span>
                 </a>
 
-                <div className="flex items-center gap-2 py-1">
-                  <div className="flex-1 h-px bg-white/5" />
-                  <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-bold">Or Scan QR Code</span>
-                  <div className="flex-1 h-px bg-white/5" />
-                </div>
-
-                {/* QR Code */}
-                <div className="flex flex-col items-center gap-3">
-                {qrImageUrl ? (
-                  <div className="relative group rounded-2xl border border-white/10 bg-white p-4 shadow-xl transition-all duration-300 overflow-hidden">
-                    <img
-                      src={qrImageUrl}
-                      alt="Payment QR Code"
-                      className="h-48 w-48 object-contain relative z-10"
-                    />
-                    {/* Scanning laser effect */}
-                    <div className="absolute left-4 right-4 top-4 h-[2px] bg-primary/60 shadow-[0_0_8px_rgba(244,63,94,0.8)] z-20 animate-scan pointer-events-none" />
-                    
-                    {/* Custom scanner corner borders */}
-                    <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-primary rounded-tl animate-pulse-soft z-20" />
-                    <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-primary rounded-tr animate-pulse-soft z-20" />
-                    <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-primary rounded-bl animate-pulse-soft z-20" />
-                    <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-primary rounded-br animate-pulse-soft z-20" />
-                  </div>
-                ) : (
-                  <div className="flex h-48 w-48 items-center justify-center rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02]">
-                    <div className="text-center">
-                      <QrCode className="h-10 w-10 text-muted-foreground/50 mx-auto animate-pulse-soft" />
-                      <p className="mt-2 text-xs text-muted-foreground">No QR configured</p>
-                    </div>
-                  </div>
-                )}
-                {qrImageUrl && (
-                  <div className="flex flex-col items-center gap-2">
-                    <p className="text-sm font-semibold text-muted-foreground">
-                      Scan to pay <span className="text-foreground font-extrabold tabular-nums">{formatCurrency(amount)}</span>
-                    </p>
-                    <button
-                      onClick={handleDownloadQr}
-                      type="button"
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-rose-400 transition-colors cursor-pointer bg-primary/10 hover:bg-primary/20 px-3.5 py-1.5 rounded-full border border-primary/20"
-                    >
-                      <Download className="h-3.5 w-3.5" />
-                      Save QR Code
-                    </button>
-                  </div>
-                )}
-                </div>
+                {/* Visual spacer */}
+                <div className="h-1" />
               </div>
 
               {/* Screenshot Upload */}
