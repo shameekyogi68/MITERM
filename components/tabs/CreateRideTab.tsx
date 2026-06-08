@@ -141,7 +141,7 @@ export default function CreateRideTab() {
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <CalendarDays className="h-4 w-4" />
-                Trip Date
+                Date of Chariot Expedition
               </label>
               <div className="relative">
                 <input
@@ -157,7 +157,7 @@ export default function CreateRideTab() {
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <Fuel className="h-4 w-4" />
-                Petrol Price (₹/L)
+                Liquid Gold Price (₹/L)
               </label>
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -189,7 +189,7 @@ export default function CreateRideTab() {
           <div className="space-y-3">
             <label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <Users className="h-4 w-4" />
-              Select Attendees
+              Select Passengers (Accomplices)
               <span className="ml-auto text-xs text-muted-foreground">{attendees.length}/6</span>
             </label>
             <div className="grid grid-cols-3 gap-2.5">
@@ -241,7 +241,7 @@ export default function CreateRideTab() {
             {attendees.length < 2 && (
               <p className="text-xs text-destructive flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse-soft" />
-                Minimum 2 members required (including Shameek)
+                Need at least 2 souls (including Shameek) to split the pain
               </p>
             )}
           </div>
@@ -297,7 +297,7 @@ export default function CreateRideTab() {
                 className="flex items-center gap-1.5 rounded-xl border border-dashed bg-card/50 px-4 py-3 text-xs font-medium text-muted-foreground transition-all hover:bg-muted/50 hover:border-primary/30 hover:text-primary w-full justify-center"
               >
                 <Plus className="h-3.5 w-3.5" />
-                Add Expense
+                Add Extra Damage (Tolls, Parking, etc.)
               </button>
             </div>
           </div>
@@ -328,7 +328,7 @@ export default function CreateRideTab() {
           {success && (
             <div className="rounded-xl bg-success/10 border border-success/20 px-4 py-3 text-sm text-success flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4" />
-              Ride created successfully!
+              Ride created! Wallet damage logged successfully.
             </div>
           )}
 
@@ -342,11 +342,11 @@ export default function CreateRideTab() {
             {isSubmitting ? (
               <span className="flex items-center justify-center gap-2">
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Creating Ride...
+                Logging Chariot Expedition...
               </span>
             ) : (
               <span className="flex items-center justify-center gap-2">
-                Create Ride
+                Log Expedition & Divide Damage
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </span>
             )}

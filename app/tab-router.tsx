@@ -140,12 +140,12 @@ export default function TabRouter({
               {tabs.find((t) => t.id === activeTab)?.label}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {activeTab === "dashboard" && "Overview of rides, payments, and statistics"}
-              {activeTab === "create" && "Record a new trip and calculate shares"}
+              {activeTab === "dashboard" && "Behold the holy grail of fuel statistics, debts, and mileage calculations."}
+              {activeTab === "create" && "Log a new journey and divide the fuel damage among the chosen passengers."}
               {activeTab === "pending" && "Track and manage pending payments"}
               {activeTab === "history" && "View complete payment history"}
-              {activeTab === "rides" && "Browse all past rides"}
-              {activeTab === "settings" && "Configure system settings"}
+              {activeTab === "rides" && "The chronicle of your past road trips and mileage adventures."}
+              {activeTab === "settings" && "Adjust the secret parameters of the Petrol Pandit universe."}
             </p>
           </div>
         </div>

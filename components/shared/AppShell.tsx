@@ -49,13 +49,12 @@ export default function AppShell({
             <div className="flex items-center gap-2 sm:gap-3">
               <div>
                 <h1 className="text-sm xs:text-base sm:text-lg font-extrabold tracking-tight flex items-center gap-1">
-                  <span className="gradient-text font-black">MITE</span>
-                  <span className="text-foreground">Ride</span>
-                  <span className="text-muted-foreground/75 font-normal hidden xs:inline">Manager</span>
+                  <span className="gradient-text font-black">Petrol</span>
+                  <span className="text-foreground">Pandit</span>
                   <Sparkles className="h-3 w-3 text-primary/60 animate-pulse-soft" />
                 </h1>
                 <p className="text-[8px] leading-none text-muted-foreground/60 tracking-widest uppercase font-bold">
-                  Commute Tracker
+                  Fuel Expense Oracle
                 </p>
               </div>
               {isAdmin && (
@@ -70,7 +69,7 @@ export default function AppShell({
       </header>
       <OfflineBanner />
       <main className="relative z-10 container mx-auto max-w-6xl px-4 py-6">{children}</main>
-
+ 
       {/* Premium Footer */}
       <footer className="relative z-10 border-t mt-12 pb-[calc(7.5rem+env(safe-area-inset-bottom))] md:pb-0">
         <div className="container mx-auto max-w-6xl px-4 py-6">
@@ -79,7 +78,7 @@ export default function AppShell({
               <div className="flex h-5 w-5 items-center justify-center rounded-md bg-gradient-to-br from-primary/10 to-purple-500/10">
                 <Car className="h-3 w-3 text-primary" />
               </div>
-              <span className="font-medium">MITE Ride Manager</span>
+              <span className="font-medium">Petrol Pandit</span>
               <span className="opacity-50">·</span>
               <span>v1.0.0</span>
             </div>

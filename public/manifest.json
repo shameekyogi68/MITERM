@@ -1,7 +1,7 @@
 {
-  "name": "MITE Ride Manager",
-  "short_name": "RideManager",
-  "description": "Manage shared ride expenses for MITE friends",
+  "name": "Petrol Pandit",
+  "short_name": "PetrolPandit",
+  "description": "Calculate and manage MITE ride expenses with the Petrol Pandit",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

@@ -21,23 +21,23 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "MITE Ride Manager",
-    template: "%s | MITE Ride Manager",
+    default: "Petrol Pandit",
+    template: "%s | Petrol Pandit",
   },
   description:
-    "Premium ride expense management for MITE friends — track costs, payments, and ride history with style.",
+    "The divine mileage oracle calculating the exact fuel tax for the daily MITE pilgrimage.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "RideManager",
+    title: "PetrolPandit",
   },
   icons: {
     apple: "/icon-192.png",
   },
   openGraph: {
-    title: "MITE Ride Manager",
-    description: "Premium ride expense management for MITE friends",
+    title: "Petrol Pandit",
+    description: "The divine mileage oracle calculating the exact fuel tax for the daily MITE pilgrimage.",
     type: "website",
   },
 };
