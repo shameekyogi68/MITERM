@@ -34,8 +34,28 @@ export default function PaymentDialog({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [step, setStep] = useState<"upload" | "done">("upload");
+  const [phonepeUrl, setPhonepeUrl] = useState<string>("");
+  const [upiUrl, setUpiUrl] = useState<string>("");
 
   useEffect(() => {
+    const upiQuery = `pa=7338603959@ybl&pn=MITE%20Ride%20Manager&am=${amount}&cu=INR`;
+    setUpiUrl(`upi://pay?${upiQuery}`);
+    setPhonepeUrl(`phonepe://upi/pay?${upiQuery}`);
+
+    if (typeof window !== "undefined" && isOpen) {
+      const ua = navigator.userAgent.toLowerCase();
+      const isAndroid = /android/.test(ua);
+      const isIOS = /iphone|ipad|ipod/.test(ua);
+
+      if (isAndroid) {
+        setPhonepeUrl(`intent://pay?${upiQuery}#Intent;scheme=upi;package=com.phonepe.app;end`);
+      } else if (isIOS) {
+        setPhonepeUrl(`phonepe://upi/pay?${upiQuery}`);
+      } else {
+        setPhonepeUrl(`upi://pay?${upiQuery}`);
+      }
+    }
+
     if (isOpen) {
       getSetting("qrImageUrl").then((url) => {
         if (typeof url === "string" && url) {
@@ -46,7 +66,7 @@ export default function PaymentDialog({
       setSuccess(false);
       setStep("upload");
     }
-  }, [isOpen]);
+  }, [isOpen, amount]);
 
   if (!isOpen) return null;
 
@@ -187,7 +207,7 @@ export default function PaymentDialog({
                 {/* UPI Payment Button */}
                 {/* Direct PhonePe Deep Link */}
                 <a
-                  href={`phonepe://pay?pa=7338603959@ybl&pn=MITE%20Ride%20Manager&am=${amount}&cu=INR`}
+                  href={phonepeUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#5f259f] to-[#4c1d80] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-purple-900/20 transition-all hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
@@ -198,7 +218,7 @@ export default function PaymentDialog({
 
                 {/* Generic UPI Deep Link */}
                 <a
-                  href={`upi://pay?pa=7338603959@ybl&pn=MITE%20Ride%20Manager&am=${amount}&cu=INR`}
+                  href={upiUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-xs font-bold text-white/80 transition-all hover:bg-white/10 hover:text-white hover:-translate-y-0.5 cursor-pointer"
