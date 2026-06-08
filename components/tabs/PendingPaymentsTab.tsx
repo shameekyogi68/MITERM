@@ -13,6 +13,7 @@ import {
   Zap,
   ShieldCheck,
   Users,
+  ExternalLink,
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { getPendingPayments } from "@/app/actions/stats.actions";
@@ -350,24 +351,58 @@ export default function PendingPaymentsTab({ isAdmin }: { isAdmin: boolean }) {
                       {item.status}
                     </span>
 
-                    {/* CTA button */}
-                    <button
-                      onClick={() =>
-                        setPaymentDialog({
-                          open: true,
-                          rideId: item.rideId,
-                          memberName: item.memberName,
-                          amount: item.amount,
-                          rideDate: item.rideDate,
-                          status: item.status,
-                        })
-                      }
-                      className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 sm:py-2 text-xs font-bold text-white transition-all hover:brightness-110 active:scale-95 cursor-pointer shadow-md shadow-primary/10 hover:shadow-primary/20"
-                      style={{ background: "linear-gradient(to right, #7c3aed, #6d28d9)" }}
-                    >
-                      {isAdmin ? (item.status === "VERIFICATION" ? "Verify" : "Mark Paid") : "Pay Now"}
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
+                    {isAdmin ? (
+                      <button
+                        onClick={() =>
+                          setPaymentDialog({
+                            open: true,
+                            rideId: item.rideId,
+                            memberName: item.memberName,
+                            amount: item.amount,
+                            rideDate: item.rideDate,
+                            status: item.status,
+                          })
+                        }
+                        className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 sm:py-2 text-xs font-bold text-white transition-all hover:brightness-110 active:scale-95 cursor-pointer shadow-md shadow-primary/10 hover:shadow-primary/20"
+                        style={{ background: "linear-gradient(to right, #7c3aed, #6d28d9)" }}
+                      >
+                        {item.status === "VERIFICATION" ? "Verify" : "Mark Paid"}
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </button>
+                    ) : item.status === "VERIFICATION" ? (
+                      <a
+                        href={`https://api.whatsapp.com/send?phone=917338603959&text=${encodeURIComponent(
+                          `Hi Shameek, please verify my payment of ₹${item.amount} for the ride on ${new Date(
+                            item.rideDate
+                          ).toLocaleDateString("en-IN")}.`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 sm:py-2 text-xs font-bold text-white transition-all hover:brightness-110 active:scale-95 cursor-pointer shadow-md shadow-success/15 hover:shadow-success/25"
+                        style={{ background: "linear-gradient(to right, #10b981, #059669)" }}
+                      >
+                        Ask to Review
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </a>
+                    ) : (
+                      <button
+                        onClick={() =>
+                          setPaymentDialog({
+                            open: true,
+                            rideId: item.rideId,
+                            memberName: item.memberName,
+                            amount: item.amount,
+                            rideDate: item.rideDate,
+                            status: item.status,
+                          })
+                        }
+                        className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 sm:py-2 text-xs font-bold text-white transition-all hover:brightness-110 active:scale-95 cursor-pointer shadow-md shadow-primary/10 hover:shadow-primary/20"
+                        style={{ background: "linear-gradient(to right, #7c3aed, #6d28d9)" }}
+                      >
+                        Pay Now
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
               );
