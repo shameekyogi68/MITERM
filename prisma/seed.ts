@@ -20,12 +20,12 @@ async function main() {
   }
 
   const settings = [
-    { key: 'mileage', value: 16 },
+    { key: 'mileage', value: 15 },
     { key: 'routeDistance', value: 252 },
     { key: 'qrImageUrl', value: '/qr-code.png' },
     { key: 'adminSecretUrl', value: 'shameekyogi68' },
     { key: 'roundingRule', value: 'ADJUST_TO_ADMIN' },
-    { key: 'petrolPriceOffset', value: 8.39 },
+    { key: 'petrolPriceOffset', value: 0 },
   ];
 
   for (const s of settings) {

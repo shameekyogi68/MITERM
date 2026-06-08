@@ -9,9 +9,9 @@ export const MEMBER_DISTANCES: Record<string, number> = {
 
 export const ALL_MEMBERS = Object.keys(MEMBER_DISTANCES);
 
-export const MILEAGE = 16;
+export const MILEAGE = 15;
 export const ROUTE_DISTANCE = 252;
-export const FUEL_LITERS = ROUTE_DISTANCE / MILEAGE; // 15.75
+export const FUEL_LITERS = ROUTE_DISTANCE / MILEAGE; // 16.8
 
 export const EXPENSE_TYPES = ['TOLL', 'PARKING', 'MAINTENANCE', 'FASTAG', 'OTHER'] as const;
 
