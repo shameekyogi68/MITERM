@@ -140,11 +140,11 @@ export default function TabRouter({
   };
 
   return (
-    <div className="space-y-6 pb-28 md:pb-0 animate-fade-in">
+    <div className="space-y-6 pb-[calc(7.5rem+env(safe-area-inset-bottom))] md:pb-6 animate-fade-in">
       {/* Floating Bottom Tab Navigation on Mobile, original Top Navigation on Desktop */}
-      <div className="fixed bottom-6 left-4 right-4 z-50 md:relative md:bottom-auto md:left-auto md:right-auto bg-transparent border-0 rounded-2xl p-0 max-w-4xl mx-auto">
-        <div className="relative rounded-2xl glass-premium p-1.5 shadow-2xl">
-          <div className="flex gap-1 relative z-10">
+      <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] left-3.5 right-3.5 z-50 md:relative md:bottom-auto md:left-auto md:right-auto bg-transparent border-0 rounded-2xl p-0 max-w-4xl mx-auto">
+        <div className="relative rounded-2xl glass-premium p-1.5 shadow-2xl border-white/10 backdrop-blur-2xl">
+          <div className="flex gap-0.5 relative z-10">
             {visibleTabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -155,18 +155,18 @@ export default function TabRouter({
                     if (el) tabRefs.current.set(tab.id, el);
                   }}
                   onClick={() => switchTab(tab.id)}
-                  className={`relative flex flex-col items-center justify-center gap-1 rounded-xl py-2 px-1 text-center transition-all duration-300 min-w-0 flex-1 z-10 select-none cursor-pointer ${
+                  className={`relative flex flex-col items-center justify-center gap-0.5 sm:gap-1 rounded-xl py-1.5 px-0.5 text-center transition-all duration-300 min-w-0 flex-1 z-10 select-none cursor-pointer ${
                     isActive
-                      ? "text-white font-semibold"
-                      : "text-white/30 hover:text-white/60 hover:bg-white/5"
+                      ? "text-white font-extrabold"
+                      : "text-white/35 hover:text-white/60 hover:bg-white/5"
                   }`}
                 >
                   <Icon
-                    className={`h-4.5 w-4.5 shrink-0 transition-transform duration-300 ${isActive ? "scale-110" : ""}`}
-                    style={isActive ? { filter: `drop-shadow(0 0 8px ${TAB_GLOW[tab.id]})` } : undefined}
+                    className={`h-4.5 w-4.5 shrink-0 transition-all duration-300 ${isActive ? "scale-110 text-white" : "text-white/60"}`}
+                    style={isActive ? { filter: `drop-shadow(0 0 10px ${TAB_GLOW[tab.id]})` } : undefined}
                   />
-                  <span className="text-[9px] xs:text-[10px] md:text-xs block md:hidden truncate max-w-full font-semibold">{tab.shortLabel}</span>
-                  <span className="text-xs font-semibold hidden md:block truncate max-w-full">{tab.label}</span>
+                  <span className="text-[9px] xs:text-[10px] md:text-xs block md:hidden truncate max-w-full font-bold">{tab.shortLabel}</span>
+                  <span className="text-xs font-bold hidden md:block truncate max-w-full">{tab.label}</span>
                 </button>
               );
             })}
@@ -178,7 +178,7 @@ export default function TabRouter({
               style={{
                 left: indicatorStyle.left,
                 width: indicatorStyle.width,
-                boxShadow: "0 0 20px rgba(124,58,237,0.4), 0 0 40px rgba(109,40,217,0.2)",
+                boxShadow: "0 0 15px rgba(124,58,237,0.35), 0 0 30px rgba(109,40,217,0.15)",
               }}
             />
           )}

@@ -232,8 +232,40 @@ export default function PaymentHistoryTab() {
         </div>
       ) : (
         <>
-          {/* Table — glass-premium wrapper, sticky header, cyan amounts */}
-          <div className="overflow-hidden rounded-2xl glass-premium animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+          {/* Mobile Card Layout */}
+          <div className="block md:hidden space-y-3">
+            {filtered.map((p, i) => (
+              <div
+                key={`${p.id}-${i}`}
+                className="glass-premium rounded-2xl p-4 flex flex-col gap-2.5 animate-fade-in-up"
+                style={{ animationDelay: `${i * 0.03}s` }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-extrabold text-sm text-white">{p.memberName}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Paid: {formatDateTime(p.paidAt)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-black text-sm tabular-nums" style={{ color: "#06b6d4" }}>
+                      {formatCurrency(p.amount)}
+                    </p>
+                    <span className="inline-flex items-center gap-0.5 rounded-full bg-success/15 px-2 py-0.5 text-[9px] font-bold text-success uppercase mt-1">
+                      <CheckCircle2 className="h-2.5 w-2.5" />
+                      Paid
+                    </span>
+                  </div>
+                </div>
+                <div className="h-px bg-white/5 w-full" />
+                <div className="flex justify-between items-center text-[10px] text-muted-foreground">
+                  <span>Ride Date</span>
+                  <span className="font-bold text-white/95">{formatDate(p.rideDate)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-hidden rounded-2xl glass-premium animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>

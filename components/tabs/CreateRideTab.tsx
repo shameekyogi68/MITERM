@@ -192,33 +192,47 @@ export default function CreateRideTab() {
               Select Attendees
               <span className="ml-auto text-xs text-muted-foreground">{attendees.length}/6</span>
             </label>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-2.5">
               {ALL_MEMBERS.map((name) => {
                 const isSelected = attendees.includes(name);
                 const isShameek = name === "Shameek";
+                const initials = name.slice(0, 2).toUpperCase();
                 return (
                   <button
                     key={name}
                     onClick={() => toggleAttendee(name)}
                     disabled={isShameek}
-                    className={`group relative flex items-center gap-3 rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
+                    type="button"
+                    className={`group relative flex flex-col items-center justify-center gap-2 rounded-2xl border py-4 px-2 text-center transition-all duration-300 select-none cursor-pointer ${
                       isSelected
-                        ? "border-primary/50 bg-gradient-to-r from-primary/[0.08] to-purple-500/[0.08] text-primary shadow-sm"
-                        : "border bg-card text-muted-foreground hover:border-muted-foreground/30 hover:bg-muted/50"
-                    } ${isShameek ? "cursor-not-allowed opacity-80" : ""}`}
+                        ? "border-primary/50 bg-gradient-to-b from-primary/[0.06] to-purple-500/[0.06] text-white shadow-lg shadow-primary/5 scale-[1.02]"
+                        : "border-white/5 bg-card text-muted-foreground hover:border-white/10 hover:bg-white/[0.02]"
+                    } ${isShameek ? "opacity-95" : ""}`}
                   >
+                    {/* Avatar Bubble */}
                     <div
-                      className={`flex h-6 w-6 items-center justify-center rounded-lg border text-xs font-bold transition-all ${
+                      className={`relative flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br transition-all duration-300 ${
                         isSelected
-                          ? "border-primary bg-gradient-to-br from-primary to-purple-600 text-white shadow-sm"
-                          : "border"
-                      }`}
+                          ? "from-primary to-purple-600 shadow-md shadow-primary/25 text-white font-extrabold"
+                          : "from-white/5 to-white/10 text-white/50 border border-white/5 font-semibold"
+                      } text-xs group-hover:scale-105`}
                     >
-                      {isSelected ? "✓" : ""}
+                      {initials}
+                      {/* Checkmark indicator badge */}
+                      {isSelected && (
+                        <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-success text-[9px] font-black text-white border-2 border-card shadow-sm animate-spring-in">
+                          ✓
+                        </span>
+                      )}
                     </div>
-                    <span>{name}</span>
+                    
+                    <span className={`text-xs font-bold transition-colors ${isSelected ? "text-white" : "text-muted-foreground"}`}>
+                      {name}
+                    </span>
                     {isShameek && (
-                      <span className="ml-auto text-[10px] text-muted-foreground/60">Always</span>
+                      <span className="text-[8px] text-primary/80 font-bold uppercase tracking-widest leading-none">
+                        Always
+                      </span>
                     )}
                   </button>
                 );
@@ -226,7 +240,7 @@ export default function CreateRideTab() {
             </div>
             {attendees.length < 2 && (
               <p className="text-xs text-destructive flex items-center gap-1">
-                <span className="h-1 w-1 rounded-full bg-destructive" />
+                <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse-soft" />
                 Minimum 2 members required (including Shameek)
               </p>
             )}

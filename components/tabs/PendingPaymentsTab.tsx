@@ -293,55 +293,82 @@ export default function PendingPaymentsTab({ isAdmin }: { isAdmin: boolean }) {
               return (
                 <div
                   key={`${item.rideId}-${item.memberName}-${i}`}
-                  className="glass-premium rounded-2xl p-4 flex items-center gap-4 animate-fade-in-up transition-all duration-200"
+                  className="glass-premium rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 animate-fade-in-up transition-all duration-200"
                   style={{ animationDelay: `${i * 0.04}s` }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-1px)"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.transform = ""; }}
-                >
-                  {/* Avatar */}
-                  <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${avatarGradient} text-white text-sm font-bold`}>
-                    {initials}
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm truncate">{item.memberName}</p>
-                    <p className="text-[11px] text-muted-foreground">{formatDate(item.rideDate)}</p>
-                  </div>
-
-                  {/* Amount */}
-                  <div className="text-right shrink-0">
-                    <p className="font-semibold text-sm tabular-nums" style={{ color: "#06b6d4" }}>
-                      {formatCurrency(item.amount)}
-                    </p>
-                  </div>
-
-                  {/* Status badge */}
-                  <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide shrink-0 ${statusStyle}`}>
-                    {item.status === "OVERDUE" && <AlertTriangle className="h-3 w-3" />}
-                    {item.status === "VERIFICATION" && <ShieldCheck className="h-3 w-3" />}
-                    {item.status === "PENDING" && <Clock className="h-3 w-3" />}
-                    {item.status}
-                  </span>
-
-                  {/* CTA button */}
-                  <button
-                    onClick={() =>
-                      setPaymentDialog({
-                        open: true,
-                        rideId: item.rideId,
-                        memberName: item.memberName,
-                        amount: item.amount,
-                        rideDate: item.rideDate,
-                        status: item.status,
-                      })
+                  onMouseEnter={(e) => {
+                    if (window.innerWidth >= 640) {
+                      (e.currentTarget as HTMLDivElement).style.transform = "translateY(-1px)";
                     }
-                    className="shrink-0 inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold text-white transition-all hover:-translate-y-0.5 active:scale-95"
-                    style={{ background: "linear-gradient(to right, #7c3aed, #6d28d9)" }}
-                  >
-                    {isAdmin ? "Mark Paid" : "Pay Now"}
-                    <ArrowRight className="h-3 w-3" />
-                  </button>
+                  }}
+                  onMouseLeave={(e) => {
+                    if (window.innerWidth >= 640) {
+                      (e.currentTarget as HTMLDivElement).style.transform = "";
+                    }
+                  }}
+                >
+                  {/* Top section: Avatar + Info + Badge (on mobile) */}
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    {/* Avatar */}
+                    <div className={`flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${avatarGradient} text-white text-xs sm:text-sm font-bold shadow-md`}>
+                      {initials}
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between sm:justify-start gap-2">
+                        <p className="font-extrabold text-sm sm:text-base text-white truncate">{item.memberName}</p>
+                        {/* Status badge on Mobile */}
+                        <span className={`inline-flex sm:hidden items-center gap-0.5 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide shrink-0 ${statusStyle}`}>
+                          {item.status === "OVERDUE" && <AlertTriangle className="h-2.5 w-2.5" />}
+                          {item.status === "VERIFICATION" && <ShieldCheck className="h-2.5 w-2.5" />}
+                          {item.status === "PENDING" && <Clock className="h-2.5 w-2.5" />}
+                          {item.status}
+                        </span>
+                      </div>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">{formatDate(item.rideDate)}</p>
+                    </div>
+                  </div>
+
+                  {/* Divider line on Mobile */}
+                  <div className="block sm:hidden h-px bg-white/5 w-full" />
+
+                  {/* Bottom section: Amount + Action (on mobile) */}
+                  <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0">
+                    {/* Amount */}
+                    <div className="text-left sm:text-right shrink-0">
+                      <p className="text-[9px] sm:hidden text-muted-foreground uppercase font-bold tracking-wider">Amount Due</p>
+                      <p className="font-extrabold text-base sm:text-sm tabular-nums" style={{ color: "#06b6d4" }}>
+                        {formatCurrency(item.amount)}
+                      </p>
+                    </div>
+
+                    {/* Status badge on Desktop */}
+                    <span className={`hidden sm:inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide shrink-0 ${statusStyle}`}>
+                      {item.status === "OVERDUE" && <AlertTriangle className="h-3 w-3" />}
+                      {item.status === "VERIFICATION" && <ShieldCheck className="h-3 w-3" />}
+                      {item.status === "PENDING" && <Clock className="h-3 w-3" />}
+                      {item.status}
+                    </span>
+
+                    {/* CTA button */}
+                    <button
+                      onClick={() =>
+                        setPaymentDialog({
+                          open: true,
+                          rideId: item.rideId,
+                          memberName: item.memberName,
+                          amount: item.amount,
+                          rideDate: item.rideDate,
+                          status: item.status,
+                        })
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 sm:py-2 text-xs font-bold text-white transition-all hover:brightness-110 active:scale-95 cursor-pointer shadow-md shadow-primary/10 hover:shadow-primary/20"
+                      style={{ background: "linear-gradient(to right, #7c3aed, #6d28d9)" }}
+                    >
+                      {isAdmin ? (item.status === "VERIFICATION" ? "Verify" : "Mark Paid") : "Pay Now"}
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
               );
             })}

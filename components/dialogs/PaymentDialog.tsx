@@ -107,7 +107,7 @@ export default function PaymentDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-md"
@@ -115,8 +115,8 @@ export default function PaymentDialog({
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md animate-fade-in-scale">
-        <div className="glass-premium rounded-2xl overflow-hidden shadow-2xl shadow-primary/15 relative z-10">
+      <div className="relative w-full max-w-md mt-auto sm:mt-0 animate-slide-up sm:animate-fade-in-scale">
+        <div className="glass-premium rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl shadow-primary/15 relative z-10">
           {/* Gradient top bar */}
           <div className="h-1 bg-gradient-to-r from-primary via-purple-500 to-primary bg-[length:200%_100%] animate-[border-flow_3s_linear_infinite]" />
 
@@ -131,7 +131,7 @@ export default function PaymentDialog({
                 )}
               </div>
               <div>
-                <h2 className="text-lg font-bold">
+                <h2 className="text-base sm:text-lg font-bold">
                   {currentStatus === "VERIFICATION" ? "Verify Payment" : "Pay Your Share"}
                 </h2>
                 <p className="text-xs text-muted-foreground font-semibold">{memberName}</p>
@@ -146,7 +146,7 @@ export default function PaymentDialog({
           </div>
 
           {step === "done" ? (
-            <div className="flex flex-col items-center gap-4 px-6 py-12">
+            <div className="flex flex-col items-center gap-4 px-6 pt-12 pb-[calc(3rem+env(safe-area-inset-bottom))] sm:pb-12">
               <div className="relative">
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-success/10 animate-fade-in-scale">
                   <Check className="h-10 w-10 text-success" />
@@ -163,7 +163,7 @@ export default function PaymentDialog({
               </p>
             </div>
           ) : (
-            <div className="space-y-5 px-6 pb-6">
+            <div className="space-y-5 px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:pb-6">
               {/* Amount Card (Receipt Style) */}
               <div className="relative rounded-2xl bg-white/[0.02] border border-white/[0.06] p-5 overflow-hidden shadow-inner backdrop-blur-sm">
                 {/* Decorative Ticket Notch holes on left & right borders */}

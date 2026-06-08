@@ -33,33 +33,34 @@ export default function AppShell({
       <div className="fixed top-0 left-0 right-0 z-[60] h-1 bg-gradient-to-r from-[#7c3aed] via-[#6d28d9] to-[#7c3aed] bg-[length:200%_100%] animate-[border-flow_3s_linear_infinite]" />
 
       <header
-        className={`sticky top-1.5 z-50 w-[calc(100%-2rem)] mx-auto border-b transition-all duration-300 rounded-2xl ${
+        className={`sticky top-3 z-50 w-[calc(100%-1.5rem)] xs:w-[calc(100%-2rem)] mx-auto border transition-all duration-300 rounded-2xl ${
           scrolled
-            ? "bg-card/75 backdrop-blur-2xl shadow-2xl border-white/5"
-            : "bg-background/40 backdrop-blur-md border-primary/5"
+            ? "bg-card/80 backdrop-blur-2xl shadow-xl border-white/10"
+            : "bg-background/40 backdrop-blur-md border-white/5"
         }`}
       >
-        <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-purple-600 text-primary-foreground shadow-lg shadow-primary/20 animate-float">
-              <Car className="h-5 w-5 text-white" />
+        <div className="container mx-auto flex h-14 sm:h-16 max-w-6xl items-center justify-between px-3 sm:px-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="relative flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-purple-600 text-primary-foreground shadow-lg shadow-primary/20 animate-float">
+              <Car className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-white" />
               {/* Glow ring */}
               <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary to-purple-600 opacity-40 blur-md -z-10" />
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <div>
-                <h1 className="text-lg font-bold tracking-tight flex items-center gap-1.5">
-                  <span className="gradient-text">MITE</span>
-                  <span className="text-foreground font-extrabold">Ride Manager</span>
-                  <Sparkles className="h-3.5 w-3.5 text-primary/60 animate-pulse-soft" />
+                <h1 className="text-sm xs:text-base sm:text-lg font-extrabold tracking-tight flex items-center gap-1">
+                  <span className="gradient-text font-black">MITE</span>
+                  <span className="text-foreground">Ride</span>
+                  <span className="text-muted-foreground/75 font-normal hidden xs:inline">Manager</span>
+                  <Sparkles className="h-3 w-3 text-primary/60 animate-pulse-soft" />
                 </h1>
-                <p className="text-[9px] leading-none text-muted-foreground tracking-widest uppercase font-semibold">
-                  Expense Tracker
+                <p className="text-[8px] leading-none text-muted-foreground/60 tracking-widest uppercase font-bold">
+                  Commute Tracker
                 </p>
               </div>
               {isAdmin && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-primary to-purple-600 px-2.5 py-0.5 text-[10px] font-semibold text-white shadow-lg shadow-primary/20">
-                  <Gauge className="h-2.5 w-2.5" />
+                <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-primary to-purple-600 px-2 py-0.5 text-[9px] font-bold text-white shadow-md shadow-primary/20">
+                  <Gauge className="h-2 w-2" />
                   ADMIN
                 </span>
               )}

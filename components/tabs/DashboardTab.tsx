@@ -107,12 +107,12 @@ function StatCard({
     : typeof value === "number"
       ? value
       : parseFloat(String(value).replace(/[₹,%]/g, "")) || 0;
-
+ 
   const animatedValue = useAnimatedCounter(numericValue, 800, isCurrency ? "₹" : "", "", 0);
-
+ 
   return (
     <div
-      className="group relative rounded-2xl glass-premium p-5 transition-all duration-300 animate-fade-in-up"
+      className="group relative rounded-2xl glass-premium p-4 sm:p-5 transition-all duration-300 animate-fade-in-up"
       style={{
         animationDelay: `${delay * 0.06}s`,
       }}
@@ -129,52 +129,52 @@ function StatCard({
     >
       {/* Icon square */}
       <div
-        className="flex h-11 w-11 items-center justify-center rounded-xl"
+        className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-xl"
         style={{ background: accentBg }}
       >
-        <Icon className="h-5 w-5" style={{ color: accentColor }} />
+        <Icon className="h-4 sm:h-5 w-4 sm:w-5" style={{ color: accentColor }} />
       </div>
-
+ 
       {/* Value */}
       <p
-        className="mt-4 text-[42px] font-light leading-none tracking-tight tabular-nums stat-number"
+        className="mt-3 sm:mt-4 text-xl xs:text-2xl sm:text-3xl md:text-4xl font-extrabold leading-none tracking-tight tabular-nums stat-number"
         style={{ color: "inherit" }}
       >
         {isCurrency ? animatedValue : value}
       </p>
-
+ 
       {/* Label */}
-      <p className="mt-1 text-[11px] uppercase tracking-[0.15em] font-medium text-muted-foreground">
+      <p className="mt-1 text-[9px] xs:text-[10px] sm:text-[11px] uppercase tracking-[0.12em] sm:tracking-[0.15em] font-bold text-muted-foreground truncate">
         {title}
       </p>
-
+ 
       {/* Trend badge */}
       {delta && (
-        <div className="mt-2">
+        <div className="mt-1.5 sm:mt-2">
           <span
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+            className={`inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-2 py-0.5 text-[9px] sm:text-[10px] font-bold ${
               delta.value >= 0
                 ? "bg-success/15 text-success"
                 : "bg-destructive/15 text-destructive"
             }`}
           >
             {delta.value >= 0 ? (
-              <ArrowUpRight className="h-3 w-3" />
+              <ArrowUpRight className="h-2.5 sm:h-3 w-2.5 sm:w-3" />
             ) : (
-              <ArrowDownRight className="h-3 w-3" />
+              <ArrowDownRight className="h-2.5 sm:h-3 w-2.5 sm:w-3" />
             )}
             {Math.abs(delta.value)}% {delta.label}
           </span>
         </div>
       )}
-
+ 
       {/* Sparkline */}
       {sparklineData && (
-        <div className="mt-3 h-8">
-          <SparklineChart data={sparklineData} color={accentColor} height={32} />
+        <div className="mt-2.5 sm:mt-3 h-7 sm:h-8">
+          <SparklineChart data={sparklineData} color={accentColor} height={28} />
         </div>
       )}
-
+ 
       {/* Bottom accent line */}
       <div
         className="absolute bottom-0 left-4 right-4 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -384,7 +384,7 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
           </div>
 
           {/* Cinematic Image with Purple Rim-Light Glow */}
-          <div className="relative flex justify-end items-center h-48 md:h-64 rounded-2xl overflow-hidden" style={{ boxShadow: "0 0 60px rgba(124,58,237,0.4), 0 0 120px rgba(109,40,217,0.2)" }}>
+          <div className="relative flex justify-end items-center h-36 xs:h-44 sm:h-52 md:h-64 rounded-2xl overflow-hidden" style={{ boxShadow: "0 0 40px rgba(124,58,237,0.3), 0 0 80px rgba(109,40,217,0.15)" }}>
             {/* Purple rim-light glow effect */}
             <div className="absolute inset-0 bg-gradient-to-l from-[#7c3aed]/30 via-transparent to-transparent pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#7c3aed]/10 via-transparent to-transparent pointer-events-none" />
@@ -393,14 +393,14 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
               src="/car-hero.png"
               alt="Hyundai Exter SUV"
               className="relative w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-              style={{ filter: "drop-shadow(0 0 20px rgba(124,58,237,0.3))" }}
+              style={{ filter: "drop-shadow(0 0 15px rgba(124,58,237,0.25))" }}
             />
           </div>
         </div>
       </div>
 
       {/* Stat Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {statCards.map((card, i) => (
           <StatCard key={card.title} {...card} delay={i + 1} />
         ))}
