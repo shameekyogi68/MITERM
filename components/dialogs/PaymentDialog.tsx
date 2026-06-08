@@ -45,8 +45,8 @@ export default function PaymentDialog({
   const [upiPaytm, setUpiPaytm]         = useState("7338603959@ptyes");
   const [qrImageUrl, setQrImageUrl]     = useState("");
   const [copiedKey, setCopiedKey]       = useState<string | null>(null);
-
-
+  const [redirectingApp, setRedirectingApp] = useState<{ name: string; upiId: string; scheme: string } | null>(null);
+  const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -70,18 +70,22 @@ export default function PaymentDialog({
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    if (redirectTimeoutRef.current) {
+      clearTimeout(redirectTimeoutRef.current);
+      redirectTimeoutRef.current = null;
+    }
+    setRedirectingApp(null);
     onClose();
   };
-
-
-
-
 
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
+      }
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
       }
     };
   }, []);
@@ -114,19 +118,33 @@ export default function PaymentDialog({
   }, [isOpen]);
 
   const handleUpiPayment = async (appName: string, upiId: string, appScheme: string) => {
+    if (redirectTimeoutRef.current) {
+      clearTimeout(redirectTimeoutRef.current);
+    }
     try {
       await navigator.clipboard.writeText(upiId);
-      addToast("success", `${appName} ID copied! Open app and paste to pay.`);
+      addToast("success", `Copied UPI ID for ${appName}!`);
       
-      // Delay redirect slightly so user sees the success toast
-      setTimeout(() => {
+      setRedirectingApp({ name: appName, upiId, scheme: appScheme });
+      
+      redirectTimeoutRef.current = setTimeout(() => {
         window.location.href = appScheme;
-      }, 600);
+      }, 1200);
     } catch (err) {
       console.error("UPI copy failed:", err);
-      // Fallback: just redirect
-      window.location.href = appScheme;
+      setRedirectingApp({ name: appName, upiId, scheme: appScheme });
+      redirectTimeoutRef.current = setTimeout(() => {
+        window.location.href = appScheme;
+      }, 1200);
     }
+  };
+
+  const handleCancelRedirect = () => {
+    if (redirectTimeoutRef.current) {
+      clearTimeout(redirectTimeoutRef.current);
+      redirectTimeoutRef.current = null;
+    }
+    setRedirectingApp(null);
   };
 
   const handleCopy = (text: string, key: string) => {
@@ -286,6 +304,99 @@ export default function PaymentDialog({
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {redirectingApp && (
+          <div className="absolute inset-0 z-50 bg-[#0d0f17]/95 backdrop-blur-md flex flex-col justify-between p-6 animate-fade-in">
+            <div className="flex-1 flex flex-col items-center justify-center text-center space-y-5">
+              {/* App Logo Indicator */}
+              <div 
+                className="h-14 w-14 rounded-2xl flex items-center justify-center text-white font-extrabold text-lg shadow-lg animate-bounce-in"
+                style={{ 
+                  background: redirectingApp.name === "PhonePe" 
+                    ? "linear-gradient(135deg, #5f259f, #4c1d80)" 
+                    : redirectingApp.name === "GPay" 
+                    ? "linear-gradient(135deg, #1a73e8, #1557b0)" 
+                    : "linear-gradient(135deg, #00baf2, #008fc2)"
+                }}
+              >
+                {redirectingApp.name[0]}
+              </div>
+
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-white">UPI ID Copied!</h3>
+                <p className="text-[11px] text-muted-foreground max-w-xs leading-relaxed">
+                  UPI ID for <span className="text-white font-semibold">{redirectingApp.name}</span> copied to clipboard. 
+                  Due to bank regulations, you must pay manually.
+                </p>
+              </div>
+
+              {/* Paste Instructions Box */}
+              <div className="w-full max-w-xs rounded-xl bg-white/[0.03] border border-white/[0.08] p-4 text-left space-y-3">
+                <div>
+                  <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider font-semibold">Copied ID</p>
+                  <div className="flex items-center justify-between mt-1 gap-2">
+                    <code className="text-xs font-mono text-primary font-bold truncate max-w-[170px]">
+                      {redirectingApp.upiId}
+                    </code>
+                    <span className="text-[9px] shrink-0 bg-success/15 border border-success/30 text-success px-2 py-0.5 rounded-full font-bold">
+                      Copied
+                    </span>
+                  </div>
+                </div>
+
+                <div className="h-px bg-white/[0.06]" />
+
+                <div>
+                  <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider font-semibold">Amount to Pay</p>
+                  <p className="text-base font-bold text-white mt-0.5 tabular-nums">
+                    {formatCurrency(amount)}
+                  </p>
+                </div>
+
+                <div className="h-px bg-white/[0.06]" />
+
+                <div className="text-[10px] text-muted-foreground/90 space-y-1.5 leading-relaxed">
+                  <p className="flex items-start gap-1">
+                    <span className="text-primary font-bold">1.</span> Paste the copied ID inside {redirectingApp.name} (under Pay to UPI ID).
+                  </p>
+                  <p className="flex items-start gap-1">
+                    <span className="text-primary font-bold">2.</span> Pay exactly {formatCurrency(amount)}.
+                  </p>
+                  <p className="flex items-start gap-1">
+                    <span className="text-primary font-bold">3.</span> Return here and mark as paid.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="space-y-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href = redirectingApp.scheme;
+                }}
+                className="w-full h-11 rounded-xl text-xs font-bold text-white shadow-lg flex items-center justify-center gap-2 touch-manipulation hover:opacity-90 active:opacity-80 transition-opacity"
+                style={{ 
+                  background: redirectingApp.name === "PhonePe" 
+                    ? "linear-gradient(135deg, #5f259f, #4c1d80)" 
+                    : redirectingApp.name === "GPay" 
+                    ? "linear-gradient(135deg, #1a73e8, #1557b0)" 
+                    : "linear-gradient(135deg, #00baf2, #008fc2)"
+                }}
+              >
+                Open {redirectingApp.name} Now
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleCancelRedirect}
+                className="w-full h-10 rounded-xl border border-white/[0.08] bg-white/[0.02] text-[11px] font-semibold text-muted-foreground hover:text-white hover:bg-white/[0.05] transition-all touch-manipulation"
+              >
+                Go Back / Check QR Code
+              </button>
+            </div>
+          </div>
+        )}
         {/* ── Header Container ── */}
         <div className="flex flex-col shrink-0">
           {/* Drag handle (mobile only) */}
@@ -374,6 +485,39 @@ export default function PaymentDialog({
                   </div>
                 </div>
 
+                {/* ── P2P Instruction Stepper Card ── */}
+                <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-3.5 space-y-2.5">
+                  <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+                    <ShieldCheck className="h-3.5 w-3.5 text-primary animate-pulse" /> App Payment Steps
+                  </h3>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex gap-2.5 items-start">
+                      <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-primary/10 border border-primary/20 text-[9px] font-bold text-primary mt-0.5">
+                        1
+                      </div>
+                      <p className="text-muted-foreground leading-normal text-[11px]">
+                        Tap any app below to <span className="text-white font-medium">copy the UPI ID</span> to your clipboard.
+                      </p>
+                    </div>
+                    <div className="flex gap-2.5 items-start">
+                      <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-primary/10 border border-primary/20 text-[9px] font-bold text-primary mt-0.5">
+                        2
+                      </div>
+                      <p className="text-muted-foreground leading-normal text-[11px]">
+                        The app will open. Search and <span className="text-white font-medium">paste the UPI ID</span> inside, then pay exactly <span className="text-primary font-bold">{formatCurrency(amount)}</span>.
+                      </p>
+                    </div>
+                    <div className="flex gap-2.5 items-start">
+                      <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-primary/10 border border-primary/20 text-[9px] font-bold text-primary mt-0.5">
+                        3
+                      </div>
+                      <p className="text-muted-foreground leading-normal text-[11px]">
+                        After making the payment, return here and tap <span className="text-success font-medium">"Mark as Paid"</span> at the bottom.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {/* ── UPI payment buttons ── */}
                 <div className="grid grid-cols-3 gap-2 shrink-0">
                   {/* PhonePe */}
@@ -407,11 +551,7 @@ export default function PaymentDialog({
                   </button>
                 </div>
 
-                {/* Explanation text to assist the user */}
-                <p className="text-center text-[10px] text-muted-foreground/60 leading-normal px-2">
-                  NPCI regulations block direct browser redirects for personal UPI transfers. 
-                  Tapping copies the UPI ID and opens the app so you can easily paste it.
-                </p>
+
 
                 {/* ── QR Code ── */}
                 <div className="flex flex-col items-center gap-2.5">
