@@ -10,7 +10,6 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Car,
-  QrCode,
   X,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";

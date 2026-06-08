@@ -3,6 +3,7 @@ import withPWA from "next-pwa";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["@prisma/client"],
+  turbopack: {},
   images: {
     remotePatterns: [{ protocol: "https", hostname: "**" }],
   },
