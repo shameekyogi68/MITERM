@@ -169,6 +169,16 @@ nav, [role="tablist"] {
 .h-13 { height: 3.25rem; }
 .min-h-\[52px\] { min-height: 52px; }
 
+/* xs breakpoint utilities (420px) — used throughout the app */
+@media (min-width: 420px) {
+  .xs\:text-\[10px\] { font-size: 10px; }
+  .xs\:text-2xl { font-size: 1.5rem; line-height: 2rem; }
+  .xs\:text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+  .xs\:h-40 { height: 10rem; }
+  .xs\:inline-flex { display: inline-flex; }
+  .xs\:hidden { display: none; }
+}
+
 /* ===== Premium Scrollbar ===== */
 ::-webkit-scrollbar {
   width: 4px;

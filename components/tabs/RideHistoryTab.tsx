@@ -314,8 +314,8 @@ export default function RideHistoryTab({ isAdmin }: { isAdmin: boolean }) {
                   {/* Expanded Content */}
                   {isExpanded && (
                     <div className="border-t border-white/[0.06] animate-slide-down">
-                      <div className="p-5">
-                        <div className="grid gap-6 md:grid-cols-2">
+                      <div className="p-4 sm:p-5">
+                        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
                           {/* Trip Details */}
                           <div className="space-y-3">
                             <h4 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Trip Details</h4>

@@ -118,13 +118,13 @@ export default function TabRouter({
         {/* Page header — compact on mobile */}
         <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-6">
           <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20">
-            <Icon className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-primary" />
+            <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           </div>
-          <div className="min-w-0">
-            <h2 className="text-lg sm:text-2xl font-bold tracking-tight leading-tight">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base sm:text-2xl font-bold tracking-tight leading-tight">
               {activeTabData?.label}
             </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground leading-snug line-clamp-1">
+            <p className="text-[11px] sm:text-sm text-muted-foreground leading-snug line-clamp-1">
               {TAB_SUBTITLES[activeTab]}
             </p>
           </div>

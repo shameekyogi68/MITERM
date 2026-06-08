@@ -255,41 +255,45 @@ export default function CreateRideTab() {
             </label>
             <div className="space-y-2">
               {expenses.map((exp, i) => (
-                <div key={i} className="flex gap-2 animate-fade-in">
-                  <select
-                    value={exp.type}
-                    onChange={(e) => updateExpense(i, "type", e.target.value)}
-                    className="w-28 rounded-xl border bg-card px-3 py-3 text-sm"
-                  >
-                    {EXPENSE_TYPES.map((t) => (
-                      <option key={t} value={t}>
-                        {t.charAt(0) + t.slice(1).toLowerCase()}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="relative">
-                    <IndianRupee className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                      type="number"
-                      placeholder="Amount"
-                      value={exp.amount || ""}
-                      onChange={(e) => updateExpense(i, "amount", Number(e.target.value))}
-                      className="w-28 rounded-xl border bg-card py-3 pl-8 pr-3 text-sm"
-                    />
+                <div key={i} className="flex flex-col sm:flex-row gap-2 animate-fade-in">
+                  <div className="flex gap-2">
+                    <select
+                      value={exp.type}
+                      onChange={(e) => updateExpense(i, "type", e.target.value)}
+                      className="flex-1 sm:w-28 sm:flex-none rounded-xl border bg-card px-3 py-3 text-sm"
+                    >
+                      {EXPENSE_TYPES.map((t) => (
+                        <option key={t} value={t}>
+                          {t.charAt(0) + t.slice(1).toLowerCase()}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="relative w-28 shrink-0">
+                      <IndianRupee className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                      <input
+                        type="number"
+                        placeholder="Amount"
+                        value={exp.amount || ""}
+                        onChange={(e) => updateExpense(i, "amount", Number(e.target.value))}
+                        className="w-full rounded-xl border bg-card py-3 pl-8 pr-3 text-sm"
+                      />
+                    </div>
                   </div>
-                  <input
-                    type="text"
-                    placeholder="Description"
-                    value={exp.description}
-                    onChange={(e) => updateExpense(i, "description", e.target.value)}
-                    className="flex-1 rounded-xl border bg-card px-4 py-3 text-sm"
-                  />
-                  <button
-                    onClick={() => removeExpense(i)}
-                    className="flex items-center justify-center rounded-xl border px-3 text-muted-foreground transition-all hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Description (optional)"
+                      value={exp.description}
+                      onChange={(e) => updateExpense(i, "description", e.target.value)}
+                      className="flex-1 rounded-xl border bg-card px-4 py-3 text-sm"
+                    />
+                    <button
+                      onClick={() => removeExpense(i)}
+                      className="flex items-center justify-center rounded-xl border px-3 text-muted-foreground transition-all hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 shrink-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
               <button

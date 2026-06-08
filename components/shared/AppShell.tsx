@@ -92,7 +92,7 @@ export default function AppShell({
           {/* Logo + Brand */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="relative flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-purple-600 text-white shadow-lg shadow-primary/25 animate-float">
-              <Car className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
+              <Car className="h-4 w-4 sm:h-5 sm:w-5" />
               <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary to-purple-600 opacity-40 blur-md -z-10" />
             </div>
             <div className="min-w-0">
@@ -172,7 +172,7 @@ export default function AppShell({
       <OfflineBanner />
 
       {/* Main content — tight padding on mobile */}
-      <main className="relative z-10 max-w-6xl mx-auto px-3 sm:px-5 pt-3 sm:pt-5 pb-2">
+      <main className="relative z-10 max-w-6xl mx-auto px-3 sm:px-5 pt-2 sm:pt-5 pb-2">
         {children}
       </main>
 

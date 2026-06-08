@@ -52,10 +52,10 @@ export default function OverdueBanner({
             {overdue.map((item, i) => (
               <div
                 key={`${item.rideId}-${item.memberName}-${i}`}
-                className="flex items-center justify-between px-5 py-3 text-sm transition-colors hover:bg-destructive/[0.02]"
+                className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-5 py-3 gap-2.5 sm:gap-0 text-sm transition-colors hover:bg-destructive/[0.02]"
               >
-                <div className="flex items-center gap-4">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/5 shrink-0">
                     <Zap className="h-3.5 w-3.5 text-destructive" />
                   </div>
                   <div>
@@ -69,7 +69,7 @@ export default function OverdueBanner({
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between sm:justify-end gap-3 pl-11 sm:pl-0">
                   <span className="font-bold text-destructive">{formatCurrency(item.amount)}</span>
                   <button
                     onClick={() => onPayClick(item)}
@@ -108,10 +108,10 @@ export default function OverdueBanner({
             {pending.map((item, i) => (
               <div
                 key={`${item.rideId}-${item.memberName}-${i}`}
-                className="flex items-center justify-between px-5 py-3 text-sm transition-colors hover:bg-warning/[0.02]"
+                className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-5 py-3 gap-2.5 sm:gap-0 text-sm transition-colors hover:bg-warning/[0.02]"
               >
-                <div className="flex items-center gap-4">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-warning/5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-warning/5 shrink-0">
                     <Clock className="h-3.5 w-3.5 text-warning" />
                   </div>
                   <div>
@@ -119,7 +119,7 @@ export default function OverdueBanner({
                     <p className="text-xs text-muted-foreground mt-0.5">{formatDate(item.rideDate)}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between sm:justify-end gap-3 pl-11 sm:pl-0">
                   <span className="font-bold">{formatCurrency(item.amount)}</span>
                   <button
                     onClick={() => onPayClick(item)}

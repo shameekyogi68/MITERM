@@ -98,51 +98,51 @@ export default function PaymentHistoryTab() {
   return (
     <div className="space-y-5 animate-fade-in">
       {/* Summary Stat Cards — glass-premium */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
         <div
-          className="group glass-premium rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 card-hover animate-fade-in-up"
+          className="group glass-premium rounded-2xl p-3 sm:p-5 transition-all duration-300 hover:-translate-y-1 card-hover animate-fade-in-up"
           style={{ animationDelay: "0.05s" }}
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
-            <IndianRupee className="h-5 w-5 text-white" />
+          <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
+            <IndianRupee className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
-          <p className="mt-3 text-2xl font-bold tracking-tight gradient-text stat-number">
+          <p className="mt-2 sm:mt-3 text-lg sm:text-2xl font-bold tracking-tight gradient-text stat-number truncate">
             {formatCurrency(totalCollected)}
           </p>
-          <p className="text-[11px] uppercase tracking-[0.1em] font-medium text-muted-foreground">Total Collected</p>
+          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.1em] font-medium text-muted-foreground leading-tight">Total Collected</p>
         </div>
 
         <div
-          className="group glass-premium rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 card-hover animate-fade-in-up"
+          className="group glass-premium rounded-2xl p-3 sm:p-5 transition-all duration-300 hover:-translate-y-1 card-hover animate-fade-in-up"
           style={{ animationDelay: "0.1s" }}
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: "linear-gradient(135deg, #7c3aed, #6d28d9)" }}>
-            <TrendingUp className="h-5 w-5 text-white" />
+          <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: "linear-gradient(135deg, #7c3aed, #6d28d9)" }}>
+            <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
-          <p className="mt-3 text-2xl font-bold tracking-tight tabular-nums stat-number">
+          <p className="mt-2 sm:mt-3 text-lg sm:text-2xl font-bold tracking-tight tabular-nums stat-number truncate">
             {formatCurrency(avgPayment)}
           </p>
-          <p className="text-[11px] uppercase tracking-[0.1em] font-medium text-muted-foreground">Avg Payment</p>
+          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.1em] font-medium text-muted-foreground leading-tight">Avg Payment</p>
         </div>
 
         <div
-          className="group glass-premium rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 card-hover animate-fade-in-up"
+          className="group glass-premium rounded-2xl p-3 sm:p-5 transition-all duration-300 hover:-translate-y-1 card-hover animate-fade-in-up"
           style={{ animationDelay: "0.15s" }}
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: "linear-gradient(135deg, #06b6d4, #0284c7)" }}>
-            <Calendar className="h-5 w-5 text-white" />
+          <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: "linear-gradient(135deg, #06b6d4, #0284c7)" }}>
+            <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
           </div>
-          <p className="mt-3 text-2xl font-bold tracking-tight tabular-nums stat-number">
+          <p className="mt-2 sm:mt-3 text-lg sm:text-2xl font-bold tracking-tight tabular-nums stat-number">
             {filtered.length}
           </p>
-          <p className="text-[11px] uppercase tracking-[0.1em] font-medium text-muted-foreground">Records</p>
+          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.1em] font-medium text-muted-foreground leading-tight">Records</p>
           <p className="text-[10px] text-muted-foreground/60">{uniqueMembers} members</p>
         </div>
       </div>
 
       {/* Filter bar — glass pills */}
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-[200px]">
+      <div className="flex flex-wrap gap-2.5">
+        <div className="relative flex-1 min-w-[160px]">
           <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
@@ -177,24 +177,26 @@ export default function PaymentHistoryTab() {
           <option value="this-month">This Month</option>
           <option value="last-month">Last Month</option>
         </select>
-        {/* CSV — outlined glass */}
-        <button
-          onClick={() => handleExport("csv")}
-          className="inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm font-medium transition-all hover:bg-[#7c3aed]/10"
-          style={{ border: "1px solid rgba(124,58,237,0.4)", color: "#7c3aed" }}
-        >
-          <ArrowDownToLine className="h-4 w-4" />
-          CSV
-        </button>
-        {/* JSON — outlined glass */}
-        <button
-          onClick={() => handleExport("json")}
-          className="inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm font-medium transition-all hover:bg-[#7c3aed]/10"
-          style={{ border: "1px solid rgba(124,58,237,0.4)", color: "#7c3aed" }}
-        >
-          <ArrowDownToLine className="h-4 w-4" />
-          JSON
-        </button>
+        <div className="flex gap-2 ml-auto">
+          {/* CSV — outlined glass */}
+          <button
+            onClick={() => handleExport("csv")}
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-3 text-sm font-medium transition-all hover:bg-[#7c3aed]/10"
+            style={{ border: "1px solid rgba(124,58,237,0.4)", color: "#7c3aed" }}
+          >
+            <ArrowDownToLine className="h-4 w-4" />
+            <span className="hidden sm:inline">CSV</span>
+          </button>
+          {/* JSON — outlined glass */}
+          <button
+            onClick={() => handleExport("json")}
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-3 text-sm font-medium transition-all hover:bg-[#7c3aed]/10"
+            style={{ border: "1px solid rgba(124,58,237,0.4)", color: "#7c3aed" }}
+          >
+            <ArrowDownToLine className="h-4 w-4" />
+            <span className="hidden sm:inline">JSON</span>
+          </button>
+        </div>
       </div>
 
       {/* Empty state */}

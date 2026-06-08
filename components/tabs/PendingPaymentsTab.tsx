@@ -161,49 +161,49 @@ export default function PendingPaymentsTab({ isAdmin }: { isAdmin: boolean }) {
   return (
     <div className="space-y-5 animate-fade-in">
       {/* Summary Stat Pills */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
         {/* Pending pill */}
-        <div className="glass-premium rounded-2xl p-4 flex items-center gap-3 animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: "rgba(245,158,11,0.1)" }}>
-            <Clock className="h-5 w-5" style={{ color: "#f59e0b" }} />
+        <div className="glass-premium rounded-2xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3 animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
+          <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: "rgba(245,158,11,0.1)" }}>
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: "#f59e0b" }} />
           </div>
-          <div>
-            <p className="text-2xl font-light tabular-nums" style={{ color: "#f59e0b" }}>
+          <div className="min-w-0">
+            <p className="text-xl sm:text-2xl font-light tabular-nums leading-none" style={{ color: "#f59e0b" }}>
               {pending.length}
             </p>
-            <p className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground font-medium">Pending</p>
-            <p className="text-[10px] text-muted-foreground/60">{formatCurrency(totalPendingAmount)}</p>
+            <p className="text-[9px] sm:text-[11px] uppercase tracking-[0.08em] text-muted-foreground font-medium leading-tight mt-0.5">Pending</p>
+            <p className="text-[9px] sm:text-[10px] text-muted-foreground/60 truncate">{formatCurrency(totalPendingAmount)}</p>
           </div>
         </div>
 
         {/* Overdue pill */}
-        <div className="glass-premium rounded-2xl p-4 flex items-center gap-3 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: "rgba(244,63,94,0.1)" }}>
-            <AlertTriangle className="h-5 w-5" style={{ color: "#f43f5e" }} />
+        <div className="glass-premium rounded-2xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+          <div className="relative flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: "rgba(244,63,94,0.1)" }}>
+            <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: "#f43f5e" }} />
             {overdue.length > 0 && (
               <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive animate-pulse-overdue" />
             )}
           </div>
-          <div>
-            <p className="text-2xl font-light tabular-nums" style={{ color: "#f43f5e" }}>
+          <div className="min-w-0">
+            <p className="text-xl sm:text-2xl font-light tabular-nums leading-none" style={{ color: "#f43f5e" }}>
               {overdue.length}
             </p>
-            <p className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground font-medium">Overdue</p>
-            <p className="text-[10px]" style={{ color: "rgba(244,63,94,0.6)" }}>{formatCurrency(totalOverdueAmount)}</p>
+            <p className="text-[9px] sm:text-[11px] uppercase tracking-[0.08em] text-muted-foreground font-medium leading-tight mt-0.5">Overdue</p>
+            <p className="text-[9px] sm:text-[10px] truncate" style={{ color: "rgba(244,63,94,0.6)" }}>{formatCurrency(totalOverdueAmount)}</p>
           </div>
         </div>
 
         {/* Members pill */}
-        <div className="glass-premium rounded-2xl p-4 flex items-center gap-3 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: "rgba(124,58,237,0.1)" }}>
-            <Users className="h-5 w-5" style={{ color: "#7c3aed" }} />
+        <div className="glass-premium rounded-2xl p-3 sm:p-4 flex items-center gap-2 sm:gap-3 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
+          <div className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: "rgba(124,58,237,0.1)" }}>
+            <Users className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: "#7c3aed" }} />
           </div>
-          <div>
-            <p className="text-2xl font-light tabular-nums" style={{ color: "#7c3aed" }}>
+          <div className="min-w-0">
+            <p className="text-xl sm:text-2xl font-light tabular-nums leading-none" style={{ color: "#7c3aed" }}>
               {uniqueMembers}
             </p>
-            <p className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground font-medium">Members</p>
-            <p className="text-[10px] text-muted-foreground/60">{verification.length} verifying</p>
+            <p className="text-[9px] sm:text-[11px] uppercase tracking-[0.08em] text-muted-foreground font-medium leading-tight mt-0.5">Members</p>
+            <p className="text-[9px] sm:text-[10px] text-muted-foreground/60">{verification.length} verifying</p>
           </div>
         </div>
       </div>
@@ -226,24 +226,24 @@ export default function PendingPaymentsTab({ isAdmin }: { isAdmin: boolean }) {
       </div>
 
       {/* Search & Filter */}
-      <div className="flex gap-3">
-        <div className="relative flex-1">
+      <div className="flex gap-2.5">
+        <div className="relative flex-1 min-w-0">
           <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search by member name..."
+            placeholder="Search member..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded-full py-3 pl-10 pr-4 text-sm transition-all"
             style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
           />
         </div>
-        <div className="relative">
+        <div className="relative shrink-0">
           <Filter className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <select
             value={memberFilter}
             onChange={(e) => setMemberFilter(e.target.value)}
-            className="select-premium rounded-full py-3 pl-9 pr-8 text-sm transition-all"
+            className="select-premium rounded-full py-3 pl-9 pr-8 text-sm transition-all max-w-[140px] sm:max-w-none"
             style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
           >
             <option value="all">All Members</option>

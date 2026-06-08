@@ -132,7 +132,7 @@ function StatCard({
  
       {/* Value */}
       <p
-        className="mt-3 sm:mt-4 text-xl xs:text-2xl sm:text-3xl md:text-4xl font-extrabold leading-none tracking-tight tabular-nums stat-number"
+        className="mt-3 sm:mt-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-extrabold leading-none tracking-tight tabular-nums stat-number"
         style={{ color: "inherit" }}
       >
         {isCurrency ? animatedValue : value}
@@ -281,7 +281,7 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest">Liquid Gold Price Today</span>
-                  <p className="text-[42px] font-light leading-none tabular-nums" style={{ color: "#f59e0b" }}>
+                  <p className="text-4xl sm:text-[42px] font-light leading-none tabular-nums" style={{ color: "#f59e0b" }}>
                     ₹{stats.todayPetrolPrice.toFixed(2)}
                   </p>
                   <span className="text-xs font-medium text-muted-foreground">per liter of tears</span>
@@ -300,29 +300,29 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
             <div className="rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] p-4 shadow-inner">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest">Mileage (If driven like a saint 😇)</span>
-                  <p className="text-[36px] font-light leading-none tabular-nums" style={{ color: "#7c3aed" }}>
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest leading-tight block">Mileage (saint 😇)</span>
+                  <p className="text-3xl font-light leading-none tabular-nums" style={{ color: "#7c3aed" }}>
                     {stats.mileage}
                   </p>
                   <span className="text-xs font-medium text-muted-foreground">km/L</span>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest">Distance (Avoiding Potholes)</span>
-                  <p className="text-[36px] font-light leading-none tabular-nums" style={{ color: "#06b6d4" }}>
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest leading-tight block">Distance (potholes)</span>
+                  <p className="text-3xl font-light leading-none tabular-nums" style={{ color: "#06b6d4" }}>
                     {stats.routeDistance}
                   </p>
                   <span className="text-xs font-medium text-muted-foreground">km</span>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest">Fuel Required (Gone forever 💨)</span>
-                  <p className="text-[36px] font-light leading-none tabular-nums">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest leading-tight block">Fuel Needed 💨</span>
+                  <p className="text-3xl font-light leading-none tabular-nums">
                     {(stats.routeDistance / stats.mileage).toFixed(2)}
                   </p>
                   <span className="text-xs font-medium text-muted-foreground">Liters</span>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest">Damage to Wallet</span>
-                  <p className="text-[36px] font-light leading-none gradient-text tabular-nums">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest leading-tight block">Wallet Damage</span>
+                  <p className="text-2xl sm:text-3xl font-light leading-none gradient-text tabular-nums break-all">
                     {formatCurrency(Math.round((stats.routeDistance / stats.mileage) * stats.todayPetrolPrice))}
                   </p>
                 </div>
@@ -349,7 +349,7 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
       </div>
 
       {/* Stat Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {statCards.map((card, i) => (
           <StatCard key={card.title} {...card} delay={i + 1} />
         ))}
@@ -373,14 +373,14 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
       </div>
 
       {/* Charts Row */}
-      <div className="grid gap-6 lg:grid-cols-3 animate-fade-in-up" style={{ animationDelay: "0.35s" }}>
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-3 animate-fade-in-up" style={{ animationDelay: "0.35s" }}>
         {/* Weekly Earnings Bar Chart */}
-        <div className="lg:col-span-2 rounded-2xl glass-premium p-6 card-hover">
+        <div className="lg:col-span-2 rounded-2xl glass-premium p-4 sm:p-6 card-hover">
           <WeeklyEarningsBarChart data={stats.monthlyFuelSpend} />
         </div>
 
         {/* Collection Rate Donut Chart */}
-        <div className="rounded-2xl glass-premium p-6 card-hover">
+        <div className="rounded-2xl glass-premium p-4 sm:p-6 card-hover">
           <CollectionRateDonutChart
             collected={stats.totalCollected}
             pending={stats.totalPending}

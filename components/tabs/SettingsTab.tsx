@@ -139,20 +139,20 @@ export default function SettingsTab() {
 
   const SettingCard = ({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
     <div className="overflow-hidden rounded-2xl border bg-card transition-all hover:shadow-md">
-      <div className="flex items-center gap-3 border-b bg-gradient-to-r from-primary/[0.03] to-purple-500/[0.03] px-6 py-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20">
+      <div className="flex items-center gap-3 border-b bg-gradient-to-r from-primary/[0.03] to-purple-500/[0.03] px-4 sm:px-6 py-3 sm:py-4">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20 shrink-0">
           <Icon className="h-4 w-4 text-primary" />
         </div>
         <h3 className="text-sm font-semibold">{title}</h3>
       </div>
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {children}
       </div>
     </div>
   );
 
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div className="space-y-4 sm:space-y-5 animate-fade-in">
       {message && (
         <div
           className={`rounded-xl border px-5 py-3 text-sm flex items-center gap-2 animate-slide-down ${
@@ -166,55 +166,55 @@ export default function SettingsTab() {
         </div>
       )}
 
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
         {/* Configuration */}
         <SettingCard icon={Settings2} title="Configuration">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Route className="h-4 w-4 text-muted-foreground" />
+        <div className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <Route className="h-4 w-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Route Distance</p>
                   <p className="text-[10px] text-muted-foreground">Round trip in km</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <input
                   type="number"
                   value={(settings.routeDistance as number) ?? 252}
                   onChange={(e) => handleSaveSetting("routeDistance", Number(e.target.value))}
                   className="w-20 rounded-xl border bg-card px-3 py-2 text-sm text-right transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
-                <span className="text-xs text-muted-foreground">km</span>
+                <span className="text-xs text-muted-foreground w-6">km</span>
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Gauge className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <Gauge className="h-4 w-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Mileage</p>
                   <p className="text-[10px] text-muted-foreground">km per liter</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <input
                   type="number"
                   value={(settings.mileage as number) ?? 16}
                   onChange={(e) => handleSaveSetting("mileage", Number(e.target.value))}
                   className="w-20 rounded-xl border bg-card px-3 py-2 text-sm text-right transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
-                <span className="text-xs text-muted-foreground">km/L</span>
+                <span className="text-xs text-muted-foreground w-8">km/L</span>
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <IndianRupee className="h-4 w-4 text-muted-foreground" />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <IndianRupee className="h-4 w-4 text-muted-foreground shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Petrol Price Offset</p>
                   <p className="text-[10px] text-muted-foreground">Manual correction to API price</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <input
                   type="number"
                   step="0.01"
@@ -222,7 +222,7 @@ export default function SettingsTab() {
                   onChange={(e) => handleSaveSetting("petrolPriceOffset", Number(e.target.value))}
                   className="w-20 rounded-xl border bg-card px-3 py-2 text-sm text-right transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
-                <span className="text-xs text-muted-foreground">₹</span>
+                <span className="text-xs text-muted-foreground w-4">₹</span>
               </div>
             </div>
           </div>
@@ -297,7 +297,7 @@ export default function SettingsTab() {
 
       {/* UPI & Contact Settings */}
       <SettingCard icon={IndianRupee} title="UPI & Contact Settings">
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-4 sm:gap-5 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">PhonePe UPI ID</label>
             <input
@@ -334,7 +334,7 @@ export default function SettingsTab() {
             />
           </div>
 
-          <div className="flex flex-col gap-1.5 md:col-span-2">
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Payee Account Name</label>
             <input
               type="text"
@@ -347,7 +347,7 @@ export default function SettingsTab() {
             <p className="text-[10px] text-muted-foreground">The actual account holder name registered at the bank. Crucial for Google Pay verification.</p>
           </div>
 
-          <div className="flex flex-col gap-1.5 md:col-span-2">
+          <div className="flex flex-col gap-1.5 sm:col-span-2">
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">WhatsApp / Admin Phone</label>
             <input
               type="text"
@@ -407,14 +407,14 @@ export default function SettingsTab() {
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => handleExport("json")}
-            className="inline-flex items-center gap-2 rounded-xl border bg-card px-5 py-3 text-sm font-medium transition-all hover:bg-muted hover:shadow-sm hover:border-primary/30"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-xl border bg-card px-5 py-3 text-sm font-medium transition-all hover:bg-muted hover:shadow-sm hover:border-primary/30"
           >
             <ArrowDownToLine className="h-4 w-4" />
             Export JSON
           </button>
           <button
             onClick={() => handleExport("csv")}
-            className="inline-flex items-center gap-2 rounded-xl border bg-card px-5 py-3 text-sm font-medium transition-all hover:bg-muted hover:shadow-sm hover:border-primary/30"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-xl border bg-card px-5 py-3 text-sm font-medium transition-all hover:bg-muted hover:shadow-sm hover:border-primary/30"
           >
             <ArrowDownToLine className="h-4 w-4" />
             Export CSV
