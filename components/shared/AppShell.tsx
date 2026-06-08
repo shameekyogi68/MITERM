@@ -1,6 +1,6 @@
 "use client";
 
-import { Car, Gauge, Sparkles } from "lucide-react";
+import { Car, Gauge } from "lucide-react";
 import { useEffect, useState } from "react";
 import OfflineBanner from "./OfflineBanner";
 
@@ -36,35 +36,35 @@ export default function AppShell({
       <header
         className={`sticky top-0 z-50 transition-all duration-300 ${
           scrolled
-            ? "bg-background/85 backdrop-blur-2xl shadow-lg shadow-black/20 border-b border-white/[0.06]"
+            ? "bg-background/80 backdrop-blur-md shadow-md border-b border-white/[0.06]"
             : "bg-background/0"
         }`}
       >
         <div className="flex h-16 sm:h-20 max-w-6xl mx-auto items-center justify-between px-4 sm:px-6">
           {/* Logo + Brand */}
-          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-            {/* Custom Premium Logo */}
-            <div className="relative flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-violet-600 via-primary to-cyan-500 text-white shadow-xl shadow-primary/20 animate-float border border-white/20">
-              <Car className="h-5.5 w-5.5 sm:h-6.5 sm:w-6.5" />
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-violet-600 via-primary to-cyan-500 opacity-55 blur-lg -z-10" />
+          <div className="flex items-center gap-3.5 min-w-0">
+            {/* Custom Modern Logo */}
+            <div className="relative flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-b from-white/[0.08] to-white/[0.02] text-white border border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.4)] transition-all duration-300 hover:border-primary/40">
+              <Car className="h-5 w-5 text-white" />
+              <div className="absolute inset-0 rounded-xl bg-primary/5 opacity-0 hover:opacity-100 transition-opacity duration-300" />
             </div>
-
-            <div className="min-w-0">
-              <h1 className="text-base sm:text-xl font-black tracking-tight flex items-center gap-1 leading-none">
-                <span className="gradient-text bg-gradient-to-r from-violet-400 via-primary to-cyan-400">Petrol</span>
-                <span className="text-foreground">Pandit</span>
-                <Sparkles className="h-3 w-3 text-cyan-400 animate-pulse-soft shrink-0" />
-              </h1>
-              <p className="text-[9px] sm:text-[10px] leading-none text-muted-foreground/60 tracking-[0.2em] sm:tracking-[0.25em] uppercase font-bold mt-1">
-                Fuel Expense Oracle
+ 
+            <div className="min-w-0 flex flex-col justify-center">
+              <div className="flex items-center gap-2">
+                <h1 className="font-heading text-lg sm:text-xl font-bold tracking-tight text-white flex items-center leading-none">
+                  Petrol<span className="text-primary font-medium">Pandit</span>
+                </h1>
+                {isAdmin && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-[9px] font-bold text-primary tracking-wider uppercase shrink-0">
+                    <Gauge className="h-2.5 w-2.5" />
+                    Admin
+                  </span>
+                )}
+              </div>
+              <p className="text-[9px] sm:text-[10px] leading-none text-white/40 tracking-[0.22em] uppercase font-bold mt-1.5">
+                RIDE EXPENSE PLATFORM
               </p>
             </div>
-            {isAdmin && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-primary to-purple-600 px-2.5 py-1 text-[9px] font-bold text-white shadow-md shadow-primary/20 shrink-0">
-                <Gauge className="h-2.5 w-2.5" />
-                ADMIN
-              </span>
-            )}
           </div>
         </div>
       </header>
