@@ -20,7 +20,7 @@ async function main() {
   }
 
   const settings = [
-    { key: 'mileage', value: 15 },
+    { key: 'mileage', value: 16 },
     { key: 'routeDistance', value: 252 },
     { key: 'qrImageUrl', value: '/qr-code.jpeg' },
     { key: 'adminSecretUrl', value: 'shameekyogi68' },
