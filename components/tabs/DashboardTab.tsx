@@ -318,6 +318,26 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
               </p>
             </div>
 
+            {/* Petrol Price Card */}
+            <div className="rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl border border-amber-500/20 p-4 shadow-inner">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest">Today's Petrol Price</span>
+                  <p className="text-[42px] font-light leading-none tabular-nums" style={{ color: "#f59e0b" }}>
+                    ₹{stats.todayPetrolPrice.toFixed(2)}
+                  </p>
+                  <span className="text-xs font-medium text-muted-foreground">per liter</span>
+                </div>
+                <div className="flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold backdrop-blur-sm">
+                  <span className="relative flex h-2 w-2 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+                  </span>
+                  <span className="text-amber-500">Live</span>
+                </div>
+              </div>
+            </div>
+
             {/* Specifications Grid in Frosted Glass Panel */}
             <div className="rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] p-4 shadow-inner">
               <div className="grid grid-cols-2 gap-3">
@@ -360,14 +380,6 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
                 <QrCode className="h-4 w-4" />
                 View Payment QR
               </button>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs font-semibold backdrop-blur-sm">
-                <span className="relative flex h-2 w-2 shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
-                </span>
-                <span className="text-white/90">₹{stats.todayPetrolPrice.toFixed(2)}/L</span>
-                <span className="text-white/40 text-[10px] uppercase tracking-widest">Live</span>
-              </div>
             </div>
           </div>
 

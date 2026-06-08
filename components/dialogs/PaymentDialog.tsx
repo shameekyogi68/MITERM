@@ -182,8 +182,27 @@ export default function PaymentDialog({
                 </div>
               </div>
 
-              {/* QR Code */}
-              <div className="flex flex-col items-center gap-3">
+              {/* Payment Options */}
+              <div className="flex flex-col gap-3">
+                {/* UPI Payment Button */}
+                <a
+                  href={`upi://pay?pa=7338603959@ybl&pn=MITE%20Ride%20Manager&am=${amount}&cu=INR`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-purple-500/25 transition-all hover:shadow-xl hover:shadow-purple-500/40 hover:-translate-y-0.5 cursor-pointer"
+                >
+                  <span>Pay with PhonePe</span>
+                  <ArrowRight className="h-4 w-4" />
+                </a>
+
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-px bg-white/10" />
+                  <span className="text-xs text-muted-foreground font-medium">OR</span>
+                  <div className="flex-1 h-px bg-white/10" />
+                </div>
+
+                {/* QR Code */}
+                <div className="flex flex-col items-center gap-3">
                 {qrImageUrl ? (
                   <div className="relative group rounded-2xl border border-white/10 bg-white p-4 shadow-xl transition-all duration-300 overflow-hidden">
                     <img
@@ -223,6 +242,7 @@ export default function PaymentDialog({
                     </button>
                   </div>
                 )}
+                </div>
               </div>
 
               {/* Screenshot Upload */}
