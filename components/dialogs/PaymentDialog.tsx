@@ -271,14 +271,14 @@ export default function PaymentDialog({
                       href={phonepeUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#5f259f] to-[#4c1d80] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-purple-950/20 transition-all hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
+                      className="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl bg-gradient-to-r from-[#5f259f] to-[#4c1d80] px-4 text-sm font-bold text-white shadow-lg shadow-purple-950/20 active:scale-[0.98] transition-transform touch-manipulation"
                     >
                       <span>Pay with PhonePe</span>
                       <ArrowRight className="h-4 w-4" />
                     </a>
                     <button
                       onClick={() => handleCopy(upiPhonePe, "phonepe")}
-                      className="h-11 w-11 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-muted-foreground hover:text-white cursor-pointer"
+                      className="h-14 w-14 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 active:bg-white/10 transition-colors text-muted-foreground touch-manipulation"
                       title="Copy UPI ID"
                       type="button"
                     >
@@ -296,14 +296,14 @@ export default function PaymentDialog({
                       href={gpayUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#1a73e8] to-[#1557b0] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-blue-950/20 transition-all hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
+                      className="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl bg-gradient-to-r from-[#1a73e8] to-[#1557b0] px-4 text-sm font-bold text-white shadow-lg shadow-blue-950/20 active:scale-[0.98] transition-transform touch-manipulation"
                     >
                       <span>Pay with Google Pay</span>
                       <ArrowRight className="h-4 w-4" />
                     </a>
                     <button
                       onClick={() => handleCopy(upiGPay, "gpay")}
-                      className="h-11 w-11 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-muted-foreground hover:text-white cursor-pointer"
+                      className="h-14 w-14 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 active:bg-white/10 transition-colors text-muted-foreground touch-manipulation"
                       title="Copy UPI ID"
                       type="button"
                     >
@@ -321,14 +321,14 @@ export default function PaymentDialog({
                       href={paytmUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00baf2] to-[#008fc2] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-sky-950/20 transition-all hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
+                      className="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl bg-gradient-to-r from-[#00baf2] to-[#008fc2] px-4 text-sm font-bold text-white shadow-lg shadow-sky-950/20 active:scale-[0.98] transition-transform touch-manipulation"
                     >
                       <span>Pay with Paytm</span>
                       <ArrowRight className="h-4 w-4" />
                     </a>
                     <button
                       onClick={() => handleCopy(upiPaytm, "paytm")}
-                      className="h-11 w-11 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-muted-foreground hover:text-white cursor-pointer"
+                      className="h-14 w-14 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 active:bg-white/10 transition-colors text-muted-foreground touch-manipulation"
                       title="Copy UPI ID"
                       type="button"
                     >
@@ -454,7 +454,7 @@ export default function PaymentDialog({
                 <div className="flex gap-3">
                   <button
                     onClick={onClose}
-                    className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold transition-all hover:bg-white/10 hover:shadow-inner cursor-pointer"
+                    className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 h-14 text-sm font-semibold active:bg-white/10 transition-colors touch-manipulation"
                   >
                     Cancel
                   </button>
@@ -463,7 +463,7 @@ export default function PaymentDialog({
                     <button
                       onClick={handleVerify}
                       disabled={isLoading}
-                      className="flex-1 rounded-xl bg-gradient-to-r from-success to-emerald-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-success/25 transition-all hover:shadow-xl hover:shadow-success/40 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2 cursor-pointer"
+                      className="flex-1 rounded-xl bg-gradient-to-r from-success to-emerald-600 px-4 h-14 text-sm font-bold text-white shadow-lg shadow-success/25 active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-manipulation"
                     >
                       {isLoading ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -478,7 +478,7 @@ export default function PaymentDialog({
                     <button
                       onClick={handleMarkPaid}
                       disabled={isLoading}
-                      className="flex-1 rounded-xl bg-gradient-to-r from-primary to-violet-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-primary/30 transition-all hover:shadow-xl hover:shadow-primary/45 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2 cursor-pointer"
+                      className="flex-1 rounded-xl bg-gradient-to-r from-primary to-violet-600 px-4 h-14 text-sm font-bold text-white shadow-lg shadow-primary/30 active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-manipulation"
                     >
                       {isLoading ? (
                         <Loader2 className="h-4 w-4 animate-spin" />

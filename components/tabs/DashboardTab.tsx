@@ -251,10 +251,9 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
     <div className="space-y-6">
       {/* Hyundai Exter Hero Card with Full-Bleed Gradient */}
       <div
-        className="relative overflow-hidden rounded-3xl p-6 shadow-2xl card-hover animate-fade-in-up animate-gradient-shift"
+        className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl sm:shadow-2xl animate-fade-in-up"
         style={{ 
           background: "linear-gradient(135deg, #1a0533 0%, #0a1628 100%)",
-          backgroundSize: "200% 200%"
         }}
       >
         {/* Purple rim-light glow on right side */}
@@ -333,8 +332,8 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
 
           </div>
 
-          {/* Cinematic Image with Purple Rim-Light Glow */}
-          <div className="relative flex justify-end items-center h-36 xs:h-44 sm:h-52 md:h-64 rounded-2xl overflow-hidden" style={{ boxShadow: "0 0 40px rgba(124,58,237,0.3), 0 0 80px rgba(109,40,217,0.15)" }}>
+          {/* Cinematic Image */}
+          <div className="relative flex justify-end items-center h-32 xs:h-40 sm:h-52 md:h-64 rounded-xl sm:rounded-2xl overflow-hidden" style={{ boxShadow: "0 0 40px rgba(124,58,237,0.3), 0 0 80px rgba(109,40,217,0.15)" }}>
             {/* Purple rim-light glow effect */}
             <div className="absolute inset-0 bg-gradient-to-l from-[#7c3aed]/30 via-transparent to-transparent pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#7c3aed]/10 via-transparent to-transparent pointer-events-none" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   LayoutDashboard,
   PlusCircle,
@@ -26,13 +26,22 @@ const TAB_GLOW: Record<string, string> = {
 };
 
 const tabs = [
-  { id: "dashboard", label: "Dashboard", shortLabel: "Home", icon: LayoutDashboard, adminOnly: false, color: "from-blue-500 to-blue-600" },
-  { id: "create", label: "Create Ride", shortLabel: "Create", icon: PlusCircle, adminOnly: true, color: "from-emerald-500 to-emerald-600" },
-  { id: "pending", label: "Pending", shortLabel: "Pending", icon: Clock, adminOnly: false, color: "from-orange-500 to-orange-600" },
-  { id: "history", label: "History", shortLabel: "Paid", icon: History, adminOnly: false, color: "from-purple-500 to-purple-600" },
-  { id: "rides", label: "Rides", shortLabel: "Rides", icon: List, adminOnly: false, color: "from-pink-500 to-pink-600" },
-  { id: "settings", label: "Settings", shortLabel: "Settings", icon: Settings, adminOnly: true, color: "from-slate-500 to-slate-600" },
+  { id: "dashboard", label: "Dashboard", shortLabel: "Home", icon: LayoutDashboard, adminOnly: false },
+  { id: "create", label: "Create Ride", shortLabel: "Create", icon: PlusCircle, adminOnly: true },
+  { id: "pending", label: "Pending", shortLabel: "Pending", icon: Clock, adminOnly: false },
+  { id: "history", label: "History", shortLabel: "Paid", icon: History, adminOnly: false },
+  { id: "rides", label: "Rides", shortLabel: "Rides", icon: List, adminOnly: false },
+  { id: "settings", label: "Settings", shortLabel: "More", icon: Settings, adminOnly: true },
 ];
+
+const TAB_SUBTITLES: Record<string, string> = {
+  dashboard: "Behold the holy grail of fuel stats, debts & mileage.",
+  create: "Log a journey and divide the fuel damage among passengers.",
+  pending: "Track and collect pending payments.",
+  history: "View complete payment history.",
+  rides: "Chronicle of past road trips and mileage adventures.",
+  settings: "Adjust the secret parameters of the Petrol Pandit universe.",
+};
 
 export default function TabRouter({
   isAdmin,
@@ -43,109 +52,80 @@ export default function TabRouter({
 }) {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const [contentKey, setContentKey] = useState(0);
   const tabRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const navRef = useRef<HTMLDivElement>(null);
 
+  // Read initial tab from URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get("tab");
     if (tab && tabs.find((t) => t.id === tab && (!t.adminOnly || isAdmin))) {
       setActiveTab(tab);
     }
-
-    const handleTabChange = (e: CustomEvent) => {
-      const changeState = () => setActiveTab(e.detail);
-      if (typeof document !== "undefined" && "startViewTransition" in document) {
-        (document as any).startViewTransition(changeState);
-      } else {
-        changeState();
-      }
-    };
-    window.addEventListener("tabchange", handleTabChange as EventListener);
-
-    const handlePopState = () => {
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get("tab");
-      if (tab) {
-        const changeState = () => setActiveTab(tab);
-        if (typeof document !== "undefined" && "startViewTransition" in document) {
-          (document as any).startViewTransition(changeState);
-        } else {
-          changeState();
-        }
-      }
-    };
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("tabchange", handleTabChange as EventListener);
-      window.removeEventListener("popstate", handlePopState);
-    };
   }, [isAdmin]);
 
-  // Update indicator position with resize and load checks
+  // Handle browser back/forward
   useEffect(() => {
-    const updateIndicator = () => {
-      const el = tabRefs.current.get(activeTab);
-      if (el) {
-        setIndicatorStyle({
-          left: el.offsetLeft,
-          width: el.offsetWidth,
-        });
-      }
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab") || "dashboard";
+      setActiveTab(tab);
+      setContentKey((k) => k + 1);
     };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
+  // Update indicator position — uses requestAnimationFrame for smoothness
+  const updateIndicator = useCallback(() => {
+    const el = tabRefs.current.get(activeTab);
+    if (el) {
+      setIndicatorStyle({ left: el.offsetLeft, width: el.offsetWidth });
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
     updateIndicator();
-    // Run after a small delay to make sure rendering and fonts are fully settled
-    const timer = setTimeout(updateIndicator, 50);
-
-    window.addEventListener("resize", updateIndicator);
+    const id = requestAnimationFrame(updateIndicator);
+    window.addEventListener("resize", updateIndicator, { passive: true });
     return () => {
-      clearTimeout(timer);
+      cancelAnimationFrame(id);
       window.removeEventListener("resize", updateIndicator);
     };
-  }, [activeTab]);
+  }, [updateIndicator]);
 
   const visibleTabs = tabs.filter((t) => !t.adminOnly || isAdmin);
 
-  const switchTab = (tabId: string) => {
-    const changeState = () => {
-      setActiveTab(tabId);
-      const url = new URL(window.location.href);
-      url.searchParams.set("tab", tabId);
-      window.history.pushState({}, "", url.toString());
-    };
-
-    if (typeof document !== "undefined" && "startViewTransition" in document) {
-      (document as any).startViewTransition(changeState);
-    } else {
-      changeState();
-    }
-  };
-
-  const getTabIcon = (tabId: string) => {
-    const tab = tabs.find((t) => t.id === tabId);
-    return tab?.icon || LayoutDashboard;
-  };
+  // Instant tab switch — no ViewTransition API (causes jank on mobile)
+  const switchTab = useCallback((tabId: string) => {
+    if (tabId === activeTab) return; // no-op if same tab
+    setActiveTab(tabId);
+    setContentKey((k) => k + 1);
+    // Push to URL history
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", tabId);
+    window.history.pushState({}, "", url.toString());
+    // Scroll to top of content smoothly
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [activeTab]);
 
   const renderTabContent = () => {
-    const Icon = getTabIcon(activeTab);
+    const activeTabData = tabs.find((t) => t.id === activeTab);
+    const Icon = activeTabData?.icon || LayoutDashboard;
     return (
-      <div key={activeTab} className="animate-slide-up-fade">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20 animate-spring-in">
-            <Icon className="h-5 w-5 text-primary" />
+      <div key={contentKey} className="tab-content-enter">
+        {/* Page header — compact on mobile */}
+        <div className="flex items-center gap-2.5 sm:gap-3 mb-4 sm:mb-6">
+          <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20">
+            <Icon className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-primary" />
           </div>
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">
-              {tabs.find((t) => t.id === activeTab)?.label}
+          <div className="min-w-0">
+            <h2 className="text-lg sm:text-2xl font-bold tracking-tight leading-tight">
+              {activeTabData?.label}
             </h2>
-            <p className="text-sm text-muted-foreground">
-              {activeTab === "dashboard" && "Behold the holy grail of fuel statistics, debts, and mileage calculations."}
-              {activeTab === "create" && "Log a new journey and divide the fuel damage among the chosen passengers."}
-              {activeTab === "pending" && "Track and manage pending payments"}
-              {activeTab === "history" && "View complete payment history"}
-              {activeTab === "rides" && "The chronicle of your past road trips and mileage adventures."}
-              {activeTab === "settings" && "Adjust the secret parameters of the Petrol Pandit universe."}
+            <p className="text-xs sm:text-sm text-muted-foreground leading-snug line-clamp-1">
+              {TAB_SUBTITLES[activeTab]}
             </p>
           </div>
         </div>
@@ -160,57 +140,80 @@ export default function TabRouter({
   };
 
   return (
-    <div className="space-y-6 pb-[calc(7.5rem+env(safe-area-inset-bottom))] md:pb-6 animate-fade-in">
-      {/* Floating Bottom Tab Navigation on Mobile, original Top Navigation on Desktop */}
-      <div className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] left-3.5 right-3.5 z-50 md:relative md:bottom-auto md:left-auto md:right-auto bg-transparent border-0 rounded-2xl p-0 max-w-4xl mx-auto">
-        <div className="relative rounded-2xl glass-premium p-1.5 shadow-2xl border-white/10 backdrop-blur-2xl">
-          <div className="flex gap-0.5 relative z-10">
+    <div className="pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-6">
+      {/* ── Floating Bottom Nav (Mobile) / Top Nav (Desktop) ── */}
+      <div
+        ref={navRef}
+        className="fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] left-3 right-3 z-50 md:relative md:bottom-auto md:left-auto md:right-auto md:mb-6 max-w-4xl md:mx-auto"
+      >
+        <nav
+          className="relative rounded-2xl bg-[#0d0f17]/90 backdrop-blur-2xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.04)] p-1"
+          role="tablist"
+          aria-label="Main navigation"
+        >
+          {/* Tab buttons */}
+          <div className="flex relative z-10">
             {visibleTabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
-                  ref={(el) => {
-                    if (el) tabRefs.current.set(tab.id, el);
+                  ref={(el) => { if (el) tabRefs.current.set(tab.id, el); }}
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-label={tab.label}
+                  // onPointerDown for instant response — no 300ms delay
+                  onPointerDown={(e) => {
+                    e.preventDefault(); // prevent ghost click
+                    switchTab(tab.id);
                   }}
-                  onClick={() => switchTab(tab.id)}
-                  className={`relative flex flex-col items-center justify-center gap-0.5 sm:gap-1 rounded-xl py-1.5 px-0.5 text-center transition-all duration-300 min-w-0 flex-1 z-10 select-none cursor-pointer ${
-                    isActive
-                      ? "text-white font-extrabold"
-                      : "text-white/35 hover:text-white/60 hover:bg-white/5"
-                  }`}
+                  className={`
+                    relative flex flex-col items-center justify-center gap-0.5
+                    flex-1 min-w-0 min-h-[52px] sm:min-h-[48px]
+                    py-2 px-1 rounded-xl z-10
+                    select-none touch-manipulation
+                    transition-colors duration-150
+                    ${isActive
+                      ? "text-white"
+                      : "text-white/40 active:text-white/70 active:bg-white/5"
+                    }
+                  `}
                 >
                   <Icon
-                    className={`h-4.5 w-4.5 shrink-0 transition-all duration-300 ${isActive ? "scale-110 text-white" : "text-white/60"}`}
-                    style={isActive ? { filter: `drop-shadow(0 0 10px ${TAB_GLOW[tab.id]})` } : undefined}
+                    className={`h-5 w-5 shrink-0 transition-transform duration-200 ${isActive ? "scale-110" : "scale-100"}`}
+                    style={isActive ? { filter: `drop-shadow(0 0 8px ${TAB_GLOW[tab.id]})` } : undefined}
                   />
-                  <span className="text-[9px] xs:text-[10px] md:text-xs block md:hidden truncate max-w-full font-bold">{tab.shortLabel}</span>
-                  <span className="text-xs font-bold hidden md:block truncate max-w-full">{tab.label}</span>
+                  <span className="text-[9px] xs:text-[10px] font-bold leading-none block md:hidden">
+                    {tab.shortLabel}
+                  </span>
+                  <span className="text-xs font-bold leading-none hidden md:block">
+                    {tab.label}
+                  </span>
                 </button>
               );
             })}
           </div>
-          {/* Animated sliding indicator with spring physics */}
+
+          {/* Sliding indicator — GPU composited via transform */}
           {indicatorStyle.width > 0 && (
             <div
-              className="absolute bottom-1.5 top-1.5 rounded-xl bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] transition-all duration-[400ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] z-0"
+              className="absolute inset-y-1 rounded-xl bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] z-0 pointer-events-none"
               style={{
                 left: indicatorStyle.left,
                 width: indicatorStyle.width,
-                boxShadow: "0 0 15px rgba(124,58,237,0.35), 0 0 30px rgba(109,40,217,0.15)",
+                boxShadow: "0 0 12px rgba(124,58,237,0.4), 0 0 24px rgba(109,40,217,0.2)",
+                willChange: "left, width",
+                transition: "left 320ms cubic-bezier(0.34, 1.2, 0.64, 1), width 320ms cubic-bezier(0.34, 1.2, 0.64, 1)",
               }}
             />
           )}
-        </div>
+        </nav>
       </div>
 
-      {/* Tab Content with animated transitions */}
+      {/* Tab Content */}
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent rounded-3xl pointer-events-none" />
-        <div className="relative">
-          {renderTabContent()}
-        </div>
+        {renderTabContent()}
       </div>
     </div>
   );

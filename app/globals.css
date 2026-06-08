@@ -137,14 +137,37 @@
 
 * {
   border-color: var(--border);
+  /* Prevent blue flash on touch — must be on all elements */
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  /* Prevent pull-to-refresh rubberbanding from clashing with scroll */
+  overscroll-behavior-y: contain;
 }
 
 body {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
-  min-height: 100vh;
+  min-height: 100svh; /* use svh for mobile — avoids address-bar resize jank */
+  overscroll-behavior-y: none;
 }
+
+/* ===== Global touch optimizations ===== */
+button, a, [role="tab"], [role="button"] {
+  touch-action: manipulation; /* no 300ms delay */
+  -webkit-tap-highlight-color: transparent;
+}
+
+nav, [role="tablist"] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Utility: h-13 (52px tap target) */
+.h-13 { height: 3.25rem; }
+.min-h-\[52px\] { min-height: 52px; }
 
 /* ===== Premium Scrollbar ===== */
 ::-webkit-scrollbar {
@@ -331,6 +354,26 @@ body {
 }
 .animate-slide-up-fade {
   animation: slide-up-fade 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== Tab content entry animation ===== */
+@keyframes tabContentEnter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tab-content-enter {
+  animation: tabContentEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+/* ===== Slide up from bottom (for mobile sheet modals) ===== */
+@keyframes slideUpSheet {
+  from { transform: translateY(100%); opacity: 0.6; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.animate-slide-up {
+  animation: slideUpSheet 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform;
 }
 .animate-count-up {
   animation: count-up 0.4s ease-out;
