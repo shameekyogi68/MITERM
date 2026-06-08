@@ -55,10 +55,18 @@ export default function AppShell({
                   Petrol<span className="text-primary font-medium">Pandit</span>
                 </h1>
                 {isAdmin && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-[9px] font-bold text-primary tracking-wider uppercase shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      document.cookie = "admin_token=; path=/; max-age=0; SameSite=Strict; Secure";
+                      window.location.href = "/";
+                    }}
+                    className="inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 hover:bg-destructive/10 hover:border-destructive/20 hover:text-destructive active:bg-destructive/20 px-2 py-0.5 text-[9px] font-bold text-primary tracking-wider uppercase shrink-0 transition-colors cursor-pointer"
+                    title="Click to exit Admin view"
+                  >
                     <Gauge className="h-2.5 w-2.5" />
-                    Admin
-                  </span>
+                    Admin (Exit)
+                  </button>
                 )}
               </div>
               <p className="text-[9px] sm:text-[10px] leading-none text-white/40 tracking-[0.22em] uppercase font-bold mt-1.5">
