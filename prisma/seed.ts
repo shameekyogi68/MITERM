@@ -22,10 +22,14 @@ async function main() {
   const settings = [
     { key: 'mileage', value: 15 },
     { key: 'routeDistance', value: 252 },
-    { key: 'qrImageUrl', value: '/qr-code.png' },
+    { key: 'qrImageUrl', value: '/qr-code.jpeg' },
     { key: 'adminSecretUrl', value: 'shameekyogi68' },
     { key: 'roundingRule', value: 'ADJUST_TO_ADMIN' },
     { key: 'petrolPriceOffset', value: 0 },
+    { key: 'upiPhonePe', value: '7338603959@ybl' },
+    { key: 'upiGPay', value: 'shameekyogiofficial@oksbi' },
+    { key: 'upiPaytm', value: '7338603959@ptyes' },
+    { key: 'adminPhone', value: '7338603959' },
   ];
 
   for (const s of settings) {

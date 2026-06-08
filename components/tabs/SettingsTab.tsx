@@ -48,7 +48,6 @@ export default function SettingsTab() {
   const [upiPhonePe, setUpiPhonePe] = useState("");
   const [upiGPay, setUpiGPay] = useState("");
   const [upiPaytm, setUpiPaytm] = useState("");
-  const [upiGeneric, setUpiGeneric] = useState("");
   const [adminPhone, setAdminPhone] = useState("");
 
   useEffect(() => {
@@ -60,9 +59,8 @@ export default function SettingsTab() {
       
       // Initialize UPI and phone settings with values from db or fallbacks
       setUpiPhonePe((s.upiPhonePe as string) || "7338603959@ybl");
-      setUpiGPay((s.upiGPay as string) || "7338603959@okaxis");
-      setUpiPaytm((s.upiPaytm as string) || "7338603959@paytm");
-      setUpiGeneric((s.upiGeneric as string) || "7338603959@ybl");
+      setUpiGPay((s.upiGPay as string) || "shameekyogiofficial@oksbi");
+      setUpiPaytm((s.upiPaytm as string) || "7338603959@ptyes");
       setAdminPhone((s.adminPhone as string) || "7338603959");
 
       setIsLoading(false);
@@ -318,7 +316,7 @@ export default function SettingsTab() {
               onChange={(e) => setUpiGPay(e.target.value)}
               onBlur={() => handleSaveSetting("upiGPay", upiGPay)}
               className="rounded-xl border bg-card px-3.5 py-2 text-sm transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
-              placeholder="7338603959@okaxis"
+              placeholder="shameekyogiofficial@oksbi"
             />
           </div>
 
@@ -330,19 +328,7 @@ export default function SettingsTab() {
               onChange={(e) => setUpiPaytm(e.target.value)}
               onBlur={() => handleSaveSetting("upiPaytm", upiPaytm)}
               className="rounded-xl border bg-card px-3.5 py-2 text-sm transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
-              placeholder="7338603959@paytm"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Generic / Other UPI ID</label>
-            <input
-              type="text"
-              value={upiGeneric}
-              onChange={(e) => setUpiGeneric(e.target.value)}
-              onBlur={() => handleSaveSetting("upiGeneric", upiGeneric)}
-              className="rounded-xl border bg-card px-3.5 py-2 text-sm transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
-              placeholder="7338603959@ybl"
+              placeholder="7338603959@ptyes"
             />
           </div>
 

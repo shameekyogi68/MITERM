@@ -36,15 +36,13 @@ export default function PaymentDialog({
   
   // UPI ID states from settings
   const [upiPhonePe, setUpiPhonePe] = useState("7338603959@ybl");
-  const [upiGPay, setUpiGPay] = useState("7338603959@okaxis");
-  const [upiPaytm, setUpiPaytm] = useState("7338603959@paytm");
-  const [upiGeneric, setUpiGeneric] = useState("7338603959@ybl");
+  const [upiGPay, setUpiGPay] = useState("shameekyogiofficial@oksbi");
+  const [upiPaytm, setUpiPaytm] = useState("7338603959@ptyes");
 
   // Deep Link URL states
   const [phonepeUrl, setPhonepeUrl] = useState<string>("");
   const [gpayUrl, setGpayUrl] = useState<string>("");
   const [paytmUrl, setPaytmUrl] = useState<string>("");
-  const [genericUpiUrl, setGenericUpiUrl] = useState<string>("");
   const [qrImageUrl, setQrImageUrl] = useState<string>("");
 
   // Copy success indicator
@@ -68,23 +66,20 @@ export default function PaymentDialog({
 
     const loadSettingsAndBuildLinks = async () => {
       // Fetch setting values in parallel
-      const [phSetting, gpSetting, ptSetting, genSetting, qrSetting] = await Promise.all([
+      const [phSetting, gpSetting, ptSetting, qrSetting] = await Promise.all([
         getSetting("upiPhonePe"),
         getSetting("upiGPay"),
         getSetting("upiPaytm"),
-        getSetting("upiGeneric"),
         getSetting("qrImageUrl"),
       ]);
 
       const activePhonePe = (phSetting as string) || "7338603959@ybl";
-      const activeGPay = (gpSetting as string) || "7338603959@okaxis";
-      const activePaytm = (ptSetting as string) || "7338603959@paytm";
-      const activeGeneric = (genSetting as string) || "7338603959@ybl";
+      const activeGPay = (gpSetting as string) || "shameekyogiofficial@oksbi";
+      const activePaytm = (ptSetting as string) || "7338603959@ptyes";
 
       setUpiPhonePe(activePhonePe);
       setUpiGPay(activeGPay);
       setUpiPaytm(activePaytm);
-      setUpiGeneric(activeGeneric);
 
       if (typeof qrSetting === "string" && qrSetting) {
         setQrImageUrl(qrSetting);
@@ -123,10 +118,6 @@ export default function PaymentDialog({
       } else {
         setPaytmUrl(`upi://pay?${paytmQuery}`);
       }
-
-      // Generic UPI Deep Link
-      const genericQuery = `pa=${activeGeneric}&pn=${payeeName}&am=${amountStr}&cu=INR`;
-      setGenericUpiUrl(`upi://pay?${genericQuery}`);
     };
 
     loadSettingsAndBuildLinks();
@@ -343,30 +334,6 @@ export default function PaymentDialog({
                   </button>
                 </div>
 
-                {/* Generic UPI */}
-                <div className="flex gap-2 items-center">
-                  <a
-                    href={genericUpiUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-xs font-bold text-white/80 transition-all hover:bg-white/10 hover:text-white hover:-translate-y-0.5 cursor-pointer"
-                  >
-                    <span>Pay with other UPI App</span>
-                  </a>
-                  <button
-                    onClick={() => handleCopy(upiGeneric, "generic")}
-                    className="h-9 w-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-muted-foreground hover:text-white cursor-pointer"
-                    title="Copy UPI ID"
-                    type="button"
-                  >
-                    {copiedKey === "generic" ? (
-                      <Check className="h-3.5 w-3.5 text-success animate-fade-in-scale" />
-                    ) : (
-                      <Copy className="h-3.5 w-3.5" />
-                    )}
-                  </button>
-                </div>
-
                 {/* Address Verification Info */}
                 <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-3 text-xs space-y-1">
                   <p className="text-muted-foreground font-semibold text-center text-[10px] uppercase tracking-wider">Configured Payee Addresses</p>
@@ -382,10 +349,6 @@ export default function PaymentDialog({
                     <div className="flex justify-between">
                       <span>Paytm VPA:</span>
                       <span className="text-white/80 select-all">{upiPaytm}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Other UPI VPA:</span>
-                      <span className="text-white/80 select-all">{upiGeneric}</span>
                     </div>
                   </div>
                 </div>
