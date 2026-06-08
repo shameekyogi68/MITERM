@@ -25,3 +25,8 @@ export function daysPending(createdAt: Date | string): number {
 export function isOverdue(createdAt: Date | string, threshold = 3): boolean {
   return daysPending(createdAt) > threshold;
 }
+
+export function getTodayIST(): Date {
+  const nowInIST = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+  return new Date(Date.UTC(nowInIST.getFullYear(), nowInIST.getMonth(), nowInIST.getDate()));
+}

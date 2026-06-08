@@ -8,6 +8,7 @@ import {
   petrolPriceSchema,
   exportFormatSchema,
 } from "@/lib/validations";
+import { getTodayIST } from "@/lib/utils";
 
 // ── GET SETTING ──────────────────────────────────────────────────────────────
 export async function getSetting(key: string) {
@@ -64,8 +65,7 @@ export async function updateSetting(
 // ── GET TODAY'S PETROL PRICE ─────────────────────────────────────────────────
 export async function getTodayPetrolPrice() {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = getTodayIST();
 
     // Check if we already have today's price cached in the database
     let todayRecord = await prisma.petrolPrice.findUnique({
@@ -141,8 +141,7 @@ export async function updatePetrolPrice(
       return { success: false, error: firstError?.message ?? "Invalid price." };
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = getTodayIST();
 
     await prisma.petrolPrice.upsert({
       where: { date: today },

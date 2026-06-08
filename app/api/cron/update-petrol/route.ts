@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PetrolSource } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { getTodayIST } from "@/lib/utils";
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
@@ -47,8 +48,7 @@ export async function GET(request: Request) {
     source = "CACHE";
   }
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getTodayIST();
 
   await prisma.petrolPrice.upsert({
     where: { date: today },
