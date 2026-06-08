@@ -18,6 +18,7 @@ import {
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { getPendingPayments } from "@/app/actions/stats.actions";
 import { adminMarkPaid } from "@/app/actions/payment.actions";
+import { getSetting } from "@/app/actions/settings.actions";
 import PaymentDialog from "@/components/dialogs/PaymentDialog";
 import { useRouter } from "next/navigation";
 
@@ -69,6 +70,7 @@ export default function PendingPaymentsTab({ isAdmin }: { isAdmin: boolean }) {
   const [search, setSearch] = useState("");
   const [memberFilter, setMemberFilter] = useState("all");
   const [page, setPage] = useState(1);
+  const [adminPhone, setAdminPhone] = useState("7338603959");
   const [paymentDialog, setPaymentDialog] = useState<{
     open: boolean;
     rideId: string;
@@ -96,6 +98,11 @@ export default function PendingPaymentsTab({ isAdmin }: { isAdmin: boolean }) {
 
   useEffect(() => {
     fetchData();
+    getSetting("adminPhone").then((val) => {
+      if (typeof val === "string" && val) {
+        setAdminPhone(val);
+      }
+    });
   }, [fetchData]);
 
   const members = useMemo(
@@ -290,6 +297,8 @@ export default function PendingPaymentsTab({ isAdmin }: { isAdmin: boolean }) {
               const initials = getInitials(item.memberName);
               const avatarGradient = getAvatarGradient(item.memberName);
               const statusStyle = STATUS_STYLES[item.status] || STATUS_STYLES.PENDING;
+              const cleanPhone = adminPhone.replace(/\D/g, "");
+              const whatsappPhone = cleanPhone.startsWith("91") && cleanPhone.length > 10 ? cleanPhone : `91${cleanPhone}`;
 
               return (
                 <div
@@ -371,8 +380,8 @@ export default function PendingPaymentsTab({ isAdmin }: { isAdmin: boolean }) {
                       </button>
                     ) : item.status === "VERIFICATION" ? (
                       <a
-                        href={`https://api.whatsapp.com/send?phone=917338603959&text=${encodeURIComponent(
-                          `Hi Shameek, please verify my payment of ₹${item.amount} for the ride on ${new Date(
+                        href={`https://api.whatsapp.com/send?phone=${whatsappPhone}&text=${encodeURIComponent(
+                          `Hi, please verify my payment of ₹${item.amount} for the ride on ${new Date(
                             item.rideDate
                           ).toLocaleDateString("en-IN")}.`
                         )}`}

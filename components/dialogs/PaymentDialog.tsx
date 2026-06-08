@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Upload, Check, QrCode, Loader2, ArrowRight, ShieldCheck, Download } from "lucide-react";
+import { X, Upload, Check, QrCode, Loader2, ArrowRight, ShieldCheck, Download, Copy } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { markPayment, verifyPayment, adminMarkPaid } from "@/app/actions/payment.actions";
 import { getSetting } from "@/app/actions/settings.actions";
@@ -33,40 +33,103 @@ export default function PaymentDialog({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [step, setStep] = useState<"upload" | "done">("upload");
+  
+  // UPI ID states from settings
+  const [upiPhonePe, setUpiPhonePe] = useState("7338603959@ybl");
+  const [upiGPay, setUpiGPay] = useState("7338603959@okaxis");
+  const [upiPaytm, setUpiPaytm] = useState("7338603959@paytm");
+  const [upiGeneric, setUpiGeneric] = useState("7338603959@ybl");
+
+  // Deep Link URL states
   const [phonepeUrl, setPhonepeUrl] = useState<string>("");
-  const [upiUrl, setUpiUrl] = useState<string>("");
+  const [gpayUrl, setGpayUrl] = useState<string>("");
+  const [paytmUrl, setPaytmUrl] = useState<string>("");
+  const [genericUpiUrl, setGenericUpiUrl] = useState<string>("");
   const [qrImageUrl, setQrImageUrl] = useState<string>("");
 
-  useEffect(() => {
-    const amountStr = amount.toFixed(2);
-    const upiQuery = `pa=7338603959@ybl&pn=MITE%20Ride%20Manager&am=${amountStr}&cu=INR`;
-    setUpiUrl(`upi://pay?${upiQuery}`);
-    setPhonepeUrl(`phonepe://upi/pay?${upiQuery}`);
+  // Copy success indicator
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-    if (typeof window !== "undefined" && isOpen) {
+  const handleCopy = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 1500);
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setError(null);
+    setSuccess(false);
+    setStep("upload");
+
+    const amountStr = amount.toFixed(2);
+    const payeeName = encodeURIComponent("MITE Ride Manager");
+
+    const loadSettingsAndBuildLinks = async () => {
+      // Fetch setting values in parallel
+      const [phSetting, gpSetting, ptSetting, genSetting, qrSetting] = await Promise.all([
+        getSetting("upiPhonePe"),
+        getSetting("upiGPay"),
+        getSetting("upiPaytm"),
+        getSetting("upiGeneric"),
+        getSetting("qrImageUrl"),
+      ]);
+
+      const activePhonePe = (phSetting as string) || "7338603959@ybl";
+      const activeGPay = (gpSetting as string) || "7338603959@okaxis";
+      const activePaytm = (ptSetting as string) || "7338603959@paytm";
+      const activeGeneric = (genSetting as string) || "7338603959@ybl";
+
+      setUpiPhonePe(activePhonePe);
+      setUpiGPay(activeGPay);
+      setUpiPaytm(activePaytm);
+      setUpiGeneric(activeGeneric);
+
+      if (typeof qrSetting === "string" && qrSetting) {
+        setQrImageUrl(qrSetting);
+      }
+
       const ua = navigator.userAgent.toLowerCase();
       const isAndroid = /android/.test(ua);
       const isIOS = /iphone|ipad|ipod/.test(ua);
 
+      // PhonePe Deep Link
+      const phonepeQuery = `pa=${activePhonePe}&pn=${payeeName}&am=${amountStr}&cu=INR`;
       if (isAndroid) {
-        setPhonepeUrl(`intent://pay?${upiQuery}#Intent;scheme=upi;package=com.phonepe.app;end`);
+        setPhonepeUrl(`intent://pay?${phonepeQuery}#Intent;scheme=upi;package=com.phonepe.app;end`);
       } else if (isIOS) {
-        setPhonepeUrl(`phonepe://upi/pay?${upiQuery}`);
+        setPhonepeUrl(`phonepe://upi/pay?${phonepeQuery}`);
       } else {
-        setPhonepeUrl(`upi://pay?${upiQuery}`);
+        setPhonepeUrl(`upi://pay?${phonepeQuery}`);
       }
-    }
 
-    if (isOpen) {
-      getSetting("qrImageUrl").then((url) => {
-        if (typeof url === "string" && url) {
-          setQrImageUrl(url);
-        }
-      });
-      setError(null);
-      setSuccess(false);
-      setStep("upload");
-    }
+      // Google Pay Deep Link
+      const gpayQuery = `pa=${activeGPay}&pn=${payeeName}&am=${amountStr}&cu=INR`;
+      if (isAndroid) {
+        setGpayUrl(`intent://pay?${gpayQuery}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`);
+      } else if (isIOS) {
+        setGpayUrl(`gpay://upi/pay?${gpayQuery}`);
+      } else {
+        setGpayUrl(`upi://pay?${gpayQuery}`);
+      }
+
+      // Paytm Deep Link
+      const paytmQuery = `pa=${activePaytm}&pn=${payeeName}&am=${amountStr}&cu=INR`;
+      if (isAndroid) {
+        setPaytmUrl(`intent://pay?${paytmQuery}#Intent;scheme=upi;package=net.one97.paytm;end`);
+      } else if (isIOS) {
+        setPaytmUrl(`paytmmp://upi/pay?${paytmQuery}`);
+      } else {
+        setPaytmUrl(`upi://pay?${paytmQuery}`);
+      }
+
+      // Generic UPI Deep Link
+      const genericQuery = `pa=${activeGeneric}&pn=${payeeName}&am=${amountStr}&cu=INR`;
+      setGenericUpiUrl(`upi://pay?${genericQuery}`);
+    };
+
+    loadSettingsAndBuildLinks();
   }, [isOpen, amount]);
 
   if (!isOpen) return null;
@@ -205,27 +268,127 @@ export default function PaymentDialog({
 
               {/* Payment Options */}
               <div className="flex flex-col gap-3">
-                {/* UPI Payment Button */}
-                {/* Direct PhonePe Deep Link */}
-                <a
-                  href={phonepeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#5f259f] to-[#4c1d80] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-purple-900/20 transition-all hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
-                >
-                  <span>Pay with PhonePe</span>
-                  <ArrowRight className="h-4 w-4" />
-                </a>
+                {/* PhonePe */}
+                <div className="flex gap-2 items-center">
+                  <a
+                    href={phonepeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#5f259f] to-[#4c1d80] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-purple-950/20 transition-all hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
+                  >
+                    <span>Pay with PhonePe</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
+                  <button
+                    onClick={() => handleCopy(upiPhonePe, "phonepe")}
+                    className="h-11 w-11 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-muted-foreground hover:text-white cursor-pointer"
+                    title="Copy UPI ID"
+                    type="button"
+                  >
+                    {copiedKey === "phonepe" ? (
+                      <Check className="h-4 w-4 text-success animate-fade-in-scale" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
 
-                {/* Generic UPI Deep Link */}
-                <a
-                  href={upiUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-xs font-bold text-white/80 transition-all hover:bg-white/10 hover:text-white hover:-translate-y-0.5 cursor-pointer"
-                >
-                  <span>Pay with other UPI App (GPay, Paytm)</span>
-                </a>
+                {/* Google Pay */}
+                <div className="flex gap-2 items-center">
+                  <a
+                    href={gpayUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#1a73e8] to-[#1557b0] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-blue-950/20 transition-all hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
+                  >
+                    <span>Pay with Google Pay</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
+                  <button
+                    onClick={() => handleCopy(upiGPay, "gpay")}
+                    className="h-11 w-11 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-muted-foreground hover:text-white cursor-pointer"
+                    title="Copy UPI ID"
+                    type="button"
+                  >
+                    {copiedKey === "gpay" ? (
+                      <Check className="h-4 w-4 text-success animate-fade-in-scale" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Paytm */}
+                <div className="flex gap-2 items-center">
+                  <a
+                    href={paytmUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00baf2] to-[#008fc2] px-4 py-3 text-sm font-bold text-white shadow-lg shadow-sky-950/20 transition-all hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
+                  >
+                    <span>Pay with Paytm</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
+                  <button
+                    onClick={() => handleCopy(upiPaytm, "paytm")}
+                    className="h-11 w-11 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-muted-foreground hover:text-white cursor-pointer"
+                    title="Copy UPI ID"
+                    type="button"
+                  >
+                    {copiedKey === "paytm" ? (
+                      <Check className="h-4 w-4 text-success animate-fade-in-scale" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Generic UPI */}
+                <div className="flex gap-2 items-center">
+                  <a
+                    href={genericUpiUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-xs font-bold text-white/80 transition-all hover:bg-white/10 hover:text-white hover:-translate-y-0.5 cursor-pointer"
+                  >
+                    <span>Pay with other UPI App</span>
+                  </a>
+                  <button
+                    onClick={() => handleCopy(upiGeneric, "generic")}
+                    className="h-9 w-9 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-muted-foreground hover:text-white cursor-pointer"
+                    title="Copy UPI ID"
+                    type="button"
+                  >
+                    {copiedKey === "generic" ? (
+                      <Check className="h-3.5 w-3.5 text-success animate-fade-in-scale" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Address Verification Info */}
+                <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-3 text-xs space-y-1">
+                  <p className="text-muted-foreground font-semibold text-center text-[10px] uppercase tracking-wider">Configured Payee Addresses</p>
+                  <div className="space-y-1 font-mono text-[11px] text-muted-foreground">
+                    <div className="flex justify-between">
+                      <span>PhonePe VPA:</span>
+                      <span className="text-white/80 select-all">{upiPhonePe}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>GPay VPA:</span>
+                      <span className="text-white/80 select-all">{upiGPay}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Paytm VPA:</span>
+                      <span className="text-white/80 select-all">{upiPaytm}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Other UPI VPA:</span>
+                      <span className="text-white/80 select-all">{upiGeneric}</span>
+                    </div>
+                  </div>
+                </div>
 
                 <div className="flex items-center gap-2 py-1">
                   <div className="flex-1 h-px bg-white/5" />

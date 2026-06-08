@@ -44,12 +44,27 @@ export default function SettingsTab() {
   const [qrPreview, setQrPreview] = useState<string>("");
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
+  // Local state for UPI and Contact configurations
+  const [upiPhonePe, setUpiPhonePe] = useState("");
+  const [upiGPay, setUpiGPay] = useState("");
+  const [upiPaytm, setUpiPaytm] = useState("");
+  const [upiGeneric, setUpiGeneric] = useState("");
+  const [adminPhone, setAdminPhone] = useState("");
+
   useEffect(() => {
     const load = async () => {
       const [s, m] = await Promise.all([getAllSettings(), getAllMembers()]);
       setSettings(s);
       setMembers(m as Member[]);
       setQrPreview((s.qrImageUrl as string) || "");
+      
+      // Initialize UPI and phone settings with values from db or fallbacks
+      setUpiPhonePe((s.upiPhonePe as string) || "7338603959@ybl");
+      setUpiGPay((s.upiGPay as string) || "7338603959@okaxis");
+      setUpiPaytm((s.upiPaytm as string) || "7338603959@paytm");
+      setUpiGeneric((s.upiGeneric as string) || "7338603959@ybl");
+      setAdminPhone((s.adminPhone as string) || "7338603959");
+
       setIsLoading(false);
     };
     load();
@@ -277,6 +292,72 @@ export default function SettingsTab() {
               )}
             </div>
           ))}
+        </div>
+      </SettingCard>
+
+      {/* UPI & Contact Settings */}
+      <SettingCard icon={IndianRupee} title="UPI & Contact Settings">
+        <div className="grid gap-5 md:grid-cols-2">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">PhonePe UPI ID</label>
+            <input
+              type="text"
+              value={upiPhonePe}
+              onChange={(e) => setUpiPhonePe(e.target.value)}
+              onBlur={() => handleSaveSetting("upiPhonePe", upiPhonePe)}
+              className="rounded-xl border bg-card px-3.5 py-2 text-sm transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+              placeholder="7338603959@ybl"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Google Pay (GPay) UPI ID</label>
+            <input
+              type="text"
+              value={upiGPay}
+              onChange={(e) => setUpiGPay(e.target.value)}
+              onBlur={() => handleSaveSetting("upiGPay", upiGPay)}
+              className="rounded-xl border bg-card px-3.5 py-2 text-sm transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+              placeholder="7338603959@okaxis"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Paytm UPI ID</label>
+            <input
+              type="text"
+              value={upiPaytm}
+              onChange={(e) => setUpiPaytm(e.target.value)}
+              onBlur={() => handleSaveSetting("upiPaytm", upiPaytm)}
+              className="rounded-xl border bg-card px-3.5 py-2 text-sm transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+              placeholder="7338603959@paytm"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Generic / Other UPI ID</label>
+            <input
+              type="text"
+              value={upiGeneric}
+              onChange={(e) => setUpiGeneric(e.target.value)}
+              onBlur={() => handleSaveSetting("upiGeneric", upiGeneric)}
+              className="rounded-xl border bg-card px-3.5 py-2 text-sm transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+              placeholder="7338603959@ybl"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5 md:col-span-2">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">WhatsApp / Admin Phone</label>
+            <input
+              type="text"
+              value={adminPhone}
+              onChange={(e) => setAdminPhone(e.target.value)}
+              onBlur={() => handleSaveSetting("adminPhone", adminPhone)}
+              className="rounded-xl border bg-card px-3.5 py-2 text-sm transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+              placeholder="7338603959"
+            />
+            <p className="text-[10px] text-muted-foreground">Used for the WhatsApp "Ask to Review" link when members verify payments.</p>
+          </div>
         </div>
       </SettingCard>
 
