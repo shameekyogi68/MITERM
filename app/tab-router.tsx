@@ -56,15 +56,7 @@ export default function TabRouter({
   const tabRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const navRef = useRef<HTMLDivElement>(null);
 
-  // Handle admin session cookie and URL cleanup
-  useEffect(() => {
-    if (adminToken) {
-      document.cookie = `admin_token=${adminToken}; path=/; max-age=86400; SameSite=Strict; Secure`;
-      const url = new URL(window.location.href);
-      url.searchParams.delete("admin");
-      window.history.replaceState({}, "", url.toString());
-    }
-  }, [adminToken]);
+
 
   // Read initial tab from URL
   useEffect(() => {

@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { cookies } from "next/headers";
 import AppShell from "@/components/shared/AppShell";
 import TabRouter from "./tab-router";
 
@@ -9,21 +8,8 @@ export default async function Home({
   searchParams: Promise<{ admin?: string }>;
 }) {
   const params = await searchParams;
-  const cookieStore = await cookies();
   const adminSecret = process.env.ADMIN_SECRET || "shameekyogi68";
-  
-  let isAdmin = false;
-  let adminToken = params.admin ?? null;
-
-  if (params.admin === adminSecret) {
-    isAdmin = true;
-  } else {
-    const token = cookieStore.get("admin_token")?.value;
-    if (token === adminSecret) {
-      isAdmin = true;
-      adminToken = token;
-    }
-  }
+  const isAdmin = params.admin === adminSecret;
 
   return (
     <AppShell isAdmin={isAdmin}>
@@ -34,7 +20,7 @@ export default async function Home({
           </div>
         }
       >
-        <TabRouter isAdmin={isAdmin} adminToken={adminToken} />
+        <TabRouter isAdmin={isAdmin} adminToken={params.admin ?? null} />
       </Suspense>
     </AppShell>
   );
