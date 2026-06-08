@@ -1,7 +1,6 @@
 "use client";
 
-import { Moon, Sun, Car, Gauge, Sparkles } from "lucide-react";
-import { useTheme } from "next-themes";
+import { Car, Gauge, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import OfflineBanner from "./OfflineBanner";
 
@@ -12,12 +11,9 @@ export default function AppShell({
   children: React.ReactNode;
   isAdmin: boolean;
 }) {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -67,22 +63,6 @@ export default function AppShell({
                 </span>
               )}
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {mounted && (
-              <button
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="group relative flex h-10 w-10 items-center justify-center rounded-xl border bg-card text-muted-foreground transition-all hover:bg-accent hover:text-foreground hover:shadow-md hover:border-primary/30 hover:scale-105 active:scale-95"
-                aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-              >
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                {theme === "dark" ? (
-                  <Sun className="h-4 w-4 relative z-10 transition-transform group-hover:rotate-45 group-hover:scale-110 duration-300" />
-                ) : (
-                  <Moon className="h-4 w-4 relative z-10 transition-transform group-hover:-rotate-12 group-hover:scale-110 duration-300" />
-                )}
-              </button>
-            )}
           </div>
         </div>
       </header>
