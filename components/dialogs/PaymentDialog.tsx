@@ -89,38 +89,47 @@ export default function PaymentDialog({
     };
   }, []);
 
-  // ── Load settings & build UPI deep links ────────────────────────────────────
+  // ── Pre-fetch settings on mount to load QR instantly ────────────────────────
+  useEffect(() => {
+    (async () => {
+      try {
+        const [ph, gp, pt, qr] = await Promise.all([
+          getSetting("upiPhonePe"),
+          getSetting("upiGPay"),
+          getSetting("upiPaytm"),
+          getSetting("qrImageUrl"),
+        ]);
+        if (typeof ph === "string" && ph) setUpiPhonePe(ph);
+        if (typeof gp === "string" && gp) setUpiGPay(gp);
+        if (typeof pt === "string" && pt) setUpiPaytm(pt);
+        if (typeof qr === "string" && qr) setQrImageUrl(qr);
+      } catch (err) {
+        console.error("Failed to pre-fetch payment settings:", err);
+      }
+    })();
+  }, []);
+
+  // ── Build deep links on open or when amount changes ──────────────────────────
   useEffect(() => {
     if (!isOpen) return;
     setError(null);
     setStep("pay");
 
     const amountStr = amount.toFixed(2);
+    const payeeName = "SHAMEEK YOGI";
+    const enc = encodeURIComponent(payeeName);
 
-    (async () => {
-      const [ph, gp, pt, qr] = await Promise.all([
-        getSetting("upiPhonePe"),
-        getSetting("upiGPay"),
-        getSetting("upiPaytm"),
-        getSetting("qrImageUrl"),
-      ]);
+    setPhonepeUrl(`phonepe://pay?pa=${upiPhonePe}&pn=${enc}&am=${amountStr}&cu=INR`);
+    setGpayUrl(`tez://upi/pay?pa=${upiGPay}&pn=${enc}&am=${amountStr}&cu=INR`);
+    setPaytmUrl(`paytmmp://upi/pay?pa=${upiPaytm}&pn=${enc}&am=${amountStr}&cu=INR`);
+  }, [isOpen, amount, upiPhonePe, upiGPay, upiPaytm]);
 
-      const phonePe   = (ph as string) || "7338603959@ybl";
-      const gPay      = (gp as string) || "shameekyogiofficial@oksbi";
-      const paytm     = (pt as string) || "7338603959@ptyes";
-      const payeeName = "SHAMEEK YOGI";
-
-      setUpiPhonePe(phonePe);
-      setUpiGPay(gPay);
-      setUpiPaytm(paytm);
-      if (typeof qr === "string" && qr) setQrImageUrl(qr);
-
-      const enc = encodeURIComponent(payeeName);
-      setPhonepeUrl(`phonepe://pay?pa=${phonePe}&pn=${enc}&am=${amountStr}&cu=INR`);
-      setGpayUrl(`tez://upi/pay?pa=${gPay}&pn=${enc}&am=${amountStr}&cu=INR`);
-      setPaytmUrl(`paytmmp://upi/pay?pa=${paytm}&pn=${enc}&am=${amountStr}&cu=INR`);
-    })();
-  }, [isOpen, amount]);
+  const handleUpiClick = (url: string) => {
+    if (!url) return;
+    // Open in a new tab/context so Next.js doesn't intercept it
+    // and the browser doesn't trigger a full page refresh.
+    window.open(url, "_blank");
+  };
 
   const handleCopy = (text: string, key: string) => {
     navigator.clipboard.writeText(text).catch(() => {});
@@ -370,31 +379,34 @@ export default function PaymentDialog({
                 {/* ── UPI payment buttons ── */}
                 <div className="grid grid-cols-3 gap-2 shrink-0">
                   {/* PhonePe */}
-                  <a
-                    href={phonepeUrl}
-                    className="flex flex-col items-center justify-center h-12 rounded-xl text-xs font-bold text-white shadow-md active:opacity-75 touch-manipulation select-none"
+                  <button
+                    type="button"
+                    onClick={() => handleUpiClick(phonepeUrl)}
+                    className="flex flex-col items-center justify-center h-12 rounded-xl text-xs font-bold text-white shadow-md active:opacity-75 touch-manipulation select-none cursor-pointer"
                     style={{ background: "linear-gradient(135deg, #5f259f, #4c1d80)" }}
                   >
                     PhonePe
-                  </a>
+                  </button>
 
                   {/* GPay */}
-                  <a
-                    href={gpayUrl}
-                    className="flex flex-col items-center justify-center h-12 rounded-xl text-xs font-bold text-white shadow-md active:opacity-75 touch-manipulation select-none"
+                  <button
+                    type="button"
+                    onClick={() => handleUpiClick(gpayUrl)}
+                    className="flex flex-col items-center justify-center h-12 rounded-xl text-xs font-bold text-white shadow-md active:opacity-75 touch-manipulation select-none cursor-pointer"
                     style={{ background: "linear-gradient(135deg, #1a73e8, #1557b0)" }}
                   >
                     GPay
-                  </a>
+                  </button>
 
                   {/* Paytm */}
-                  <a
-                    href={paytmUrl}
-                    className="flex flex-col items-center justify-center h-12 rounded-xl text-xs font-bold text-white shadow-md active:opacity-75 touch-manipulation select-none"
+                  <button
+                    type="button"
+                    onClick={() => handleUpiClick(paytmUrl)}
+                    className="flex flex-col items-center justify-center h-12 rounded-xl text-xs font-bold text-white shadow-md active:opacity-75 touch-manipulation select-none cursor-pointer"
                     style={{ background: "linear-gradient(135deg, #00baf2, #008fc2)" }}
                   >
                     Paytm
-                  </a>
+                  </button>
                 </div>
 
                 {/* ── QR Code ── */}
