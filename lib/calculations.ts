@@ -96,19 +96,19 @@ export function calculateShares(input: CalculationInput): CalculationOutput {
   // ─── Step 6: Rounding adjustment → Shameek absorbs diff ──────
   const roundingDifference = fuelCost - totalRounded;
   const adjustedFuelShares = { ...roundedFuelShares };
-
-  if (Math.abs(roundingDifference) > 20) {
-    adjustedFuelShares['Shameek'] = roundedFuelShares['Shameek'] + roundingDifference;
-  }
+  adjustedFuelShares['Shameek'] = roundedFuelShares['Shameek'] + roundingDifference;
 
   // ─── Step 7: Additional expenses split equally ────────────────
   const perPersonAdditional =
     attendees.length > 0 ? roundToNearest10(additionalTotal / attendees.length) : 0;
 
+  const additionalDifference = additionalTotal - (attendees.length * perPersonAdditional);
+
   const finalShares: Record<string, number> = {};
   for (const name of attendees) {
     finalShares[name] = adjustedFuelShares[name] + perPersonAdditional;
   }
+  finalShares['Shameek'] = finalShares['Shameek'] + additionalDifference;
 
   return {
     shares: adjustedFuelShares,

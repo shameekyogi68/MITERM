@@ -11,11 +11,16 @@ import {
 
 // ── GET SETTING ──────────────────────────────────────────────────────────────
 export async function getSetting(key: string) {
-  const parsed = settingKeySchema.safeParse(key);
-  if (!parsed.success) return null;
+  try {
+    const parsed = settingKeySchema.safeParse(key);
+    if (!parsed.success) return null;
 
-  const setting = await prisma.setting.findUnique({ where: { key } });
-  return setting?.value ?? null;
+    const setting = await prisma.setting.findUnique({ where: { key } });
+    return setting?.value ?? null;
+  } catch (error) {
+    console.error("getSetting error:", error);
+    return null;
+  }
 }
 
 // ── UPDATE SETTING ───────────────────────────────────────────────────────────
@@ -58,62 +63,71 @@ export async function updateSetting(
 
 // ── GET TODAY'S PETROL PRICE ─────────────────────────────────────────────────
 export async function getTodayPetrolPrice() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-  // Check if we already have today's price cached in the database
-  let todayRecord = await prisma.petrolPrice.findUnique({
-    where: { date: today },
-  });
+    // Check if we already have today's price cached in the database
+    let todayRecord = await prisma.petrolPrice.findUnique({
+      where: { date: today },
+    });
 
-  const offsetSetting = await prisma.setting.findUnique({ where: { key: "petrolPriceOffset" } });
-  const offset = offsetSetting?.value && typeof offsetSetting.value === "number" ? offsetSetting.value : 0;
+    const offsetSetting = await prisma.setting.findUnique({ where: { key: "petrolPriceOffset" } });
+    const offset = offsetSetting?.value && typeof offsetSetting.value === "number" ? offsetSetting.value : 0;
 
-  if (!todayRecord) {
-    // If not cached today, attempt to fetch fresh from IndianAPI
-    try {
-      const apiKey = process.env.PETROL_API_KEY;
-      if (apiKey) {
-        const res = await fetch(
-          "https://fuel.indianapi.in/live_fuel_price?fuel_type=petrol&location_type=city",
-          {
-            headers: {
-              "x-api-key": apiKey,
-            },
-            next: { revalidate: 3600 } // cache for 1 hour in Next.js
-          }
-        );
-        if (res.ok) {
-          const data = await res.json();
-          const udupiData = data.find((item: any) => item.city?.toLowerCase() === "udupi");
-          if (udupiData && udupiData.price) {
-            const priceVal = parseFloat(udupiData.price);
-            todayRecord = await prisma.petrolPrice.upsert({
-              where: { date: today },
-              update: { price: priceVal, source: "API" },
-              create: { price: priceVal, date: today, source: "API" },
-            });
+    if (!todayRecord) {
+      // If not cached today, attempt to fetch fresh from IndianAPI
+      try {
+        const apiKey = process.env.PETROL_API_KEY;
+        if (apiKey) {
+          const res = await fetch(
+            "https://fuel.indianapi.in/live_fuel_price?fuel_type=petrol&location_type=city",
+            {
+              headers: {
+                "x-api-key": apiKey,
+              },
+              next: { revalidate: 3600 } // cache for 1 hour in Next.js
+            }
+          );
+          if (res.ok) {
+            const data = await res.json();
+            const udupiData = data.find((item: any) => item.city?.toLowerCase() === "udupi");
+            if (udupiData && udupiData.price) {
+              const priceVal = parseFloat(udupiData.price);
+              todayRecord = await prisma.petrolPrice.upsert({
+                where: { date: today },
+                update: { price: priceVal, source: "API" },
+                create: { price: priceVal, date: today, source: "API" },
+              });
+            }
           }
         }
+      } catch (err) {
+        console.error("Failed to fetch fresh price from IndianAPI:", err);
       }
-    } catch (err) {
-      console.error("Failed to fetch fresh price from IndianAPI:", err);
     }
-  }
 
-  // Fallback to the latest available historical record in the database if API call failed
-  if (!todayRecord) {
-    todayRecord = await prisma.petrolPrice.findFirst({
-      orderBy: { date: "desc" },
-    });
-  }
+    // Fallback to the latest available historical record in the database if API call failed
+    if (!todayRecord) {
+      todayRecord = await prisma.petrolPrice.findFirst({
+        orderBy: { date: "desc" },
+      });
+    }
 
-  const basePrice = todayRecord?.price ?? 0;
-  return {
-    price: basePrice > 0 ? basePrice + offset : 0,
-    source: (todayRecord?.source ?? "ERROR") as string,
-    lastUpdated: todayRecord?.date ?? new Date(),
-  };
+    const basePrice = todayRecord?.price ?? 0;
+    return {
+      price: basePrice > 0 ? basePrice + offset : 0,
+      source: (todayRecord?.source ?? "ERROR") as string,
+      lastUpdated: todayRecord?.date ?? new Date(),
+    };
+  } catch (error) {
+    console.error("getTodayPetrolPrice error:", error);
+    return {
+      price: 0,
+      source: "ERROR",
+      lastUpdated: new Date(),
+    };
+  }
 }
 
 // ── UPDATE PETROL PRICE ──────────────────────────────────────────────────────
@@ -145,15 +159,25 @@ export async function updatePetrolPrice(
 
 // ── GET ALL SETTINGS ─────────────────────────────────────────────────────────
 export async function getAllSettings() {
-  const settings = await prisma.setting.findMany();
-  return Object.fromEntries(
-    settings.map((s) => [s.key, s.value]),
-  );
+  try {
+    const settings = await prisma.setting.findMany();
+    return Object.fromEntries(
+      settings.map((s) => [s.key, s.value]),
+    );
+  } catch (error) {
+    console.error("getAllSettings error:", error);
+    return {};
+  }
 }
 
 // ── GET ALL MEMBERS ──────────────────────────────────────────────────────────
 export async function getAllMembers() {
-  return prisma.member.findMany({ orderBy: { name: "asc" } });
+  try {
+    return await prisma.member.findMany({ orderBy: { name: "asc" } });
+  } catch (error) {
+    console.error("getAllMembers error:", error);
+    return [];
+  }
 }
 
 // ── UPDATE MEMBER DISTANCE ───────────────────────────────────────────────────

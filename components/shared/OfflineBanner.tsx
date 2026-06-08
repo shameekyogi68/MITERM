@@ -1,8 +1,50 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { WifiOff, Wifi, RefreshCw, CloudOff, Cloud } from "lucide-react";
-import { getPendingCount } from "@/lib/offline-storage";
+import { WifiOff, RefreshCw } from "lucide-react";
+import { getPendingCount, getPendingActions, removeAction, incrementRetry } from "@/lib/offline-storage";
+import { createRide } from "@/app/actions/ride.actions";
+import { markPayment, verifyPayment } from "@/app/actions/payment.actions";
+
+async function syncOfflineActions() {
+  if (typeof window === "undefined" || !navigator.onLine) return;
+
+  try {
+    const actions = await getPendingActions();
+    if (actions.length === 0) return;
+
+    for (const action of actions) {
+      if (action.retryCount >= 5) {
+        console.warn("Offline action failed too many times, skipping:", action);
+        continue;
+      }
+
+      try {
+        let result: { success: boolean; error?: string } = { success: false };
+        
+        if (action.type === "CREATE_RIDE") {
+          result = await createRide(action.data as any);
+        } else if (action.type === "MARK_PAYMENT") {
+          result = await markPayment(action.data as any);
+        } else if (action.type === "VERIFY_PAYMENT") {
+          result = await verifyPayment(action.data as any);
+        }
+
+        if (result.success) {
+          await removeAction(action.id);
+        } else {
+          console.error("Action sync returned failure:", result.error);
+          await incrementRetry(action.id);
+        }
+      } catch (err) {
+        console.error("Action sync exception:", err);
+        await incrementRetry(action.id);
+      }
+    }
+  } catch (err) {
+    console.error("Failed to read pending actions from IndexedDB:", err);
+  }
+}
 
 export default function OfflineBanner() {
   const [isOnline, setIsOnline] = useState(true);
@@ -10,14 +52,18 @@ export default function OfflineBanner() {
 
   useEffect(() => {
     const checkOnline = () => {
-      setIsOnline(navigator.onLine);
-      if (navigator.onLine) {
-        getPendingCount().then(setPendingCount);
+      const online = navigator.onLine;
+      setIsOnline(online);
+      if (online) {
+        syncOfflineActions().then(() => {
+          getPendingCount().then(setPendingCount).catch(() => {});
+        }).catch(() => {});
       }
     };
 
     const handleOnline = async () => {
       setIsOnline(true);
+      await syncOfflineActions();
       const count = await getPendingCount();
       setPendingCount(count);
     };
@@ -32,6 +78,7 @@ export default function OfflineBanner() {
 
     const interval = setInterval(async () => {
       if (navigator.onLine) {
+        await syncOfflineActions();
         const count = await getPendingCount();
         setPendingCount(count);
       }

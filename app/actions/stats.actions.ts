@@ -3,11 +3,17 @@
 import { prisma } from "@/lib/prisma";
 import { isOverdue } from "@/lib/utils";
 import { getTodayPetrolPrice } from "./settings.actions";
+import { revalidatePath } from "next/cache";
 
 export async function getDashboardStats() {
   const [allAttendees, petrolPriceData, mileageSetting, routeDistanceSetting] = await Promise.all([
     prisma.rideAttendee.findMany({
-      include: { member: true, ride: true },
+      include: {
+        member: true,
+        ride: {
+          include: { attendees: true }
+        }
+      },
     }),
     getTodayPetrolPrice(),
     prisma.setting.findUnique({ where: { key: "mileage" } }),
@@ -87,23 +93,36 @@ export async function getDashboardStats() {
 }
 
 export async function getPendingPayments() {
-  const attendees = await prisma.rideAttendee.findMany({
-    where: { status: { in: ["PENDING", "OVERDUE", "VERIFICATION"] } },
-    include: { member: true, ride: true },
-    orderBy: { ride: { date: "desc" } },
-  });
+  try {
+    const attendees = await prisma.rideAttendee.findMany({
+      where: { status: { in: ["PENDING", "OVERDUE", "VERIFICATION"] } },
+      include: { member: true, ride: true },
+      orderBy: { ride: { date: "desc" } },
+    });
 
-  for (const a of attendees) {
-    if (a.status === "PENDING" && isOverdue(a.createdAt)) {
-      await prisma.rideAttendee.update({
-        where: { id: a.id },
-        data: { status: "OVERDUE" },
-      });
-      a.status = "OVERDUE";
+    const overdueIds: string[] = [];
+    for (const a of attendees) {
+      if (a.status === "PENDING" && isOverdue(a.createdAt)) {
+        overdueIds.push(a.id);
+        a.status = "OVERDUE";
+      }
     }
-  }
 
-  return attendees;
+    if (overdueIds.length > 0) {
+      await prisma.$transaction(async (tx) => {
+        await tx.rideAttendee.updateMany({
+          where: { id: { in: overdueIds } },
+          data: { status: "OVERDUE" },
+        });
+      });
+      revalidatePath("/");
+    }
+
+    return attendees;
+  } catch (error) {
+    console.error("getPendingPayments error:", error);
+    throw error;
+  }
 }
 
 export async function getPaymentHistory(options: {

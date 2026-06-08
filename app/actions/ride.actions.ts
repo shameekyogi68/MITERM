@@ -172,20 +172,26 @@ export async function getRide(rideId: string) {
 }
 
 // ── UPDATE RIDE STATUS ───────────────────────────────────────────────────────
-export async function updateRideStatus(rideId: string) {
-  if (!rideId || typeof rideId !== "string") return;
+export async function updateRideStatus(rideId: string): Promise<boolean> {
+  if (!rideId || typeof rideId !== "string") return false;
 
-  const attendees = await prisma.rideAttendee.findMany({
-    where: { rideId },
-  });
+  try {
+    const attendees = await prisma.rideAttendee.findMany({
+      where: { rideId },
+    });
 
-  const allPaid = attendees.every((a) => a.status === "PAID");
-  const newStatus = allPaid ? "COMPLETED" : "ACTIVE";
+    const allPaid = attendees.every((a) => a.status === "PAID");
+    const newStatus = allPaid ? "COMPLETED" : "ACTIVE";
 
-  await prisma.ride.update({
-    where: { id: rideId },
-    data: { status: newStatus },
-  });
+    await prisma.ride.update({
+      where: { id: rideId },
+      data: { status: newStatus },
+    });
+    return true;
+  } catch (error) {
+    console.error("updateRideStatus error:", error);
+    return false;
+  }
 }
 
 // ── DELETE RIDE ──────────────────────────────────────────────────────────────
@@ -196,20 +202,25 @@ export async function deleteRide(
     return { success: false, error: "Invalid ride ID." };
   }
 
-  const paidCount = await prisma.rideAttendee.count({
-    where: { rideId, status: { in: ["PAID", "VERIFICATION"] } },
-  });
+  try {
+    const paidCount = await prisma.rideAttendee.count({
+      where: { rideId, status: { in: ["PAID", "VERIFICATION"] } },
+    });
 
-  if (paidCount > 0) {
-    return {
-      success: false,
-      error: "Cannot delete ride with existing payments. Revert payments first.",
-    };
+    if (paidCount > 0) {
+      return {
+        success: false,
+        error: "Cannot delete ride with existing payments. Revert payments first.",
+      };
+    }
+
+    await prisma.ride.delete({ where: { id: rideId } });
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("deleteRide error:", error);
+    return { success: false, error: "Failed to delete ride." };
   }
-
-  await prisma.ride.delete({ where: { id: rideId } });
-  revalidatePath("/");
-  return { success: true };
 }
 
 // ── DUPLICATE RIDE ───────────────────────────────────────────────────────────

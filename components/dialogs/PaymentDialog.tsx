@@ -8,6 +8,8 @@ import {
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { markPayment, verifyPayment, adminMarkPaid } from "@/app/actions/payment.actions";
 import { getSetting } from "@/app/actions/settings.actions";
+import { useToast } from "@/components/shared/Toast";
+import { queueAction } from "@/lib/offline-storage";
 
 interface PaymentDialogProps {
   isOpen: boolean;
@@ -32,6 +34,7 @@ export default function PaymentDialog({
   isAdmin,
   onSuccess,
 }: PaymentDialogProps) {
+  const { addToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<"pay" | "done">("pay");
@@ -45,6 +48,48 @@ export default function PaymentDialog({
   const [qrImageUrl, setQrImageUrl]     = useState("");
   const [copiedKey, setCopiedKey]       = useState<string | null>(null);
 
+  const [screenshotName, setScreenshotName] = useState<string | null>(null);
+  const [screenshotData, setScreenshotData] = useState<string>("");
+
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Synchronously reset state when isOpen transitions
+  const [prevOpen, setPrevOpen] = useState(isOpen);
+  if (isOpen !== prevOpen) {
+    setPrevOpen(isOpen);
+    if (isOpen) {
+      setStep("pay");
+      setError(null);
+      setScreenshotName(null);
+      setScreenshotData("");
+    }
+  }
+
+  const handleClose = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    onClose();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setScreenshotName(file.name);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          setScreenshotData(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setScreenshotName(null);
+      setScreenshotData("");
+    }
+  };
+
   // ── Scroll lock ──────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!isOpen) return;
@@ -53,6 +98,15 @@ export default function PaymentDialog({
     html.style.overflow = "hidden";
     return () => { html.style.overflow = prev; };
   }, [isOpen]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   // ── Load settings & build UPI deep links ────────────────────────────────────
   useEffect(() => {
@@ -97,13 +151,40 @@ export default function PaymentDialog({
     setIsLoading(true);
     setError(null);
     try {
-      const result = isAdmin
-        ? await adminMarkPaid({ rideId, memberName })
-        : await markPayment({ rideId, memberName });
+      let result: { success: boolean; error?: string; isOffline?: boolean };
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        const actionId = `mark-paid-${Date.now()}`;
+        await queueAction({
+          id: actionId,
+          type: isAdmin ? "VERIFY_PAYMENT" : "MARK_PAYMENT",
+          data: {
+            rideId,
+            memberName,
+            screenshotName: screenshotName ?? undefined,
+            screenshotData: screenshotData || undefined,
+          },
+        });
+        result = { success: true, isOffline: true };
+      } else {
+        result = isAdmin
+          ? await adminMarkPaid({ rideId, memberName })
+          : await markPayment({
+              rideId,
+              memberName,
+              screenshotName: screenshotName ?? undefined,
+              screenshotData: screenshotData || undefined,
+            });
+      }
+
       if (result.success) {
         setStep("done");
         onSuccess?.();
-        setTimeout(onClose, 1800);
+        if (result.isOffline) {
+          addToast("warning", "Offline! Payment queued locally.");
+        }
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(handleClose, 1800);
       } else {
         setError(result.error ?? "Failed to process payment.");
       }
@@ -118,11 +199,28 @@ export default function PaymentDialog({
     setIsLoading(true);
     setError(null);
     try {
-      const result = await verifyPayment({ rideId, memberName });
+      let result: { success: boolean; error?: string; isOffline?: boolean };
+      const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (isOffline) {
+        const actionId = `verify-payment-${Date.now()}`;
+        await queueAction({
+          id: actionId,
+          type: "VERIFY_PAYMENT",
+          data: { rideId, memberName },
+        });
+        result = { success: true, isOffline: true };
+      } else {
+        result = await verifyPayment({ rideId, memberName });
+      }
+
       if (result.success) {
         setStep("done");
         onSuccess?.();
-        setTimeout(onClose, 1800);
+        if (result.isOffline) {
+          addToast("warning", "Offline! Verification queued locally.");
+        }
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(handleClose, 1800);
       } else {
         setError(result.error ?? "Failed to verify payment.");
       }
@@ -163,7 +261,7 @@ export default function PaymentDialog({
       {/* ── Backdrop ── */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-md animate-fade-in"
-        onClick={onClose}
+        onClick={handleClose}
         aria-hidden="true"
       />
 
@@ -229,7 +327,7 @@ export default function PaymentDialog({
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="h-9 w-9 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-white/5 hover:text-white transition-colors touch-manipulation flex-shrink-0"
             aria-label="Close dialog"
           >
@@ -400,9 +498,29 @@ export default function PaymentDialog({
                     <input
                       type="file"
                       accept="image/*"
+                      onChange={handleFileChange}
                       className="w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-primary touch-manipulation"
                     />
-                    <p className="mt-2 text-xs text-muted-foreground">Admin will verify within 24 hours</p>
+                    {screenshotName ? (
+                      <div className="mt-2 flex items-center justify-between rounded-xl bg-success/10 border border-success/20 px-3 py-2 text-xs text-success">
+                        <span className="truncate font-semibold flex items-center gap-1.5">
+                          <Check className="h-3.5 w-3.5" />
+                          {screenshotName}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setScreenshotName(null);
+                            setScreenshotData("");
+                          }}
+                          className="text-muted-foreground hover:text-white transition-colors"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-xs text-muted-foreground">Admin will verify within 24 hours</p>
+                    )}
                   </div>
                 )}
 
@@ -430,7 +548,7 @@ export default function PaymentDialog({
               <div className="flex gap-3">
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="flex-1 h-14 rounded-xl border border-white/[0.10] bg-white/[0.04] text-sm font-semibold hover:bg-white/[0.07] active:bg-white/[0.10] transition-colors touch-manipulation"
                 >
                   Cancel

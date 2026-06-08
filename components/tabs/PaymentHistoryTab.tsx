@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Search, CheckCircle2, Filter, ArrowDownToLine, TrendingUp, IndianRupee, Calendar } from "lucide-react";
+import { Search, CheckCircle2, Filter, ArrowDownToLine, TrendingUp, IndianRupee, Calendar, RefreshCw } from "lucide-react";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import { getPaymentHistory } from "@/app/actions/stats.actions";
 import { exportRides } from "@/app/actions/export.actions";
 import { ALL_MEMBERS } from "@/lib/constants";
+import { useToast } from "@/components/shared/Toast";
 
 interface PaymentRecord {
   id: string;
@@ -17,37 +18,46 @@ interface PaymentRecord {
 }
 
 export default function PaymentHistoryTab() {
+  const { addToast } = useToast();
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [memberFilter, setMemberFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
-    const now = new Date();
-    let fromDate: Date | undefined;
-    let toDate: Date | undefined;
+    setFetchError(null);
+    try {
+      const now = new Date();
+      let fromDate: Date | undefined;
+      let toDate: Date | undefined;
 
-    if (dateFilter === "this-month") {
-      fromDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    } else if (dateFilter === "last-month") {
-      fromDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      toDate = new Date(now.getFullYear(), now.getMonth(), 0);
+      if (dateFilter === "this-month") {
+        fromDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      } else if (dateFilter === "last-month") {
+        fromDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        toDate = new Date(now.getFullYear(), now.getMonth(), 0);
+      }
+
+      const data = await getPaymentHistory({ fromDate, toDate });
+      setPayments(
+        data.map((a: any) => ({
+          id: a.id,
+          rideId: a.rideId,
+          memberName: a.member.name,
+          amount: a.share,
+          rideDate: a.ride.date,
+          paidAt: a.paidAt!,
+        })),
+      );
+    } catch (err) {
+      console.error("PaymentHistory fetch error:", err);
+      setFetchError("Failed to load payment history. Please refresh.");
+    } finally {
+      setIsLoading(false);
     }
-
-    const data = await getPaymentHistory({ fromDate, toDate });
-    setPayments(
-      data.map((a: any) => ({
-        id: a.id,
-        rideId: a.rideId,
-        memberName: a.member.name,
-        amount: a.share,
-        rideDate: a.ride.date,
-        paidAt: a.paidAt!,
-      }))
-    );
-    setIsLoading(false);
   }, [dateFilter]);
 
   useEffect(() => {
@@ -67,30 +77,72 @@ export default function PaymentHistoryTab() {
   const avgPayment = filtered.length > 0 ? totalCollected / filtered.length : 0;
 
   const handleExport = async (format: "json" | "csv") => {
-    const result = await exportRides(format);
-    const blob = new Blob([result.data], { type: result.contentType });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = result.filename;
-    a.click();
-    URL.revokeObjectURL(url);
+    let url: string | null = null;
+    try {
+      const result = await exportRides(format);
+      if (result.filename === "error.json") {
+        try {
+          const errObj = JSON.parse(result.data);
+          if (errObj.error) {
+            addToast("error", errObj.error);
+            return;
+          }
+        } catch {}
+      }
+
+      const blob = new Blob([result.data], { type: result.contentType });
+      url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = result.filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error("Export error:", err);
+      addToast("error", "Failed to export rides.");
+    } finally {
+      if (url) {
+        URL.revokeObjectURL(url);
+      }
+    }
   };
 
   if (isLoading) {
     return (
       <div className="space-y-5 animate-fade-in">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-2xl glass-premium p-5 space-y-3">
-              <div className="skeleton h-10 w-10 rounded-xl" />
-              <div className="skeleton h-8 w-24" />
-              <div className="skeleton h-4 w-20" />
+            <div key={i} className="rounded-2xl glass-premium p-3 sm:p-5 space-y-3">
+              <div className="skeleton h-8 w-8 sm:h-10 sm:w-10 rounded-xl" />
+              <div className="skeleton h-6 w-16" />
+              <div className="skeleton h-3 w-20" />
             </div>
           ))}
         </div>
-        <div className="skeleton h-14 rounded-2xl" />
+        <div className="skeleton h-12 rounded-full" />
         <div className="skeleton h-64 rounded-2xl" />
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-4 text-center px-4">
+        <div className="h-14 w-14 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center">
+          <RefreshCw className="h-6 w-6 text-destructive" />
+        </div>
+        <div>
+          <p className="font-bold text-foreground">{fetchError}</p>
+        </div>
+        <button
+          onClick={fetchData}
+          className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white touch-manipulation active:scale-95"
+          style={{ background: "linear-gradient(135deg, #7c3aed, #6d28d9)" }}
+        >
+          <RefreshCw className="h-4 w-4" />
+          Retry
+        </button>
       </div>
     );
   }
@@ -169,7 +221,11 @@ export default function PaymentHistoryTab() {
         </div>
         <select
           value={dateFilter}
-          onChange={(e) => setDateFilter(e.target.value)}
+          onChange={(e) => {
+            setDateFilter(e.target.value);
+            setSearch("");
+            setMemberFilter("all");
+          }}
           className="select-premium rounded-full px-4 py-3 text-sm transition-all"
           style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
         >

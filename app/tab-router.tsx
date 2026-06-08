@@ -56,6 +56,16 @@ export default function TabRouter({
   const tabRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const navRef = useRef<HTMLDivElement>(null);
 
+  // Handle admin session cookie and URL cleanup
+  useEffect(() => {
+    if (adminToken) {
+      document.cookie = `admin_token=${adminToken}; path=/; max-age=86400; SameSite=Strict; Secure`;
+      const url = new URL(window.location.href);
+      url.searchParams.delete("admin");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [adminToken]);
+
   // Read initial tab from URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -65,17 +75,22 @@ export default function TabRouter({
     }
   }, [isAdmin]);
 
-  // Handle browser back/forward
+  // Handle browser back/forward with admin-only tab protection
   useEffect(() => {
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
       const tab = params.get("tab") || "dashboard";
-      setActiveTab(tab);
+      const targetTab = tabs.find((t) => t.id === tab);
+      if (targetTab && (!targetTab.adminOnly || isAdmin)) {
+        setActiveTab(tab);
+      } else {
+        setActiveTab("dashboard");
+      }
       setContentKey((k) => k + 1);
     };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
+  }, [isAdmin]);
 
   // Update indicator position — uses requestAnimationFrame for smoothness
   const updateIndicator = useCallback(() => {
@@ -97,18 +112,33 @@ export default function TabRouter({
 
   const visibleTabs = tabs.filter((t) => !t.adminOnly || isAdmin);
 
-  // Instant tab switch — no ViewTransition API (causes jank on mobile)
+  // Instant tab switch ── no ViewTransition API (causes jank on mobile)
   const switchTab = useCallback((tabId: string) => {
-    if (tabId === activeTab) return; // no-op if same tab
+    // Tapping the active tab triggers a refresh of its content
+    if (tabId === activeTab) {
+      setContentKey((k) => k + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
     setActiveTab(tabId);
     setContentKey((k) => k + 1);
-    // Push to URL history
     const url = new URL(window.location.href);
     url.searchParams.set("tab", tabId);
     window.history.pushState({}, "", url.toString());
-    // Scroll to top of content smoothly
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [activeTab]);
+
+  // Listen to tabchange custom events from child components
+  useEffect(() => {
+    const handleTabChange = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      if (customEvent.detail) {
+        switchTab(customEvent.detail);
+      }
+    };
+    window.addEventListener("tabchange", handleTabChange);
+    return () => window.removeEventListener("tabchange", handleTabChange);
+  }, [switchTab]);
 
   const renderTabContent = () => {
     const activeTabData = tabs.find((t) => t.id === activeTab);

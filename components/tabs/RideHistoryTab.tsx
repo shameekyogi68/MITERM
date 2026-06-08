@@ -18,6 +18,7 @@ import { format } from "date-fns";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { getRides, deleteRide, duplicateRide } from "@/app/actions/ride.actions";
 import PaymentDialog from "@/components/dialogs/PaymentDialog";
+import { useToast } from "@/components/shared/Toast";
 
 interface RideAttendee {
   id: string;
@@ -56,10 +57,12 @@ function parseRoute(notes: string | null): { from: string; to: string } {
 
 export default function RideHistoryTab({ isAdmin }: { isAdmin: boolean }) {
   const router = useRouter();
+  const { addToast } = useToast();
   const [rides, setRides] = useState<Ride[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDuplicating, setIsDuplicating] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -77,13 +80,38 @@ export default function RideHistoryTab({ isAdmin }: { isAdmin: boolean }) {
     status?: string;
   }>({ open: false, rideId: "", memberName: "", amount: 0, rideDate: new Date() });
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (targetPage = page) => {
     setIsLoading(true);
-    const data = await getRides({ page, limit: 10 });
-    setRides(data.rides as unknown as Ride[]);
-    setTotal(data.total);
-    setIsLoading(false);
+    setError(null);
+    try {
+      const data = await getRides({ page: targetPage, limit: 10 });
+      setRides((prev) => {
+        const fetchedRides = data.rides as unknown as Ride[];
+        if (targetPage === 1) {
+          return fetchedRides;
+        } else {
+          const existingIds = new Set(prev.map((r) => r.id));
+          const newRides = fetchedRides.filter((r) => !existingIds.has(r.id));
+          return [...prev, ...newRides];
+        }
+      });
+      setTotal(data.total);
+    } catch (err) {
+      console.error("RideHistory fetch error:", err);
+      setError("Failed to load rides. Pull down to refresh.");
+    } finally {
+      setIsLoading(false);
+    }
   }, [page]);
+
+  const handleResetAndFetch = useCallback(async () => {
+    setExpandedId(null);
+    if (page === 1) {
+      await fetchData(1);
+    } else {
+      setPage(1);
+    }
+  }, [page, fetchData]);
 
   useEffect(() => {
     fetchData();
@@ -92,23 +120,46 @@ export default function RideHistoryTab({ isAdmin }: { isAdmin: boolean }) {
   const handleDelete = async (rideId: string) => {
     setDeleting(rideId);
     setError(null);
-    const result = await deleteRide(rideId);
-    if (result.success) {
-      fetchData();
-      router.refresh();
-    } else {
-      setError(result.error ?? "Failed to delete ride.");
+    try {
+      const result = await deleteRide(rideId);
+      if (result.success) {
+        addToast("success", "Ride deleted successfully.");
+        await handleResetAndFetch();
+        router.refresh();
+      } else {
+        setError(result.error ?? "Failed to delete ride.");
+        addToast("error", result.error ?? "Failed to delete ride.");
+      }
+    } catch (err) {
+      console.error("Delete ride error:", err);
+      setError("An unexpected error occurred.");
+      addToast("error", "An unexpected error occurred.");
+    } finally {
+      setDeleting(null);
     }
-    setDeleting(null);
   };
 
   const handleDuplicate = async () => {
-    if (!duplicateDialog.open) return;
-    const result = await duplicateRide(duplicateDialog.rideId, new Date(duplicateDialog.date));
-    if (result.success) {
-      setDuplicateDialog({ open: false, rideId: "", date: "" });
-      fetchData();
-      router.refresh();
+    if (!duplicateDialog.open || !duplicateDialog.date) return;
+    setIsDuplicating(true);
+    setError(null);
+    try {
+      const result = await duplicateRide(duplicateDialog.rideId, new Date(duplicateDialog.date));
+      if (result.success) {
+        addToast("success", "Ride duplicated successfully.");
+        setDuplicateDialog({ open: false, rideId: "", date: "" });
+        await handleResetAndFetch();
+        router.refresh();
+      } else {
+        setError(result.error ?? "Failed to duplicate ride.");
+        addToast("error", result.error ?? "Failed to duplicate ride.");
+      }
+    } catch (err) {
+      console.error("Duplicate ride error:", err);
+      setError("An unexpected error occurred.");
+      addToast("error", "An unexpected error occurred.");
+    } finally {
+      setIsDuplicating(false);
     }
   };
 
@@ -471,18 +522,26 @@ export default function RideHistoryTab({ isAdmin }: { isAdmin: boolean }) {
             <div className="mt-5 flex gap-3">
               <button
                 onClick={() => setDuplicateDialog({ open: false, rideId: "", date: "" })}
-                className="flex-1 rounded-xl px-4 py-3 text-sm font-medium transition-all hover:bg-white/[0.06]"
+                disabled={isDuplicating}
+                className="flex-1 rounded-xl px-4 py-3 text-sm font-medium transition-all hover:bg-white/[0.06] disabled:opacity-50"
                 style={{ border: "1px solid rgba(255,255,255,0.08)" }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleDuplicate}
-                disabled={!duplicateDialog.date}
-                className="flex-1 rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50"
+                disabled={!duplicateDialog.date || isDuplicating}
+                className="flex-1 rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg transition-all hover:shadow-xl disabled:opacity-50 flex items-center justify-center gap-1.5"
                 style={{ background: "linear-gradient(to right, #7c3aed, #6d28d9)" }}
               >
-                Create Copy
+                {isDuplicating ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Duplicating...
+                  </>
+                ) : (
+                  "Create Copy"
+                )}
               </button>
             </div>
           </div>

@@ -52,6 +52,8 @@ export const paymentSchema = z
       .string()
       .min(1, { message: "Member name is required." })
       .max(100, { message: "Member name too long." }),
+    screenshotName: z.string().max(200).optional(),
+    screenshotData: z.string().optional(),
   })
   .strict();
 

@@ -48,6 +48,10 @@ export async function markPayment(
         memberId: member.id,
         action: "MARKED_PAID",
         performedBy: "user",
+        metadata: parsed.data.screenshotName ? {
+          screenshotName: parsed.data.screenshotName,
+          screenshotData: parsed.data.screenshotData,
+        } : undefined,
       },
     });
 
