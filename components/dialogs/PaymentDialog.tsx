@@ -43,9 +43,6 @@ export default function PaymentDialog({
   const [upiPhonePe, setUpiPhonePe]     = useState("7338603959@ybl");
   const [upiGPay, setUpiGPay]           = useState("shameekyogiofficial@oksbi");
   const [upiPaytm, setUpiPaytm]         = useState("7338603959@ptyes");
-  const [phonepeUrl, setPhonepeUrl]     = useState("");
-  const [gpayUrl, setGpayUrl]           = useState("");
-  const [paytmUrl, setPaytmUrl]         = useState("");
   const [qrImageUrl, setQrImageUrl]     = useState("");
   const [copiedKey, setCopiedKey]       = useState<string | null>(null);
 
@@ -109,26 +106,22 @@ export default function PaymentDialog({
     })();
   }, []);
 
-  // ── Build deep links on open or when amount changes ──────────────────────────
+  // ── Reset step and error on open ────────────────────────────────────────────
   useEffect(() => {
     if (!isOpen) return;
     setError(null);
     setStep("pay");
-
-    const amountStr = amount.toFixed(2);
-    const payeeName = "SHAMEEK YOGI";
-    const enc = encodeURIComponent(payeeName);
-
-    setPhonepeUrl(`phonepe://pay?pa=${upiPhonePe}&pn=${enc}&am=${amountStr}&cu=INR`);
-    setGpayUrl(`tez://upi/pay?pa=${upiGPay}&pn=${enc}&am=${amountStr}&cu=INR`);
-    setPaytmUrl(`paytmmp://upi/pay?pa=${upiPaytm}&pn=${enc}&am=${amountStr}&cu=INR`);
-  }, [isOpen, amount, upiPhonePe, upiGPay, upiPaytm]);
+  }, [isOpen]);
 
   const handleUpiClick = (url: string) => {
     if (!url) return;
-    // Open in a new tab/context so Next.js doesn't intercept it
-    // and the browser doesn't trigger a full page refresh.
-    window.open(url, "_blank");
+    try {
+      // Use window.location.href instead of window.open to bypass mobile popup blockers
+      // and ensure the native app launches instantly without refreshing the page.
+      window.location.href = url;
+    } catch (err) {
+      console.error("UPI redirect failed:", err);
+    }
   };
 
   const handleCopy = (text: string, key: string) => {
@@ -226,6 +219,14 @@ export default function PaymentDialog({
     a.click();
     document.body.removeChild(a);
   };
+
+  const amountStr = amount.toFixed(2);
+  const payeeName = "SHAMEEK YOGI";
+  const enc = encodeURIComponent(payeeName);
+
+  const phonepeUrl = `phonepe://pay?pa=${upiPhonePe}&pn=${enc}&am=${amountStr}&cu=INR`;
+  const gpayUrl    = `tez://upi/pay?pa=${upiGPay}&pn=${enc}&am=${amountStr}&cu=INR`;
+  const paytmUrl   = `paytmmp://upi/pay?pa=${upiPaytm}&pn=${enc}&am=${amountStr}&cu=INR`;
 
   if (!isOpen || !mounted) return null;
 
