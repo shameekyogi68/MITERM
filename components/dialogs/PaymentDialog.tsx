@@ -73,14 +73,7 @@ export default function PaymentDialog({
 
 
 
-  // ── Scroll lock ──────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!isOpen) return;
-    const html = document.documentElement;
-    const prev = html.style.overflow;
-    html.style.overflow = "hidden";
-    return () => { html.style.overflow = prev; };
-  }, [isOpen]);
+
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -267,7 +260,7 @@ export default function PaymentDialog({
         className="
           relative w-full mt-auto
           sm:mt-0 sm:max-w-md sm:mx-auto sm:mx-4
-          flex flex-col
+          grid grid-rows-[auto_1fr_auto]
           rounded-t-[28px] sm:rounded-2xl
           overflow-hidden
           border border-white/[0.10]
@@ -281,37 +274,40 @@ export default function PaymentDialog({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ── Drag handle (mobile only) ── */}
-        <div className="flex justify-center pt-3 pb-1 shrink-0 sm:hidden" aria-hidden="true">
-          <div className="h-[5px] w-10 rounded-full bg-white/20" />
-        </div>
-
-        {/* ── Gradient accent line ── */}
-        <div className="h-px shrink-0 bg-gradient-to-r from-transparent via-[#7c3aed] to-transparent opacity-70" />
-
-        {/* ── Header ── */}
-        <div className="flex items-center justify-between px-5 py-4 shrink-0 border-b border-white/[0.07]">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 shrink-0">
-              {currentStatus === "VERIFICATION"
-                ? <ShieldCheck className="h-5 w-5 text-primary" />
-                : <QrCode className="h-5 w-5 text-primary" />
-              }
-            </div>
-            <div>
-              <h2 className="text-base font-bold leading-tight">
-                {currentStatus === "VERIFICATION" ? "Verify Payment" : "Pay Your Share"}
-              </h2>
-              <p className="text-xs text-muted-foreground font-semibold">{memberName}</p>
-            </div>
+        {/* ── Header Container ── */}
+        <div className="flex flex-col shrink-0">
+          {/* Drag handle (mobile only) */}
+          <div className="flex justify-center pt-3 pb-1 sm:hidden" aria-hidden="true">
+            <div className="h-[5px] w-10 rounded-full bg-white/20" />
           </div>
-          <button
-            onClick={handleClose}
-            className="h-9 w-9 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-white/5 hover:text-white transition-colors touch-manipulation flex-shrink-0"
-            aria-label="Close dialog"
-          >
-            <X className="h-4 w-4" />
-          </button>
+
+          {/* Gradient accent line */}
+          <div className="h-px bg-gradient-to-r from-transparent via-[#7c3aed] to-transparent opacity-70" />
+
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 shrink-0">
+                {currentStatus === "VERIFICATION"
+                  ? <ShieldCheck className="h-5 w-5 text-primary" />
+                  : <QrCode className="h-5 w-5 text-primary" />
+                }
+              </div>
+              <div>
+                <h2 className="text-base font-bold leading-tight">
+                  {currentStatus === "VERIFICATION" ? "Verify Payment" : "Pay Your Share"}
+                </h2>
+                <p className="text-xs text-muted-foreground font-semibold">{memberName}</p>
+              </div>
+            </div>
+            <button
+              onClick={handleClose}
+              className="h-9 w-9 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-white/5 hover:text-white transition-colors touch-manipulation flex-shrink-0"
+              aria-label="Close dialog"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {/*
