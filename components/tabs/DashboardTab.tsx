@@ -249,102 +249,111 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <div className="space-y-6">
-      {/* Hyundai Exter Hero Card with Full-Bleed Gradient */}
+      {/* ── Hyundai Exter Hero Card ─────────────────────────────────────────────── */}
       <div
-        className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl sm:shadow-2xl animate-fade-in-up"
-        style={{ 
-          background: "linear-gradient(135deg, #1a0533 0%, #0a1628 100%)",
-        }}
+        className="relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl animate-fade-in-up"
+        style={{ background: "linear-gradient(160deg, #1a0533 0%, #0d1a2e 60%, #080c18 100%)" }}
       >
-        {/* Purple rim-light glow on right side */}
-        <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#7c3aed]/20 to-transparent pointer-events-none" />
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ background: "rgba(124,58,237,0.2)" }} />
+        {/* Ambient purple glow blob */}
+        <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full blur-3xl pointer-events-none"
+          style={{ background: "rgba(124,58,237,0.25)" }} />
+        <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl pointer-events-none"
+          style={{ background: "rgba(6,182,212,0.10)" }} />
 
-        <div className="grid gap-6 md:grid-cols-2 items-center relative z-10">
-          {/* Details */}
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary border border-primary/20 backdrop-blur-sm">
-                <Car className="h-3.5 w-3.5 animate-[spin-slow_6s_linear_infinite]" />
+        {/* ── MOBILE LAYOUT (default) / DESKTOP LAYOUT (md+) ── */}
+        <div className="relative z-10">
+
+          {/* ── Top badge + title ── */}
+          <div className="px-4 pt-4 sm:px-6 sm:pt-6 flex items-start justify-between gap-3">
+            <div className="space-y-0.5">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1 text-[10px] sm:text-xs font-bold text-primary border border-primary/25 backdrop-blur-sm">
+                <Car className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-[spin-slow_6s_linear_infinite]" />
                 HYUNDAI EXTER SUV
               </div>
-              <h2 className="text-3xl font-extrabold tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight leading-none">
                 Namma <span className="gradient-text">Exter</span>
               </h2>
-              <p className="text-sm text-muted-foreground font-medium">
-                The sacred chariot gulping liters of liquid gold to drag us to MITE daily
+              <p className="text-[11px] sm:text-sm text-muted-foreground font-medium leading-snug max-w-[220px] sm:max-w-none">
+                Sacred chariot gulping liquid gold to drag us to MITE daily
               </p>
             </div>
 
-            {/* Petrol Price Card */}
-            <div className="rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 backdrop-blur-xl border border-amber-500/20 p-4 shadow-inner">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest">Liquid Gold Price Today</span>
-                  <p className="text-4xl sm:text-[42px] font-light leading-none tabular-nums" style={{ color: "#f59e0b" }}>
-                    ₹{stats.todayPetrolPrice.toFixed(2)}
-                  </p>
-                  <span className="text-xs font-medium text-muted-foreground">per liter of tears</span>
-                </div>
-                <div className="flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold backdrop-blur-sm">
-                  <span className="relative flex h-2 w-2 shrink-0">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
-                  </span>
-                  <span className="text-amber-500">Live</span>
-                </div>
+            {/* Live petrol price pill — top right */}
+            <div className="shrink-0 flex flex-col items-end gap-1">
+              <div className="flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold backdrop-blur-sm">
+                <span className="relative flex h-1.5 w-1.5 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500" />
+                </span>
+                <span className="text-amber-400">Live</span>
               </div>
+              <p className="text-2xl sm:text-3xl font-light tabular-nums leading-none" style={{ color: "#f59e0b" }}>
+                ₹{stats.todayPetrolPrice.toFixed(2)}
+              </p>
+              <span className="text-[10px] text-muted-foreground/70 font-medium">/litre</span>
             </div>
-
-            {/* Specifications Grid in Frosted Glass Panel */}
-            <div className="rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] p-4 shadow-inner">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest leading-tight block">Mileage (saint 😇)</span>
-                  <p className="text-3xl font-light leading-none tabular-nums" style={{ color: "#7c3aed" }}>
-                    {stats.mileage}
-                  </p>
-                  <span className="text-xs font-medium text-muted-foreground">km/L</span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest leading-tight block">Distance (potholes)</span>
-                  <p className="text-3xl font-light leading-none tabular-nums" style={{ color: "#06b6d4" }}>
-                    {stats.routeDistance}
-                  </p>
-                  <span className="text-xs font-medium text-muted-foreground">km</span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest leading-tight block">Fuel Needed 💨</span>
-                  <p className="text-3xl font-light leading-none tabular-nums">
-                    {(stats.routeDistance / stats.mileage).toFixed(2)}
-                  </p>
-                  <span className="text-xs font-medium text-muted-foreground">Liters</span>
-                </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest leading-tight block">Wallet Damage</span>
-                  <p className="text-2xl sm:text-3xl font-light leading-none gradient-text tabular-nums break-all">
-                    {formatCurrency(Math.round((stats.routeDistance / stats.mileage) * stats.todayPetrolPrice))}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-
           </div>
 
-          {/* Cinematic Image */}
-          <div className="relative flex justify-end items-center h-32 xs:h-40 sm:h-52 md:h-64 rounded-xl sm:rounded-2xl overflow-hidden" style={{ boxShadow: "0 0 40px rgba(124,58,237,0.3), 0 0 80px rgba(109,40,217,0.15)" }}>
-            {/* Purple rim-light glow effect */}
-            <div className="absolute inset-0 bg-gradient-to-l from-[#7c3aed]/30 via-transparent to-transparent pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#7c3aed]/10 via-transparent to-transparent pointer-events-none" />
-            
+          {/* ── Car image — full width, prominent ── */}
+          <div className="relative w-full mt-3 sm:mt-4"
+            style={{ height: "clamp(160px, 42vw, 280px)" }}>
+            {/* bottom fade so car blends into the stats panel */}
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#080c18] to-transparent z-10 pointer-events-none" />
+            {/* left subtle fade */}
+            <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#1a0533]/60 to-transparent z-10 pointer-events-none" />
+            {/* purple rim glow */}
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#7c3aed]/10 pointer-events-none z-10" />
+
             <img
               src="/car-hero.png"
               alt="Hyundai Exter SUV"
-              className="relative w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-              style={{ filter: "drop-shadow(0 0 15px rgba(124,58,237,0.25))" }}
+              className="w-full h-full object-contain object-center transition-transform duration-700 hover:scale-[1.03]"
+              style={{
+                filter: "drop-shadow(0 8px 32px rgba(124,58,237,0.4)) drop-shadow(0 0 8px rgba(6,182,212,0.2))",
+              }}
             />
           </div>
+
+          {/* ── Stats strip ── */}
+          <div className="px-4 pb-4 sm:px-6 sm:pb-6 -mt-2">
+            <div className="rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-3 sm:p-4">
+              <div className="grid grid-cols-4 divide-x divide-white/[0.06]">
+                {/* Mileage */}
+                <div className="px-2 sm:px-3 text-center">
+                  <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase font-bold tracking-wider leading-tight">Mileage</p>
+                  <p className="text-xl sm:text-2xl font-light tabular-nums mt-0.5 leading-none" style={{ color: "#7c3aed" }}>
+                    {stats.mileage}
+                  </p>
+                  <p className="text-[9px] text-muted-foreground/60 font-medium">km/L</p>
+                </div>
+                {/* Distance */}
+                <div className="px-2 sm:px-3 text-center">
+                  <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase font-bold tracking-wider leading-tight">Distance</p>
+                  <p className="text-xl sm:text-2xl font-light tabular-nums mt-0.5 leading-none" style={{ color: "#06b6d4" }}>
+                    {stats.routeDistance}
+                  </p>
+                  <p className="text-[9px] text-muted-foreground/60 font-medium">km</p>
+                </div>
+                {/* Fuel */}
+                <div className="px-2 sm:px-3 text-center">
+                  <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase font-bold tracking-wider leading-tight">Fuel</p>
+                  <p className="text-xl sm:text-2xl font-light tabular-nums mt-0.5 leading-none text-white/90">
+                    {(stats.routeDistance / stats.mileage).toFixed(1)}
+                  </p>
+                  <p className="text-[9px] text-muted-foreground/60 font-medium">litres</p>
+                </div>
+                {/* Cost */}
+                <div className="px-2 sm:px-3 text-center">
+                  <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase font-bold tracking-wider leading-tight">Today's Cost</p>
+                  <p className="text-base sm:text-xl font-bold tabular-nums mt-0.5 leading-none gradient-text">
+                    {formatCurrency(Math.round((stats.routeDistance / stats.mileage) * stats.todayPetrolPrice))}
+                  </p>
+                  <p className="text-[9px] text-muted-foreground/60 font-medium">total</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
