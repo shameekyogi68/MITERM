@@ -249,85 +249,86 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
 
       {/* ── Hero Card ── */}
       <div
-        className="relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl animate-fade-in-up"
-        style={{ background: "linear-gradient(160deg, #1a0533 0%, #0d1a2e 60%, #080c18 100%)" }}
+        className="relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-2xl border border-white/[0.08] animate-fade-in-up"
+        style={{ background: "linear-gradient(160deg, #18092a 0%, #0c1424 60%, #07090f 100%)" }}
       >
         {/* Ambient glows */}
         <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ background: "rgba(124,58,237,0.25)" }} />
-        <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl pointer-events-none" style={{ background: "rgba(6,182,212,0.10)" }} />
+        <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl pointer-events-none" style={{ background: "rgba(6,182,212,0.12)" }} />
 
         <div className="relative z-10">
           {/* Top row: badge + title + price */}
-          <div className="px-4 pt-4 sm:px-6 sm:pt-6 flex items-start justify-between gap-3">
-            <div className="space-y-0.5 min-w-0">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1 text-[10px] sm:text-xs font-bold text-primary border border-primary/25 backdrop-blur-sm">
-                <Car className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-[spin-slow_6s_linear_infinite]" />
-                HYUNDAI EXTER SUV
+          <div className="px-5 pt-5 sm:px-6 sm:pt-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div className="space-y-1 min-w-0">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-violet-600/30 to-cyan-500/30 px-3 py-1 text-[10px] sm:text-xs font-extrabold text-cyan-400 border border-cyan-500/20 backdrop-blur-sm uppercase tracking-wider">
+                <Car className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                Hyundai Exter SUV
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight leading-none">
-                Namma <span className="gradient-text">Exter</span>
+              <h2 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-white">
+                Namma <span className="gradient-text bg-gradient-to-r from-violet-400 via-primary to-cyan-400 font-extrabold">Exter</span>
               </h2>
-              <p className="text-[11px] sm:text-sm text-muted-foreground font-medium leading-snug max-w-[200px] sm:max-w-none">
+              <p className="text-xs sm:text-sm text-muted-foreground font-semibold leading-relaxed max-w-sm">
                 Sacred chariot gulping liquid gold to MITE daily
               </p>
             </div>
 
-            {/* Live petrol price */}
-            <div className="shrink-0 flex flex-col items-end gap-1">
-              <div className="flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold backdrop-blur-sm">
+            {/* Live petrol price widget */}
+            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start shrink-0 bg-white/[0.03] border border-white/[0.06] rounded-2xl p-3 sm:p-4 gap-3 sm:gap-1 backdrop-blur-md">
+              <div className="flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-[9px] font-bold tracking-wider uppercase">
                 <span className="relative flex h-1.5 w-1.5 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75" />
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500" />
                 </span>
-                <span className="text-amber-400">Live</span>
+                <span className="text-amber-400">Live price</span>
               </div>
-              <p className="text-2xl sm:text-3xl font-light tabular-nums leading-none" style={{ color: "#f59e0b" }}>
-                ₹{stats.todayPetrolPrice.toFixed(2)}
-              </p>
-              <span className="text-[10px] text-muted-foreground/70 font-medium">/litre</span>
+              <div className="flex items-baseline gap-0.5 mt-0.5">
+                <span className="text-2xl sm:text-3xl font-black tabular-nums tracking-tight text-amber-400">
+                  ₹{stats.todayPetrolPrice.toFixed(2)}
+                </span>
+                <span className="text-[10px] text-muted-foreground font-semibold">/L</span>
+              </div>
             </div>
           </div>
 
-          {/* Car image */}
-          <div className="relative w-full mt-3 sm:mt-4" style={{ height: "clamp(160px, 42vw, 280px)" }}>
-            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#080c18] to-transparent z-10 pointer-events-none" />
-            <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-[#1a0533]/60 to-transparent z-10 pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#7c3aed]/10 pointer-events-none z-10" />
+          {/* Car image container with a premium 3D glowing platform */}
+          <div className="relative w-full mt-4 flex flex-col items-center justify-center overflow-hidden" style={{ height: "clamp(180px, 45vw, 300px)" }}>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(124,58,237,0.15)_0%,transparent_70%)] pointer-events-none" />
+            <div className="absolute bottom-4 w-[80%] h-12 bg-white/[0.02] border border-white/[0.05] rounded-full blur-[2px] shadow-[0_15px_30px_rgba(124,58,237,0.2),0_0_20px_rgba(6,182,212,0.1)] transform scale-y-[0.3] pointer-events-none" />
             <img
               src="/car-clean.png"
               alt="Hyundai Exter SUV"
-              className="w-full h-full object-contain object-center transition-transform duration-700 hover:scale-[1.03]"
-              style={{ filter: "drop-shadow(0 8px 32px rgba(124,58,237,0.4)) drop-shadow(0 0 8px rgba(6,182,212,0.2))" }}
+              className="relative z-10 w-full h-[85%] object-contain object-center transition-transform duration-700 hover:scale-[1.05] animate-float"
+              style={{ filter: "drop-shadow(0 12px 36px rgba(124,58,237,0.5)) drop-shadow(0 0 10px rgba(6,182,212,0.25))" }}
             />
           </div>
 
           {/* Stats strip */}
-          <div className="px-4 pb-4 sm:px-6 sm:pb-6 -mt-2">
-            <div className="rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] p-3 sm:p-4">
+          <div className="px-5 pb-5 sm:px-6 sm:pb-6 -mt-1 relative z-20">
+            <div className="rounded-2xl bg-white/[0.02] backdrop-blur-xl border border-white/[0.06] p-4 sm:p-5 shadow-inner">
               <div className="grid grid-cols-4 divide-x divide-white/[0.06]">
-                <div className="px-2 sm:px-3 text-center">
+                <div className="px-1 sm:px-3 text-center">
                   <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase font-bold tracking-wider leading-tight">Mileage</p>
-                  <p className="text-xl sm:text-2xl font-light tabular-nums mt-0.5 leading-none" style={{ color: "#7c3aed" }}>{stats.mileage}</p>
-                  <p className="text-[9px] text-muted-foreground/60 font-medium">km/L</p>
+                  <p className="text-xl sm:text-3xl font-black mt-1 leading-none text-violet-400 tabular-nums">{stats.mileage}</p>
+                  <p className="text-[9px] text-muted-foreground/50 font-semibold mt-1">km/L</p>
                 </div>
-                <div className="px-2 sm:px-3 text-center">
+                <div className="px-1 sm:px-3 text-center">
                   <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase font-bold tracking-wider leading-tight">Distance</p>
-                  <p className="text-xl sm:text-2xl font-light tabular-nums mt-0.5 leading-none" style={{ color: "#06b6d4" }}>{stats.routeDistance}</p>
-                  <p className="text-[9px] text-muted-foreground/60 font-medium">km</p>
+                  <p className="text-xl sm:text-3xl font-black mt-1 leading-none text-cyan-400 tabular-nums">{stats.routeDistance}</p>
+                  <p className="text-[9px] text-muted-foreground/50 font-semibold mt-1">km</p>
                 </div>
-                <div className="px-2 sm:px-3 text-center">
+                <div className="px-1 sm:px-3 text-center">
                   <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase font-bold tracking-wider leading-tight">Fuel</p>
-                  <p className="text-xl sm:text-2xl font-light tabular-nums mt-0.5 leading-none text-white/90">
+                  <p className="text-xl sm:text-3xl font-black mt-1 leading-none text-white/90 tabular-nums">
                     {fuelPerTrip.toFixed(1)}
                   </p>
-                  <p className="text-[9px] text-muted-foreground/60 font-medium">litres</p>
+                  <p className="text-[9px] text-muted-foreground/50 font-semibold mt-1">litres</p>
                 </div>
-                <div className="px-2 sm:px-3 text-center">
+                <div className="px-1 sm:px-3 text-center">
                   <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase font-bold tracking-wider leading-tight">Today's Cost</p>
-                  <p className="text-base sm:text-xl font-bold tabular-nums mt-0.5 leading-none gradient-text">
+                  <p className="text-lg sm:text-3xl font-black mt-1 leading-none gradient-text bg-gradient-to-r from-violet-400 via-primary to-cyan-400 tabular-nums">
                     {formatCurrency(Math.round(fuelPerTrip * stats.todayPetrolPrice))}
                   </p>
-                  <p className="text-[9px] text-muted-foreground/60 font-medium">total</p>
+                  <p className="text-[9px] text-muted-foreground/50 font-semibold mt-1">total</p>
                 </div>
               </div>
             </div>
@@ -339,9 +340,9 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
           onClick={handleManualRefresh}
           disabled={isRefreshing}
           aria-label="Refresh dashboard"
-          className="absolute top-3 right-3 z-20 h-8 w-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/15 active:bg-white/20 transition-colors touch-manipulation disabled:opacity-50 sm:hidden"
+          className="absolute top-4 right-4 z-20 h-9 w-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/15 active:bg-white/20 transition-colors touch-manipulation disabled:opacity-50 sm:hidden"
         >
-          <RefreshCw className={`h-3.5 w-3.5 text-white/70 ${isRefreshing ? "animate-spin" : ""}`} />
+          <RefreshCw className={`h-4 w-4 text-white/70 ${isRefreshing ? "animate-spin" : ""}`} />
         </button>
       </div>
 
