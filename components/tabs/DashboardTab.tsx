@@ -3,18 +3,12 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
-  DollarSign,
   Fuel,
-  Users,
   Clock,
-  CheckCircle2,
   CreditCard,
   TrendingUp,
-  BarChart3,
-  Activity,
   ArrowUpRight,
-  IndianRupee,
-  Gauge,
+  ArrowDownRight,
   Car,
   QrCode,
   X,
@@ -22,7 +16,8 @@ import {
 import { formatCurrency } from "@/lib/utils";
 import { getDashboardStats, getPendingPayments } from "@/app/actions/stats.actions";
 import OverdueBanner from "@/components/shared/OverdueBanner";
-import MonthlyFuelChart from "@/components/charts/MonthlyFuelChart";
+import WeeklyEarningsBarChart from "@/components/charts/WeeklyEarningsBarChart";
+import CollectionRateDonutChart from "@/components/charts/CollectionRateDonutChart";
 import SparklineChart from "@/components/charts/SparklineChart";
 import PaymentDialog from "@/components/dialogs/PaymentDialog";
 
@@ -88,9 +83,9 @@ function StatCard({
   title,
   value,
   icon: Icon,
-  gradient,
+  accentColor,
+  accentBg,
   delay,
-  subtitle,
   isCurrency = false,
   sparklineData,
   delta,
@@ -98,72 +93,93 @@ function StatCard({
   title: string;
   value: string | number;
   icon: React.ElementType;
-  gradient: string;
+  accentColor: string;
+  accentBg: string;
   delay: number;
-  subtitle?: string;
   isCurrency?: boolean;
   sparklineData?: number[];
   delta?: { value: number; label: string };
 }) {
   const numericValue = isCurrency
     ? typeof value === "string"
-      ? parseFloat(value.replace(/[₹,]/g, "")) || 0
-      : value
+      ? parseFloat(value.replace(/[₹,%,]/g, "")) || 0
+      : (value as number)
     : typeof value === "number"
       ? value
-      : 0;
+      : parseFloat(String(value).replace(/[₹,%]/g, "")) || 0;
 
-  // Only show decimals for currency values that originally had them (e.g. petrol price)
-  const decimalPlaces = isCurrency && typeof value === "string" && value.includes(".") ? 2 : 0;
-  const animatedValue = useAnimatedCounter(numericValue, 800, isCurrency ? "₹" : "", "", decimalPlaces);
-
-  // Extract color from gradient for sparkline
-  const sparklineColor = gradient.includes("blue") ? "#3B82F6" :
-                        gradient.includes("emerald") ? "#10B981" :
-                        gradient.includes("orange") ? "#F59E0B" :
-                        gradient.includes("green") ? "#10B981" :
-                        gradient.includes("yellow") ? "#EAB308" :
-                        gradient.includes("teal") ? "#14B8A6" :
-                        gradient.includes("purple") ? "#8B5CF6" :
-                        gradient.includes("pink") ? "#EC4899" :
-                        "#6366F1";
+  const animatedValue = useAnimatedCounter(numericValue, 800, isCurrency ? "₹" : "", "", 0);
 
   return (
     <div
-      className={`group relative rounded-2xl glass-premium glow-card p-5 transition-all duration-300 hover:-translate-y-1.5 card-hover animate-fade-in-up`}
-      style={{ animationDelay: `${delay * 0.06}s` }}
+      className="group relative rounded-2xl glass-premium p-5 transition-all duration-300 animate-fade-in-up"
+      style={{
+        animationDelay: `${delay * 0.06}s`,
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)";
+        (e.currentTarget as HTMLDivElement).style.boxShadow = `0 0 30px ${accentColor}30, 0 8px 32px rgba(0, 0, 0, 0.4)`;
+        (e.currentTarget as HTMLDivElement).style.borderColor = `${accentColor}40`;
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLDivElement).style.transform = "";
+        (e.currentTarget as HTMLDivElement).style.boxShadow = "";
+        (e.currentTarget as HTMLDivElement).style.borderColor = "";
+      }}
     >
-      {/* Gradient overlay on hover */}
-      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-500`} />
-
-      <div className="relative">
-        <div className={`flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} shadow-lg transition-transform duration-300 group-hover:scale-110`}>
-          <Icon className="h-5 w-5 text-white" />
-        </div>
-        <p className="mt-4 text-2xl font-bold tracking-tight tabular-nums stat-number">
-          {isCurrency ? animatedValue : value}
-        </p>
-        <p className="mt-0.5 text-xs font-semibold text-muted-foreground">{title}</p>
-        {subtitle && (
-          <p className="mt-1 text-[10px] text-muted-foreground/60 font-medium">{subtitle}</p>
-        )}
-        {delta && (
-          <p className={`mt-1 text-[10px] font-medium ${delta.value >= 0 ? "delta-positive" : "delta-negative"}`}>
-            {delta.value >= 0 ? "+" : ""}{delta.value}% {delta.label}
-          </p>
-        )}
-        {sparklineData && (
-          <div className="mt-3 h-8">
-            <SparklineChart data={sparklineData} color={sparklineColor} height={32} />
-          </div>
-        )}
+      {/* Icon square */}
+      <div
+        className="flex h-11 w-11 items-center justify-center rounded-xl"
+        style={{ background: accentBg }}
+      >
+        <Icon className="h-5 w-5" style={{ color: accentColor }} />
       </div>
 
-      {/* Corner accent */}
-      <div className={`absolute top-0 right-0 h-16 w-16 rounded-bl-full bg-gradient-to-br ${gradient} opacity-[0.04] transition-opacity group-hover:opacity-[0.08]`} />
+      {/* Value */}
+      <p
+        className="mt-4 text-[42px] font-light leading-none tracking-tight tabular-nums stat-number"
+        style={{ color: "inherit" }}
+      >
+        {isCurrency ? animatedValue : value}
+      </p>
 
-      {/* Bottom shine line on hover */}
-      <div className={`absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+      {/* Label */}
+      <p className="mt-1 text-[11px] uppercase tracking-[0.15em] font-medium text-muted-foreground">
+        {title}
+      </p>
+
+      {/* Trend badge */}
+      {delta && (
+        <div className="mt-2">
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+              delta.value >= 0
+                ? "bg-success/15 text-success"
+                : "bg-destructive/15 text-destructive"
+            }`}
+          >
+            {delta.value >= 0 ? (
+              <ArrowUpRight className="h-3 w-3" />
+            ) : (
+              <ArrowDownRight className="h-3 w-3" />
+            )}
+            {Math.abs(delta.value)}% {delta.label}
+          </span>
+        </div>
+      )}
+
+      {/* Sparkline */}
+      {sparklineData && (
+        <div className="mt-3 h-8">
+          <SparklineChart data={sparklineData} color={accentColor} height={32} />
+        </div>
+      )}
+
+      {/* Bottom accent line */}
+      <div
+        className="absolute bottom-0 left-4 right-4 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{ background: `linear-gradient(to right, transparent, ${accentColor}60, transparent)` }}
+      />
     </div>
   );
 }
@@ -217,39 +233,35 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
 
   if (!stats) {
     return (
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, i) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
           <StatSkeleton key={i} />
         ))}
       </div>
     );
   }
 
+  const collectionRate = stats.totalPending + stats.totalCollected > 0
+    ? Math.round((stats.totalCollected / (stats.totalPending + stats.totalCollected)) * 100)
+    : 0;
+
   const statCards = [
     {
-      title: "Today's Petrol",
-      value: `₹${stats.todayPetrolPrice.toFixed(2)}`,
-      icon: Fuel,
-      gradient: "from-blue-500 to-blue-600",
-      subtitle: `${stats.todayPetrolPrice.toFixed(2)}/L`,
-      isCurrency: true,
-      sparklineData: [94.5, 95.2, 94.8, 95.5, 94.9, 95.1, stats.todayPetrolPrice],
-      delta: { value: 2.5, label: "vs yesterday" },
-    },
-    {
-      title: "Fuel Cost Today",
+      title: "Today's Fuel Cost",
       value: formatCurrency(stats.todayFuelCost),
-      icon: IndianRupee,
-      gradient: "from-emerald-500 to-emerald-600",
+      icon: Fuel,
+      accentColor: "#7c3aed",
+      accentBg: "rgba(124,58,237,0.1)",
       isCurrency: true,
       sparklineData: [450, 520, 480, 550, 510, 530, stats.todayFuelCost],
       delta: { value: 8.2, label: "vs yesterday" },
     },
     {
-      title: "Pending Amount",
+      title: "Total Pending",
       value: formatCurrency(stats.totalPending),
       icon: Clock,
-      gradient: "from-orange-500 to-amber-600",
+      accentColor: "#f59e0b",
+      accentBg: "rgba(245,158,11,0.1)",
       isCurrency: true,
       sparklineData: [1200, 1500, 1100, 1800, 1400, 1600, stats.totalPending],
       delta: { value: -12.5, label: "vs last week" },
@@ -258,55 +270,37 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
       title: "Total Collected",
       value: formatCurrency(stats.totalCollected),
       icon: CreditCard,
-      gradient: "from-green-500 to-emerald-600",
+      accentColor: "#06b6d4",
+      accentBg: "rgba(6,182,212,0.1)",
       isCurrency: true,
       sparklineData: [5000, 5500, 5200, 5800, 5600, 6000, stats.totalCollected],
       delta: { value: 15.3, label: "vs last week" },
     },
     {
-      title: "Pending Members",
-      value: stats.pendingCount,
-      icon: Users,
-      gradient: "from-yellow-500 to-orange-600",
-      subtitle: `${stats.overdueCount} overdue`,
-      sparklineData: [5, 6, 4, 7, 5, 6, stats.pendingCount],
-      delta: { value: -20, label: "vs last week" },
-    },
-    {
-      title: "Paid Members",
-      value: stats.paidCount,
-      icon: CheckCircle2,
-      gradient: "from-teal-500 to-green-600",
-      sparklineData: [15, 18, 16, 20, 19, 22, stats.paidCount],
-      delta: { value: 10, label: "vs last week" },
-    },
-    {
-      title: "Total Rides",
-      value: stats.totalRides,
-      icon: BarChart3,
-      gradient: "from-purple-500 to-violet-600",
-      sparklineData: [25, 28, 26, 30, 29, 32, stats.totalRides],
-      delta: { value: 12.5, label: "vs last week" },
-    },
-    {
-      title: "Avg Cost/Ride",
-      value: formatCurrency(stats.averageCostPerRide),
+      title: "Collection Rate",
+      value: `${collectionRate}%`,
       icon: TrendingUp,
-      gradient: "from-pink-500 to-rose-600",
-      isCurrency: true,
-      sparklineData: [180, 175, 190, 185, 195, 188, stats.averageCostPerRide],
+      accentColor: "#10b981",
+      accentBg: "rgba(16,185,129,0.1)",
+      isCurrency: false,
+      sparklineData: [72, 68, 75, 80, 78, 82, collectionRate],
       delta: { value: 5.2, label: "vs last week" },
     },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Hyundai Exter Hero Card with Parallax Tilt */}
-      <div className="relative overflow-hidden rounded-3xl glass-premium p-6 shadow-2xl card-hover animate-fade-in-up border-primary/20">
-        {/* Ambient Mesh Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-purple-500/5 to-indigo-500/10 opacity-50 pointer-events-none" />
-        <div className="absolute -right-24 -top-24 h-48 w-48 rounded-full bg-primary/20 blur-3xl pointer-events-none animate-ambient" />
-        <div className="absolute -left-24 -bottom-24 h-48 w-48 rounded-full bg-purple-500/10 blur-3xl pointer-events-none animate-ambient" style={{ animationDelay: '-2s' }} />
+      {/* Hyundai Exter Hero Card with Full-Bleed Gradient */}
+      <div
+        className="relative overflow-hidden rounded-3xl p-6 shadow-2xl card-hover animate-fade-in-up animate-gradient-shift"
+        style={{ 
+          background: "linear-gradient(135deg, #1a0533 0%, #0a1628 100%)",
+          backgroundSize: "200% 200%"
+        }}
+      >
+        {/* Purple rim-light glow on right side */}
+        <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#7c3aed]/20 to-transparent pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ background: "rgba(124,58,237,0.2)" }} />
 
         <div className="grid gap-6 md:grid-cols-2 items-center relative z-10">
           {/* Details */}
@@ -328,26 +322,29 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
             <div className="rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] p-4 shadow-inner">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Active Mileage</span>
-                  <p className="text-lg font-extrabold flex items-baseline gap-1 tabular-nums">
-                    {stats.mileage} <span className="text-xs font-medium text-muted-foreground">km/L</span>
+                  <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest">Active Mileage</span>
+                  <p className="text-[36px] font-light leading-none tabular-nums" style={{ color: "#7c3aed" }}>
+                    {stats.mileage}
                   </p>
+                  <span className="text-xs font-medium text-muted-foreground">km/L</span>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Route Distance</span>
-                  <p className="text-lg font-extrabold flex items-baseline gap-1 tabular-nums">
-                    {stats.routeDistance} <span className="text-xs font-medium text-muted-foreground">km</span>
+                  <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest">Route Distance</span>
+                  <p className="text-[36px] font-light leading-none tabular-nums" style={{ color: "#06b6d4" }}>
+                    {stats.routeDistance}
                   </p>
+                  <span className="text-xs font-medium text-muted-foreground">km</span>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Fuel Required</span>
-                  <p className="text-lg font-extrabold flex items-baseline gap-1 tabular-nums">
-                    {(stats.routeDistance / stats.mileage).toFixed(2)} <span className="text-xs font-medium text-muted-foreground">Liters</span>
+                  <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest">Fuel Required</span>
+                  <p className="text-[36px] font-light leading-none tabular-nums">
+                    {(stats.routeDistance / stats.mileage).toFixed(2)}
                   </p>
+                  <span className="text-xs font-medium text-muted-foreground">Liters</span>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Est. Trip Cost</span>
-                  <p className="text-lg font-extrabold text-primary tabular-nums">
+                  <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-widest">Est. Trip Cost</span>
+                  <p className="text-[36px] font-light leading-none gradient-text tabular-nums">
                     {formatCurrency(Math.round((stats.routeDistance / stats.mileage) * stats.todayPetrolPrice))}
                   </p>
                 </div>
@@ -363,32 +360,35 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
                 <QrCode className="h-4 w-4" />
                 View Payment QR
               </button>
-              <div className="inline-flex items-center gap-1.5 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 text-xs font-semibold text-muted-foreground backdrop-blur-sm animate-marquee overflow-hidden whitespace-nowrap">
-                <span className="relative flex h-2.5 w-2.5 shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success"></span>
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs font-semibold backdrop-blur-sm">
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
                 </span>
-                <span className="inline-block">Udupi Petrol: ₹{stats.todayPetrolPrice.toFixed(2)}/L • Updated 2 mins ago</span>
+                <span className="text-white/90">₹{stats.todayPetrolPrice.toFixed(2)}/L</span>
+                <span className="text-white/40 text-[10px] uppercase tracking-widest">Live</span>
               </div>
             </div>
           </div>
 
-          {/* Cinematic Image with Parallax Tilt */}
-          <div className="relative flex justify-center items-center h-48 md:h-64 rounded-2xl overflow-hidden border border-white/[0.06] shadow-2xl bg-black/40 animate-tilt">
-            {/* Glow behind the car */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-primary/25 via-purple-500/20 to-transparent rounded-full blur-3xl animate-pulse-soft pointer-events-none" />
-
+          {/* Cinematic Image with Purple Rim-Light Glow */}
+          <div className="relative flex justify-end items-center h-48 md:h-64 rounded-2xl overflow-hidden" style={{ boxShadow: "0 0 60px rgba(124,58,237,0.4), 0 0 120px rgba(109,40,217,0.2)" }}>
+            {/* Purple rim-light glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-l from-[#7c3aed]/30 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#7c3aed]/10 via-transparent to-transparent pointer-events-none" />
+            
             <img
               src="/car-hero.png"
               alt="Hyundai Exter SUV"
               className="relative w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+              style={{ filter: "drop-shadow(0 0 20px rgba(124,58,237,0.3))" }}
             />
           </div>
         </div>
       </div>
 
       {/* Stat Cards Grid */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card, i) => (
           <StatCard key={card.title} {...card} delay={i + 1} />
         ))}
@@ -411,61 +411,19 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
         />
       </div>
 
-      {/* Middle Row: Chart + Quick Stats */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Chart */}
-        <div className="lg:col-span-2 rounded-2xl border bg-card p-6 card-hover animate-fade-in-up" style={{ animationDelay: "0.35s" }}>
-          <MonthlyFuelChart data={stats.monthlyFuelSpend} />
+      {/* Charts Row */}
+      <div className="grid gap-6 lg:grid-cols-3 animate-fade-in-up" style={{ animationDelay: "0.35s" }}>
+        {/* Weekly Earnings Bar Chart */}
+        <div className="lg:col-span-2 rounded-2xl glass-premium p-6 card-hover">
+          <WeeklyEarningsBarChart data={stats.monthlyFuelSpend} />
         </div>
 
-        {/* Quick Stats */}
-        <div className="space-y-4 animate-fade-in-up" style={{ animationDelay: "0.4s" }}>
-          {stats.mostFrequentDefaulter && (
-            <div className="rounded-2xl border bg-card p-5 card-hover">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Users className="h-4 w-4" />
-                Most frequent defaulter
-              </div>
-              <p className="mt-2 text-xl font-bold text-destructive">
-                {stats.mostFrequentDefaulter.name}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {stats.mostFrequentDefaulter.count} overdue payments
-              </p>
-            </div>
-          )}
-          <div className="rounded-2xl border bg-card p-5 card-hover">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <DollarSign className="h-4 w-4" />
-              Avg cost per person
-            </div>
-            <p className="mt-2 text-xl font-bold">
-              {formatCurrency(stats.averageCostPerPerson)}
-            </p>
-          </div>
-          <div className="rounded-2xl border bg-card p-5 card-hover">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Gauge className="h-4 w-4" />
-              Collection rate
-            </div>
-            <p className="mt-2 text-xl font-bold text-success">
-              {stats.totalPending + stats.totalCollected > 0
-                ? `${Math.round((stats.totalCollected / (stats.totalPending + stats.totalCollected)) * 100)}%`
-                : "0%"}
-            </p>
-            <div className="mt-2 h-1.5 rounded-full bg-muted overflow-hidden">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-success to-emerald-400 transition-all duration-700 ease-out"
-                style={{
-                  width: `${
-                    stats.totalPending + stats.totalCollected > 0
-                      ? Math.round((stats.totalCollected / (stats.totalPending + stats.totalCollected)) * 100)
-                      : 0
-                  }%`,
-                }}
-              />
-            </div>
-          </div>
+        {/* Collection Rate Donut Chart */}
+        <div className="rounded-2xl glass-premium p-6 card-hover">
+          <CollectionRateDonutChart
+            collected={stats.totalCollected}
+            pending={stats.totalPending}
+          />
         </div>
       </div>
 

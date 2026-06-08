@@ -23,13 +23,14 @@ export default function AppShell({
     <div className="min-h-screen bg-background mesh-bg dot-grid">
       {/* Premium ambient background gradient */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute -top-40 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] animate-ambient" />
-        <div className="absolute top-1/3 right-10 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[100px] animate-ambient" style={{ animationDelay: '-4s' }} />
-        <div className="absolute -bottom-40 left-10 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px] animate-ambient" style={{ animationDelay: '-2s' }} />
+        <div className="absolute -top-40 left-1/4 w-[500px] h-[500px] rounded-full blur-[120px] animate-ambient opacity-10" style={{ background: '#7c3aed' }} />
+        <div className="absolute top-1/3 right-10 w-[400px] h-[400px] rounded-full blur-[100px] animate-ambient opacity-10" style={{ background: '#6d28d9', animationDelay: '-4s' }} />
+        <div className="absolute bottom-20 right-20 w-[300px] h-[300px] rounded-full blur-[80px] animate-ambient opacity-10" style={{ background: '#06b6d4', animationDelay: '-2s' }} />
+        <div className="absolute -bottom-40 left-10 w-[600px] h-[600px] rounded-full blur-[150px] animate-ambient opacity-[0.05]" style={{ background: '#7c3aed', animationDelay: '-6s' }} />
       </div>
 
       {/* Gradient accent line at top */}
-      <div className="fixed top-0 left-0 right-0 z-[60] h-1 bg-gradient-to-r from-primary via-purple-500 to-primary bg-[length:200%_100%] animate-[border-flow_3s_linear_infinite]" />
+      <div className="fixed top-0 left-0 right-0 z-[60] h-1 bg-gradient-to-r from-[#7c3aed] via-[#6d28d9] to-[#7c3aed] bg-[length:200%_100%] animate-[border-flow_3s_linear_infinite]" />
 
       <header
         className={`sticky top-1.5 z-50 w-[calc(100%-2rem)] mx-auto border-b transition-all duration-300 rounded-2xl ${

@@ -16,6 +16,15 @@ import PaymentHistoryTab from "@/components/tabs/PaymentHistoryTab";
 import RideHistoryTab from "@/components/tabs/RideHistoryTab";
 import SettingsTab from "@/components/tabs/SettingsTab";
 
+const TAB_GLOW: Record<string, string> = {
+  dashboard: "rgba(124,58,237,0.6)",
+  create: "rgba(16,185,129,0.6)",
+  pending: "rgba(245,158,11,0.6)",
+  history: "rgba(124,58,237,0.6)",
+  rides: "rgba(6,182,212,0.6)",
+  settings: "rgba(100,116,139,0.6)",
+};
+
 const tabs = [
   { id: "dashboard", label: "Dashboard", shortLabel: "Home", icon: LayoutDashboard, adminOnly: false, color: "from-blue-500 to-blue-600" },
   { id: "create", label: "Create Ride", shortLabel: "Create", icon: PlusCircle, adminOnly: true, color: "from-emerald-500 to-emerald-600" },
@@ -146,14 +155,16 @@ export default function TabRouter({
                     if (el) tabRefs.current.set(tab.id, el);
                   }}
                   onClick={() => switchTab(tab.id)}
-                  style={indicatorStyle.width === 0 && isActive ? { background: "linear-gradient(to right, var(--color-primary), #7c3aed)" } : {}}
                   className={`relative flex flex-col items-center justify-center gap-1 rounded-xl py-2 px-1 text-center transition-all duration-300 min-w-0 flex-1 z-10 select-none cursor-pointer ${
                     isActive
                       ? "text-white font-semibold"
-                      : "text-muted-foreground/60 hover:text-foreground hover:bg-white/5"
+                      : "text-white/30 hover:text-white/60 hover:bg-white/5"
                   }`}
                 >
-                  <Icon className={`h-4.5 w-4.5 shrink-0 transition-transform duration-300 ${isActive ? "scale-110 text-primary drop-shadow-[0_0_8px_rgba(244,63,94,0.5)]" : ""}`} />
+                  <Icon
+                    className={`h-4.5 w-4.5 shrink-0 transition-transform duration-300 ${isActive ? "scale-110" : ""}`}
+                    style={isActive ? { filter: `drop-shadow(0 0 8px ${TAB_GLOW[tab.id]})` } : undefined}
+                  />
                   <span className="text-[9px] xs:text-[10px] md:text-xs block md:hidden truncate max-w-full font-semibold">{tab.shortLabel}</span>
                   <span className="text-xs font-semibold hidden md:block truncate max-w-full">{tab.label}</span>
                 </button>
@@ -163,11 +174,11 @@ export default function TabRouter({
           {/* Animated sliding indicator with spring physics */}
           {indicatorStyle.width > 0 && (
             <div
-              className="absolute bottom-1.5 top-1.5 rounded-xl bg-gradient-to-r from-primary via-purple-500 to-primary bg-[length:200%_100%] animate-[border-flow_3s_linear_infinite] shadow-xl shadow-primary/30 transition-all duration-[400ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] z-0"
+              className="absolute bottom-1.5 top-1.5 rounded-xl bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] transition-all duration-[400ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] z-0"
               style={{
                 left: indicatorStyle.left,
                 width: indicatorStyle.width,
-                boxShadow: "0 0 20px rgba(99, 102, 241, 0.4), 0 0 40px rgba(168, 85, 247, 0.2)",
+                boxShadow: "0 0 20px rgba(124,58,237,0.4), 0 0 40px rgba(109,40,217,0.2)",
               }}
             />
           )}

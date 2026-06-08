@@ -8,13 +8,10 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Loader2,
   ArrowRight,
   Filter,
   Zap,
   ShieldCheck,
-  TrendingDown,
-  IndianRupee,
   Users,
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -34,11 +31,37 @@ interface PendingItem {
 
 const ITEMS_PER_PAGE = 10;
 
-export default function PendingPaymentsTab({
-  isAdmin,
-}: {
-  isAdmin: boolean;
-}) {
+const AVATAR_GRADIENTS = [
+  "from-violet-500 to-purple-600",
+  "from-cyan-500 to-blue-600",
+  "from-amber-500 to-orange-600",
+  "from-rose-500 to-pink-600",
+  "from-emerald-500 to-teal-600",
+  "from-indigo-500 to-violet-600",
+];
+
+const STATUS_STYLES: Record<string, string> = {
+  PAID: "bg-success/10 text-success border border-success/20",
+  PENDING: "bg-warning/10 text-warning border border-warning/20",
+  OVERDUE: "bg-destructive/10 text-destructive border border-destructive/20",
+  VERIFICATION: "bg-[#7c3aed]/10 text-[#7c3aed] border border-[#7c3aed]/20",
+};
+
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+function getAvatarGradient(name: string): string {
+  const sum = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return AVATAR_GRADIENTS[sum % AVATAR_GRADIENTS.length];
+}
+
+export default function PendingPaymentsTab({ isAdmin }: { isAdmin: boolean }) {
   const router = useRouter();
   const [payments, setPayments] = useState<PendingItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -65,7 +88,7 @@ export default function PendingPaymentsTab({
         rideDate: a.ride.date,
         status: a.status,
         createdAt: a.createdAt,
-      })),
+      }))
     );
     setIsLoading(false);
   }, []);
@@ -76,7 +99,7 @@ export default function PendingPaymentsTab({
 
   const members = useMemo(
     () => [...new Set(payments.map((p) => p.memberName))],
-    [payments],
+    [payments]
   );
 
   const filtered = useMemo(() => {
@@ -91,19 +114,11 @@ export default function PendingPaymentsTab({
   const pending = filtered.filter((p) => p.status !== "OVERDUE");
   const verification = filtered.filter((p) => p.status === "VERIFICATION");
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginatedOverdue = overdue.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE,
-  );
-  const paginatedPending = pending.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE,
-  );
-
   const totalOverdueAmount = overdue.reduce((sum, p) => sum + p.amount, 0);
   const totalPendingAmount = pending.reduce((sum, p) => sum + p.amount, 0);
   const uniqueMembers = [...new Set(filtered.map((p) => p.memberName))].length;
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginatedItems = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   const handleBulkPay = async () => {
     if (!isAdmin) return;
@@ -119,166 +134,82 @@ export default function PendingPaymentsTab({
       <div className="space-y-5 animate-fade-in">
         <div className="grid grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-2xl border bg-card p-5 space-y-3">
-              <div className="skeleton h-10 w-10 rounded-xl" />
-              <div className="skeleton h-8 w-24" />
+            <div key={i} className="rounded-2xl glass-premium p-5 space-y-3">
+              <div className="skeleton h-8 w-16" />
               <div className="skeleton h-4 w-20" />
             </div>
           ))}
         </div>
         <div className="skeleton h-14 rounded-2xl" />
-        <div className="skeleton h-64 rounded-2xl" />
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="skeleton h-20 rounded-2xl" />
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-5 animate-fade-in">
-      {/* Summary Stat Cards with Circular Progress */}
+      {/* Summary Stat Pills */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="group relative rounded-2xl border bg-card p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 card-hover animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-500/5 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="relative flex items-center gap-4">
-            {/* Circular Progress */}
-            <div className="relative h-16 w-16 shrink-0">
-              <svg className="progress-ring h-16 w-16" viewBox="0 0 100 100">
-                <circle
-                  className="text-muted/20"
-                  strokeWidth="8"
-                  stroke="currentColor"
-                  fill="transparent"
-                  r="45"
-                  cx="50"
-                  cy="50"
-                />
-                <circle
-                  className="progress-ring-circle text-orange-500"
-                  strokeWidth="8"
-                  strokeDasharray="283"
-                  strokeDashoffset={283 - (283 * (pending.length / (pending.length + overdue.length + uniqueMembers) || 0))}
-                  strokeLinecap="round"
-                  stroke="currentColor"
-                  fill="transparent"
-                  r="45"
-                  cx="50"
-                  cy="50"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Clock className="h-5 w-5 text-orange-500" />
-              </div>
-            </div>
-            <div>
-              <p className="text-2xl font-bold tracking-tight tabular-nums stat-number">
-                {pending.length}
-              </p>
-              <p className="text-xs font-medium text-muted-foreground">Pending</p>
-              <p className="text-[10px] text-muted-foreground/60">{formatCurrency(totalPendingAmount)}</p>
-            </div>
+        {/* Pending pill */}
+        <div className="glass-premium rounded-2xl p-4 flex items-center gap-3 animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: "rgba(245,158,11,0.1)" }}>
+            <Clock className="h-5 w-5" style={{ color: "#f59e0b" }} />
           </div>
-          <div className="absolute top-0 right-0 h-16 w-16 rounded-bl-full bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div>
+            <p className="text-2xl font-light tabular-nums" style={{ color: "#f59e0b" }}>
+              {pending.length}
+            </p>
+            <p className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground font-medium">Pending</p>
+            <p className="text-[10px] text-muted-foreground/60">{formatCurrency(totalPendingAmount)}</p>
+          </div>
         </div>
 
-        <div className="group relative rounded-2xl border bg-card p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 card-hover animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-red-500/5 to-rose-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="relative flex items-center gap-4">
-            {/* Circular Progress */}
-            <div className="relative h-16 w-16 shrink-0">
-              <svg className="progress-ring h-16 w-16" viewBox="0 0 100 100">
-                <circle
-                  className="text-muted/20"
-                  strokeWidth="8"
-                  stroke="currentColor"
-                  fill="transparent"
-                  r="45"
-                  cx="50"
-                  cy="50"
-                />
-                <circle
-                  className="progress-ring-circle text-red-500"
-                  strokeWidth="8"
-                  strokeDasharray="283"
-                  strokeDashoffset={283 - (283 * (overdue.length / (pending.length + overdue.length + uniqueMembers) || 0))}
-                  strokeLinecap="round"
-                  stroke="currentColor"
-                  fill="transparent"
-                  r="45"
-                  cx="50"
-                  cy="50"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
-              </div>
-            </div>
-            <div>
-              <p className="text-2xl font-bold tracking-tight text-destructive tabular-nums stat-number">
-                {overdue.length}
-              </p>
-              <p className="text-xs font-medium text-destructive">Overdue</p>
-              <p className="text-[10px] text-destructive/60">{formatCurrency(totalOverdueAmount)}</p>
-            </div>
+        {/* Overdue pill */}
+        <div className="glass-premium rounded-2xl p-4 flex items-center gap-3 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: "rgba(244,63,94,0.1)" }}>
+            <AlertTriangle className="h-5 w-5" style={{ color: "#f43f5e" }} />
+            {overdue.length > 0 && (
+              <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive animate-pulse-overdue" />
+            )}
           </div>
-          <div className="absolute top-0 right-0 h-16 w-16 rounded-bl-full bg-gradient-to-br from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div>
+            <p className="text-2xl font-light tabular-nums" style={{ color: "#f43f5e" }}>
+              {overdue.length}
+            </p>
+            <p className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground font-medium">Overdue</p>
+            <p className="text-[10px]" style={{ color: "rgba(244,63,94,0.6)" }}>{formatCurrency(totalOverdueAmount)}</p>
+          </div>
         </div>
 
-        <div className="group relative rounded-2xl border bg-card p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 card-hover animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/5 to-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="relative flex items-center gap-4">
-            {/* Circular Progress */}
-            <div className="relative h-16 w-16 shrink-0">
-              <svg className="progress-ring h-16 w-16" viewBox="0 0 100 100">
-                <circle
-                  className="text-muted/20"
-                  strokeWidth="8"
-                  stroke="currentColor"
-                  fill="transparent"
-                  r="45"
-                  cx="50"
-                  cy="50"
-                />
-                <circle
-                  className="progress-ring-circle text-purple-500"
-                  strokeWidth="8"
-                  strokeDasharray="283"
-                  strokeDashoffset={283 - (283 * (uniqueMembers / (pending.length + overdue.length + uniqueMembers) || 0))}
-                  strokeLinecap="round"
-                  stroke="currentColor"
-                  fill="transparent"
-                  r="45"
-                  cx="50"
-                  cy="50"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Users className="h-5 w-5 text-purple-500" />
-              </div>
-            </div>
-            <div>
-              <p className="text-2xl font-bold tracking-tight tabular-nums stat-number">
-                {uniqueMembers}
-              </p>
-              <p className="text-xs font-medium text-muted-foreground">Members</p>
-              <p className="text-[10px] text-muted-foreground/60">
-                {verification.length} verifying
-              </p>
-            </div>
+        {/* Members pill */}
+        <div className="glass-premium rounded-2xl p-4 flex items-center gap-3 animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: "rgba(124,58,237,0.1)" }}>
+            <Users className="h-5 w-5" style={{ color: "#7c3aed" }} />
           </div>
-          <div className="absolute top-0 right-0 h-16 w-16 rounded-bl-full bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div>
+            <p className="text-2xl font-light tabular-nums" style={{ color: "#7c3aed" }}>
+              {uniqueMembers}
+            </p>
+            <p className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground font-medium">Members</p>
+            <p className="text-[10px] text-muted-foreground/60">{verification.length} verifying</p>
+          </div>
         </div>
       </div>
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">
-            {filtered.length} payment{filtered.length !== 1 ? "s" : ""} pending
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          {filtered.length} payment{filtered.length !== 1 ? "s" : ""} pending
+        </p>
         {isAdmin && filtered.length > 0 && (
           <button
             onClick={handleBulkPay}
-            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:scale-95"
+            className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5 active:scale-95"
+            style={{ background: "linear-gradient(to right, #7c3aed, #6d28d9)", boxShadow: "0 4px 15px rgba(124,58,237,0.3)" }}
           >
             <Zap className="h-4 w-4" />
             Mark All Paid
@@ -295,7 +226,8 @@ export default function PendingPaymentsTab({
             placeholder="Search by member name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-premium w-full rounded-xl border bg-card py-3 pl-10 pr-4 text-sm transition-all"
+            className="w-full rounded-full py-3 pl-10 pr-4 text-sm transition-all"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
           />
         </div>
         <div className="relative">
@@ -303,195 +235,121 @@ export default function PendingPaymentsTab({
           <select
             value={memberFilter}
             onChange={(e) => setMemberFilter(e.target.value)}
-            className="select-premium rounded-xl border bg-card py-3 pl-9 pr-8 text-sm transition-all"
+            className="select-premium rounded-full py-3 pl-9 pr-8 text-sm transition-all"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
           >
             <option value="all">All Members</option>
             {members.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
+              <option key={m} value={m}>{m}</option>
             ))}
           </select>
         </div>
       </div>
 
+      {/* Empty State */}
       {filtered.length === 0 ? (
-        <div className="relative flex flex-col items-center justify-center py-20 text-muted-foreground overflow-hidden rounded-2xl border border-dashed bg-gradient-to-br from-success/5 to-emerald-500/5">
-          <div className="absolute inset-0 dot-grid opacity-30" />
-          <div className="relative flex flex-col items-center gap-4">
-            <div className="relative">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-success/10 to-emerald-500/10 border border-success/20 animate-fade-in-scale">
-                <CheckCircle2 className="h-10 w-10 text-success" />
-              </div>
-              <div className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-success text-white text-xs font-bold animate-scale-in">
-                ✓
-              </div>
-            </div>
+        <div className="relative flex flex-col items-center justify-center py-20 overflow-hidden rounded-2xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}>
+          <div className="flex flex-col items-center gap-4">
+            {/* Animated SVG checkmark */}
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+              <defs>
+                <linearGradient id="checkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#7c3aed" />
+                  <stop offset="100%" stopColor="#06b6d4" />
+                </linearGradient>
+              </defs>
+              <circle cx="40" cy="40" r="36" stroke="url(#checkGrad)" strokeWidth="3" strokeDasharray="226" strokeDashoffset="0" fill="rgba(124,58,237,0.06)" />
+              <polyline
+                points="24,40 35,52 56,28"
+                stroke="url(#checkGrad)"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                fill="none"
+                style={{
+                  strokeDasharray: 50,
+                  strokeDashoffset: 0,
+                  animation: "progress-ring 0.6s ease-out forwards",
+                }}
+              />
+            </svg>
             <div className="text-center">
-              <p className="text-xl font-bold gradient-text">All Clear!</p>
-              <p className="text-sm text-muted-foreground mt-1">Everyone is paid up — no pending payments</p>
+              <p className="text-2xl font-bold" style={{ background: "linear-gradient(135deg, #7c3aed, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                All Clear!
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">Everyone is paid up</p>
             </div>
           </div>
         </div>
       ) : (
         <>
-          {/* Overdue Section */}
-          {paginatedOverdue.length > 0 && (
-            <div className="group overflow-hidden rounded-2xl border border-destructive/30 transition-all hover:shadow-lg hover:shadow-destructive/5 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-              <div className="bg-gradient-to-r from-destructive/[0.08] to-destructive/[0.03] px-5 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-destructive/10 animate-pulse-soft">
-                      <AlertTriangle className="h-4 w-4 text-destructive" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-destructive">
-                        Overdue Payments
-                      </h3>
-                      <p className="text-xs text-destructive/70">
-                        {overdue.length} overdue • {formatCurrency(totalOverdueAmount)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse-soft" />
-                </div>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b bg-destructive/[0.02]">
-                      <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ride Date</th>
-                      <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Member</th>
-                      <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Amount</th>
-                      <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                      <th className="px-5 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-destructive/5">
-                    {paginatedOverdue.map((item, i) => (
-                      <tr key={`overdue-${item.rideId}-${item.memberName}-${i}`} className="group hover:bg-destructive/[0.02] transition-colors animate-fade-in" style={{ animationDelay: `${i * 0.03}s` }}>
-                        <td className="px-5 py-3.5 text-sm">{formatDate(item.rideDate)}</td>
-                        <td className="px-5 py-3.5">
-                          <span className="font-medium">{item.memberName}</span>
-                        </td>
-                        <td className="px-5 py-3.5">
-                          <span className="font-semibold text-destructive stat-number">{formatCurrency(item.amount)}</span>
-                        </td>
-                        <td className="px-5 py-3.5">
-                          <span className="inline-flex items-center gap-1 rounded-lg bg-destructive/10 px-2.5 py-1 text-xs font-semibold text-destructive">
-                            <Zap className="h-3 w-3" />
-                            Overdue
-                          </span>
-                        </td>
-                        <td className="px-5 py-3.5 text-right">
-                          <button
-                            onClick={() =>
-                              setPaymentDialog({
-                                open: true,
-                                rideId: item.rideId,
-                                memberName: item.memberName,
-                                amount: item.amount,
-                                rideDate: item.rideDate,
-                                status: item.status,
-                              })
-                            }
-                            className="inline-flex items-center gap-1.5 rounded-xl bg-destructive px-3.5 py-2 text-xs font-semibold text-destructive-foreground shadow-lg shadow-destructive/20 transition-all hover:shadow-xl hover:shadow-destructive/30 hover:brightness-110 active:scale-95"
-                          >
-                            Pay Now <ArrowRight className="h-3 w-3" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+          {/* Member Cards */}
+          <div className="space-y-3">
+            {paginatedItems.map((item, i) => {
+              const initials = getInitials(item.memberName);
+              const avatarGradient = getAvatarGradient(item.memberName);
+              const statusStyle = STATUS_STYLES[item.status] || STATUS_STYLES.PENDING;
 
-          {/* Pending Section */}
-          {paginatedPending.length > 0 && (
-            <div className="group overflow-hidden rounded-2xl border border-warning/30 transition-all hover:shadow-lg hover:shadow-warning/5 animate-fade-in-up" style={{ animationDelay: "0.25s" }}>
-              <div className="bg-gradient-to-r from-warning/[0.08] to-warning/[0.03] px-5 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-warning/10">
-                      <Clock className="h-4 w-4 text-warning" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-warning">
-                        Pending Payments
-                      </h3>
-                      <p className="text-xs text-warning/70">
-                        {pending.length} pending • {formatCurrency(totalPendingAmount)}
-                      </p>
-                    </div>
+              return (
+                <div
+                  key={`${item.rideId}-${item.memberName}-${i}`}
+                  className="glass-premium rounded-2xl p-4 flex items-center gap-4 animate-fade-in-up transition-all duration-200"
+                  style={{ animationDelay: `${i * 0.04}s` }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "translateY(-1px)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.transform = ""; }}
+                >
+                  {/* Avatar */}
+                  <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${avatarGradient} text-white text-sm font-bold`}>
+                    {initials}
                   </div>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm truncate">{item.memberName}</p>
+                    <p className="text-[11px] text-muted-foreground">{formatDate(item.rideDate)}</p>
+                  </div>
+
+                  {/* Amount */}
+                  <div className="text-right shrink-0">
+                    <p className="font-semibold text-sm tabular-nums" style={{ color: "#06b6d4" }}>
+                      {formatCurrency(item.amount)}
+                    </p>
+                  </div>
+
+                  {/* Status badge */}
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide shrink-0 ${statusStyle}`}>
+                    {item.status === "OVERDUE" && <AlertTriangle className="h-3 w-3" />}
+                    {item.status === "VERIFICATION" && <ShieldCheck className="h-3 w-3" />}
+                    {item.status === "PENDING" && <Clock className="h-3 w-3" />}
+                    {item.status}
+                  </span>
+
+                  {/* CTA button */}
+                  <button
+                    onClick={() =>
+                      setPaymentDialog({
+                        open: true,
+                        rideId: item.rideId,
+                        memberName: item.memberName,
+                        amount: item.amount,
+                        rideDate: item.rideDate,
+                        status: item.status,
+                      })
+                    }
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold text-white transition-all hover:-translate-y-0.5 active:scale-95"
+                    style={{ background: "linear-gradient(to right, #7c3aed, #6d28d9)" }}
+                  >
+                    {isAdmin ? "Mark Paid" : "Pay Now"}
+                    <ArrowRight className="h-3 w-3" />
+                  </button>
                 </div>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b bg-warning/[0.02]">
-                      <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ride Date</th>
-                      <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Member</th>
-                      <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Amount</th>
-                      <th className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                      <th className="px-5 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-warning/5">
-                    {paginatedPending.map((item, i) => (
-                      <tr key={`pending-${item.rideId}-${item.memberName}-${i}`} className="group hover:bg-warning/[0.02] transition-colors animate-fade-in" style={{ animationDelay: `${i * 0.03}s` }}>
-                        <td className="px-5 py-3.5 text-sm">{formatDate(item.rideDate)}</td>
-                        <td className="px-5 py-3.5">
-                          <span className="font-medium">{item.memberName}</span>
-                        </td>
-                        <td className="px-5 py-3.5">
-                          <span className="font-semibold stat-number">{formatCurrency(item.amount)}</span>
-                        </td>
-                        <td className="px-5 py-3.5">
-                          <span
-                            className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold ${
-                              item.status === "VERIFICATION"
-                                ? "bg-verification/10 text-verification"
-                                : "bg-warning/10 text-warning"
-                            }`}
-                          >
-                            {item.status === "VERIFICATION" ? (
-                              <><ShieldCheck className="h-3 w-3" /> Verification</>
-                            ) : (
-                              <><Clock className="h-3 w-3" /> Pending</>
-                            )}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3.5 text-right">
-                          <button
-                            onClick={() =>
-                              setPaymentDialog({
-                                open: true,
-                                rideId: item.rideId,
-                                memberName: item.memberName,
-                                amount: item.amount,
-                                rideDate: item.rideDate,
-                                status: item.status,
-                              })
-                            }
-                            className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-primary to-purple-600 px-3.5 py-2 text-xs font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-95"
-                          >
-                            Pay Now <ArrowRight className="h-3 w-3" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+              );
+            })}
+          </div>
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between rounded-2xl border bg-card px-5 py-3 text-sm">
+            <div className="flex items-center justify-between glass-premium rounded-2xl px-5 py-3 text-sm">
               <p className="text-muted-foreground">
                 Showing {Math.min(filtered.length, ITEMS_PER_PAGE)} of {filtered.length}
               </p>
@@ -499,14 +357,14 @@ export default function PendingPaymentsTab({
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="flex items-center gap-1 rounded-xl border bg-card px-4 py-2 text-sm transition-all hover:bg-muted hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1 rounded-xl px-4 py-2 text-sm transition-all hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ChevronLeft className="h-4 w-4" /> Prev
                 </button>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="flex items-center gap-1 rounded-xl border bg-card px-4 py-2 text-sm transition-all hover:bg-muted hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1 rounded-xl px-4 py-2 text-sm transition-all hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next <ChevronRight className="h-4 w-4" />
                 </button>

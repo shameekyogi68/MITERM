@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { Download, Search, CheckCircle2, Filter, ArrowDownToLine, TrendingUp, IndianRupee, Calendar } from "lucide-react";
+import { Search, CheckCircle2, Filter, ArrowDownToLine, TrendingUp, IndianRupee, Calendar } from "lucide-react";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import { getPaymentHistory } from "@/app/actions/stats.actions";
 import { exportRides } from "@/app/actions/export.actions";
@@ -45,7 +45,7 @@ export default function PaymentHistoryTab() {
         amount: a.share,
         rideDate: a.ride.date,
         paidAt: a.paidAt!,
-      })),
+      }))
     );
     setIsLoading(false);
   }, [dateFilter]);
@@ -82,7 +82,7 @@ export default function PaymentHistoryTab() {
       <div className="space-y-5 animate-fade-in">
         <div className="grid grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-2xl border bg-card p-5 space-y-3">
+            <div key={i} className="rounded-2xl glass-premium p-5 space-y-3">
               <div className="skeleton h-10 w-10 rounded-xl" />
               <div className="skeleton h-8 w-24" />
               <div className="skeleton h-4 w-20" />
@@ -97,55 +97,50 @@ export default function PaymentHistoryTab() {
 
   return (
     <div className="space-y-5 animate-fade-in">
-      {/* Summary Stat Cards */}
+      {/* Summary Stat Cards — glass-premium */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="group relative rounded-2xl border bg-card p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 card-hover animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="relative">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg transition-transform duration-300 group-hover:scale-110">
-              <IndianRupee className="h-5 w-5 text-white" />
-            </div>
-            <p className="mt-3 text-2xl font-bold tracking-tight gradient-text stat-number">
-              {formatCurrency(totalCollected)}
-            </p>
-            <p className="text-xs font-medium text-muted-foreground">Total Collected</p>
+        <div
+          className="group glass-premium rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 card-hover animate-fade-in-up"
+          style={{ animationDelay: "0.05s" }}
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
+            <IndianRupee className="h-5 w-5 text-white" />
           </div>
-          <div className="absolute top-0 right-0 h-16 w-16 rounded-bl-full bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <p className="mt-3 text-2xl font-bold tracking-tight gradient-text stat-number">
+            {formatCurrency(totalCollected)}
+          </p>
+          <p className="text-[11px] uppercase tracking-[0.1em] font-medium text-muted-foreground">Total Collected</p>
         </div>
 
-        <div className="group relative rounded-2xl border bg-card p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 card-hover animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/5 to-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="relative">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 shadow-lg transition-transform duration-300 group-hover:scale-110">
-              <TrendingUp className="h-5 w-5 text-white" />
-            </div>
-            <p className="mt-3 text-2xl font-bold tracking-tight tabular-nums stat-number">
-              {formatCurrency(avgPayment)}
-            </p>
-            <p className="text-xs font-medium text-muted-foreground">Avg Payment</p>
+        <div
+          className="group glass-premium rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 card-hover animate-fade-in-up"
+          style={{ animationDelay: "0.1s" }}
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: "linear-gradient(135deg, #7c3aed, #6d28d9)" }}>
+            <TrendingUp className="h-5 w-5 text-white" />
           </div>
-          <div className="absolute top-0 right-0 h-16 w-16 rounded-bl-full bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <p className="mt-3 text-2xl font-bold tracking-tight tabular-nums stat-number">
+            {formatCurrency(avgPayment)}
+          </p>
+          <p className="text-[11px] uppercase tracking-[0.1em] font-medium text-muted-foreground">Avg Payment</p>
         </div>
 
-        <div className="group relative rounded-2xl border bg-card p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 card-hover animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="relative">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 shadow-lg transition-transform duration-300 group-hover:scale-110">
-              <Calendar className="h-5 w-5 text-white" />
-            </div>
-            <p className="mt-3 text-2xl font-bold tracking-tight tabular-nums stat-number">
-              {filtered.length}
-            </p>
-            <p className="text-xs font-medium text-muted-foreground">Records</p>
-            <p className="text-[10px] text-muted-foreground/60">
-              {uniqueMembers} members
-            </p>
+        <div
+          className="group glass-premium rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 card-hover animate-fade-in-up"
+          style={{ animationDelay: "0.15s" }}
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110" style={{ background: "linear-gradient(135deg, #06b6d4, #0284c7)" }}>
+            <Calendar className="h-5 w-5 text-white" />
           </div>
-          <div className="absolute top-0 right-0 h-16 w-16 rounded-bl-full bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <p className="mt-3 text-2xl font-bold tracking-tight tabular-nums stat-number">
+            {filtered.length}
+          </p>
+          <p className="text-[11px] uppercase tracking-[0.1em] font-medium text-muted-foreground">Records</p>
+          <p className="text-[10px] text-muted-foreground/60">{uniqueMembers} members</p>
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filter bar — glass pills */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -154,7 +149,8 @@ export default function PaymentHistoryTab() {
             placeholder="Search..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-premium w-full rounded-xl border bg-card py-3 pl-10 pr-4 text-sm transition-all"
+            className="w-full rounded-full py-3 pl-10 pr-4 text-sm transition-all"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
           />
         </div>
         <div className="relative">
@@ -162,77 +158,129 @@ export default function PaymentHistoryTab() {
           <select
             value={memberFilter}
             onChange={(e) => setMemberFilter(e.target.value)}
-            className="select-premium rounded-xl border bg-card py-3 pl-9 pr-8 text-sm transition-all"
+            className="select-premium rounded-full py-3 pl-9 pr-8 text-sm transition-all"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
           >
             <option value="all">All Members</option>
             {ALL_MEMBERS.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
+              <option key={m} value={m}>{m}</option>
             ))}
           </select>
         </div>
         <select
           value={dateFilter}
           onChange={(e) => setDateFilter(e.target.value)}
-          className="select-premium rounded-xl border bg-card px-4 py-3 text-sm transition-all"
+          className="select-premium rounded-full px-4 py-3 text-sm transition-all"
+          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
         >
           <option value="all">All Time</option>
           <option value="this-month">This Month</option>
           <option value="last-month">Last Month</option>
         </select>
+        {/* CSV — outlined glass */}
         <button
           onClick={() => handleExport("csv")}
-          className="btn-magnetic inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-purple-600 px-4 py-3 text-sm font-medium text-white shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:scale-95"
+          className="inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm font-medium transition-all hover:bg-[#7c3aed]/10"
+          style={{ border: "1px solid rgba(124,58,237,0.4)", color: "#7c3aed" }}
         >
           <ArrowDownToLine className="h-4 w-4" />
           CSV
         </button>
+        {/* JSON — outlined glass */}
         <button
           onClick={() => handleExport("json")}
-          className="inline-flex items-center gap-2 rounded-xl border bg-card px-4 py-3 text-sm font-medium transition-all hover:bg-muted hover:shadow-sm"
+          className="inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm font-medium transition-all hover:bg-[#7c3aed]/10"
+          style={{ border: "1px solid rgba(124,58,237,0.4)", color: "#7c3aed" }}
         >
           <ArrowDownToLine className="h-4 w-4" />
           JSON
         </button>
       </div>
 
+      {/* Empty state */}
       {filtered.length === 0 ? (
-        <div className="relative flex flex-col items-center justify-center py-20 text-muted-foreground overflow-hidden rounded-2xl border border-dashed bg-gradient-to-br from-muted/30 to-muted/10">
-          <div className="absolute inset-0 dot-grid opacity-20" />
-          <div className="relative flex flex-col items-center gap-4">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-muted/30 border border-muted animate-fade-in-scale">
-              <CheckCircle2 className="h-10 w-10 text-muted-foreground/40" />
-            </div>
+        <div className="relative flex flex-col items-center justify-center py-20 overflow-hidden rounded-2xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.08)" }}>
+          <div className="flex flex-col items-center gap-4">
+            {/* Animated rising chart SVG */}
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+              <defs>
+                <linearGradient id="chartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#7c3aed" />
+                  <stop offset="100%" stopColor="#06b6d4" />
+                </linearGradient>
+              </defs>
+              <rect x="10" y="50" width="12" height="20" rx="3" fill="url(#chartGrad)" opacity="0.4" style={{ animation: "fadeInUp 0.4s ease-out 0.1s both" }} />
+              <rect x="28" y="35" width="12" height="35" rx="3" fill="url(#chartGrad)" opacity="0.6" style={{ animation: "fadeInUp 0.4s ease-out 0.2s both" }} />
+              <rect x="46" y="20" width="12" height="50" rx="3" fill="url(#chartGrad)" opacity="0.8" style={{ animation: "fadeInUp 0.4s ease-out 0.3s both" }} />
+              <rect x="64" y="10" width="12" height="60" rx="3" fill="url(#chartGrad)" style={{ animation: "fadeInUp 0.4s ease-out 0.4s both" }} />
+              <polyline
+                points="16,50 34,35 52,20 70,10"
+                stroke="url(#chartGrad)"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                fill="none"
+                style={{ animation: "fadeInUp 0.5s ease-out 0.2s both" }}
+              />
+            </svg>
             <div className="text-center">
-              <p className="text-xl font-semibold">No payments yet</p>
+              <p className="text-xl font-bold" style={{ background: "linear-gradient(135deg, #7c3aed, #06b6d4)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                No history yet
+              </p>
               <p className="text-sm text-muted-foreground mt-1">Payment records will appear here</p>
             </div>
           </div>
         </div>
       ) : (
         <>
-          <div className="overflow-hidden rounded-2xl border transition-all hover:shadow-lg animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+          {/* Table — glass-premium wrapper, sticky header, cyan amounts */}
+          <div className="overflow-hidden rounded-2xl glass-premium animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="table-sticky-header border-b bg-gradient-to-r from-primary/[0.03] to-purple-500/[0.03]">
-                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Payment Date</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Member</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Amount</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ride Date</th>
-                    <th className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                  <tr
+                    className="border-b"
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 10,
+                      backdropFilter: "blur(12px)",
+                      WebkitBackdropFilter: "blur(12px)",
+                      background: "rgba(15,17,23,0.9)",
+                    }}
+                  >
+                    <th className="px-5 py-3.5 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Payment Date</th>
+                    <th className="px-5 py-3.5 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Member</th>
+                    <th className="px-5 py-3.5 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Amount</th>
+                    <th className="px-5 py-3.5 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Ride Date</th>
+                    <th className="px-5 py-3.5 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y">
+                <tbody className="divide-y divide-white/[0.04]">
                   {filtered.map((p, i) => (
-                    <tr key={`${p.id}-${i}`} className="table-row-hover group transition-colors animate-fade-in" style={{ animationDelay: `${i * 0.02}s` }}>
+                    <tr
+                      key={`${p.id}-${i}`}
+                      className="group transition-all duration-200 animate-fade-in"
+                      style={{
+                        animationDelay: `${i * 0.02}s`,
+                        background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLTableRowElement).style.background = "rgba(255,255,255,0.04)";
+                        (e.currentTarget as HTMLTableRowElement).style.borderLeft = "2px solid #7c3aed";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLTableRowElement).style.background = i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent";
+                        (e.currentTarget as HTMLTableRowElement).style.borderLeft = "";
+                      }}
+                    >
                       <td className="px-5 py-3.5 text-sm">{formatDateTime(p.paidAt)}</td>
                       <td className="px-5 py-3.5">
                         <span className="font-medium">{p.memberName}</span>
                       </td>
                       <td className="px-5 py-3.5">
-                        <span className="font-semibold text-success stat-number">{formatCurrency(p.amount)}</span>
+                        <span className="font-semibold tabular-nums" style={{ color: "#06b6d4" }}>
+                          {formatCurrency(p.amount)}
+                        </span>
                       </td>
                       <td className="px-5 py-3.5 text-sm text-muted-foreground">{formatDate(p.rideDate)}</td>
                       <td className="px-5 py-3.5">
@@ -248,8 +296,8 @@ export default function PaymentHistoryTab() {
             </div>
           </div>
 
-          {/* Premium Summary Bar */}
-          <div className="flex items-center justify-between rounded-2xl border bg-gradient-to-r from-card via-card to-primary/[0.02] px-6 py-4 text-sm shadow-sm">
+          {/* Summary Bar */}
+          <div className="flex items-center justify-between glass-premium rounded-2xl px-6 py-4 text-sm">
             <span className="text-muted-foreground">
               {filtered.length} record{filtered.length !== 1 ? "s" : ""}
             </span>
