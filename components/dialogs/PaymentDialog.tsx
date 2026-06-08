@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Upload, Check, QrCode, Loader2, ArrowRight, ShieldCheck, Download, Copy } from "lucide-react";
+import { X, Upload, Check, QrCode, Loader2, ArrowRight, ShieldCheck, Download, Copy, AlertTriangle } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { markPayment, verifyPayment, adminMarkPaid } from "@/app/actions/payment.actions";
 import { getSetting } from "@/app/actions/settings.actions";
@@ -320,6 +320,17 @@ export default function PaymentDialog({
                       <Copy className="h-4 w-4" />
                     )}
                   </button>
+                </div>
+
+                {/* Self-Payment Testing Warning */}
+                <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-xs flex gap-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <p className="font-bold text-amber-500">Self-Payment Restriction</p>
+                    <p className="text-muted-foreground leading-normal">
+                      UPI apps block self-payments. If testing using your own phone/UPI apps (paying to your own UPI ID), GPay and PhonePe will fail. It works perfectly for other members paying you!
+                    </p>
+                  </div>
                 </div>
 
                 {/* Address Verification Info */}
