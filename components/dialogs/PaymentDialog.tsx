@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { X, Upload, Check, QrCode, Loader2, ArrowRight, ShieldCheck, Download, Copy, AlertTriangle } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { X, Check, QrCode, Loader2, ArrowRight, ShieldCheck, Download, Copy, AlertTriangle, Upload } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { markPayment, verifyPayment, adminMarkPaid } from "@/app/actions/payment.actions";
 import { getSetting } from "@/app/actions/settings.actions";
@@ -31,65 +31,44 @@ export default function PaymentDialog({
 }: PaymentDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [step, setStep] = useState<"upload" | "done">("upload");
-  
-  // UPI ID states from settings
+  const [step, setStep] = useState<"pay" | "done">("pay");
+
   const [upiPhonePe, setUpiPhonePe] = useState("7338603959@ybl");
   const [upiGPay, setUpiGPay] = useState("shameekyogiofficial@oksbi");
   const [upiPaytm, setUpiPaytm] = useState("7338603959@ptyes");
   const [payeeNameState, setPayeeNameState] = useState("SHAMEEK YOGI");
-
-  // Deep Link URL states
-  const [phonepeUrl, setPhonepeUrl] = useState<string>("");
-  const [gpayUrl, setGpayUrl] = useState<string>("");
-  const [paytmUrl, setPaytmUrl] = useState<string>("");
-  const [qrImageUrl, setQrImageUrl] = useState<string>("");
-
-  // Copy success indicator
+  const [phonepeUrl, setPhonepeUrl] = useState("");
+  const [gpayUrl, setGpayUrl] = useState("");
+  const [paytmUrl, setPaytmUrl] = useState("");
+  const [qrImageUrl, setQrImageUrl] = useState("");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  const handleCopy = (text: string, key: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedKey(key);
-    setTimeout(() => setCopiedKey(null), 1500);
-  };
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  // ── iOS-safe body scroll lock ──────────────────────────────────────────────
-  // `overflow: hidden` alone doesn't stop iOS Safari rubber-band scroll.
-  // The correct fix is position:fixed + storing the scroll offset, then
-  // restoring it on close so the page doesn't jump to top.
+  // ── Scroll lock: safest cross-browser approach ──────────────────────────────
+  // We set overflow:hidden on <html> (not body). This is the most reliable
+  // method across iOS Safari, Chrome Android, and PWA contexts.
+  // We do NOT use position:fixed (breaks PWA layout on Android WebView).
   useEffect(() => {
     if (!isOpen) return;
-    const scrollY = window.scrollY;
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.left = "0";
-    document.body.style.right = "0";
-    document.body.style.overflow = "hidden";
+    const html = document.documentElement;
+    const prevOverflow = html.style.overflow;
+    html.style.overflow = "hidden";
     return () => {
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.left = "";
-      document.body.style.right = "";
-      document.body.style.overflow = "";
-      // Restore scroll position silently
-      window.scrollTo({ top: scrollY, behavior: "instant" as ScrollBehavior });
+      html.style.overflow = prevOverflow;
     };
   }, [isOpen]);
 
+  // ── Load settings & build UPI deep links ────────────────────────────────────
   useEffect(() => {
     if (!isOpen) return;
-
     setError(null);
-    setSuccess(false);
-    setStep("upload");
+    setStep("pay");
 
     const amountStr = amount.toFixed(2);
 
-    const loadSettingsAndBuildLinks = async () => {
-      // Fetch setting values in parallel
-      const [phSetting, gpSetting, ptSetting, pnSetting, qrSetting] = await Promise.all([
+    (async () => {
+      const [ph, gp, pt, pn, qr] = await Promise.all([
         getSetting("upiPhonePe"),
         getSetting("upiGPay"),
         getSetting("upiPaytm"),
@@ -97,61 +76,41 @@ export default function PaymentDialog({
         getSetting("qrImageUrl"),
       ]);
 
-      const activePhonePe = (phSetting as string) || "7338603959@ybl";
-      const activeGPay = (gpSetting as string) || "shameekyogiofficial@oksbi";
-      const activePaytm = (ptSetting as string) || "7338603959@ptyes";
-      const activePayeeName = (pnSetting as string) || "SHAMEEK YOGI";
+      const phonePe   = (ph as string) || "7338603959@ybl";
+      const gPay      = (gp as string) || "shameekyogiofficial@oksbi";
+      const paytm     = (pt as string) || "7338603959@ptyes";
+      const payeeName = (pn as string) || "SHAMEEK YOGI";
 
-      setUpiPhonePe(activePhonePe);
-      setUpiGPay(activeGPay);
-      setUpiPaytm(activePaytm);
-      setPayeeNameState(activePayeeName);
+      setUpiPhonePe(phonePe);
+      setUpiGPay(gPay);
+      setUpiPaytm(paytm);
+      setPayeeNameState(payeeName);
+      if (typeof qr === "string" && qr) setQrImageUrl(qr);
 
-      if (typeof qrSetting === "string" && qrSetting) {
-        setQrImageUrl(qrSetting);
-      }
-
-      const encodedPayeeName = encodeURIComponent(activePayeeName);
-
-      // PhonePe Deep Link
-      // Using phonepe:// custom scheme — opens the app with the user's full session
-      // intent:// bypasses the session and causes "Add bank account" prompt
-      const phonepeQuery = `pa=${activePhonePe}&pn=${encodedPayeeName}&am=${amountStr}&cu=INR`;
-      setPhonepeUrl(`phonepe://pay?${phonepeQuery}`);
-
-      // Google Pay Deep Link
-      // GPay's internal scheme is "tez" (from Google Tez era) — opens with bank account intact
-      // intent://...nbu.paisa.user opens in isolated mode causing "Could not load banking name"
-      const gpayQuery = `pa=${activeGPay}&pn=${encodedPayeeName}&am=${amountStr}&cu=INR`;
-      setGpayUrl(`tez://upi/pay?${gpayQuery}`);
-
-      // Paytm Deep Link
-      // paytmmp:// is the correct scheme for Paytm UPI payments
-      const paytmQuery = `pa=${activePaytm}&pn=${encodedPayeeName}&am=${amountStr}&cu=INR`;
-      setPaytmUrl(`paytmmp://upi/pay?${paytmQuery}`);
-    };
-
-    loadSettingsAndBuildLinks();
+      const enc = encodeURIComponent(payeeName);
+      setPhonepeUrl(`phonepe://pay?pa=${phonePe}&pn=${enc}&am=${amountStr}&cu=INR`);
+      setGpayUrl(`tez://upi/pay?pa=${gPay}&pn=${enc}&am=${amountStr}&cu=INR`);
+      setPaytmUrl(`paytmmp://upi/pay?pa=${paytm}&pn=${enc}&am=${amountStr}&cu=INR`);
+    })();
   }, [isOpen, amount]);
 
-  if (!isOpen) return null;
+  const handleCopy = (text: string, key: string) => {
+    navigator.clipboard.writeText(text).catch(() => {});
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 1500);
+  };
 
   const handleMarkPaid = async () => {
     setIsLoading(true);
     setError(null);
     try {
-      let result;
-      if (isAdmin) {
-        result = await adminMarkPaid({ rideId, memberName });
-      } else {
-        result = await markPayment({ rideId, memberName });
-      }
-
+      const result = isAdmin
+        ? await adminMarkPaid({ rideId, memberName })
+        : await markPayment({ rideId, memberName });
       if (result.success) {
-        setSuccess(true);
         setStep("done");
         onSuccess?.();
-        setTimeout(onClose, 1500);
+        setTimeout(onClose, 1800);
       } else {
         setError(result.error ?? "Failed to process payment.");
       }
@@ -168,10 +127,9 @@ export default function PaymentDialog({
     try {
       const result = await verifyPayment({ rideId, memberName });
       if (result.success) {
-        setSuccess(true);
         setStep("done");
         onSuccess?.();
-        setTimeout(onClose, 1500);
+        setTimeout(onClose, 1800);
       } else {
         setError(result.error ?? "Failed to verify payment.");
       }
@@ -186,341 +144,295 @@ export default function PaymentDialog({
     if (!qrImageUrl) return;
     const a = document.createElement("a");
     a.href = qrImageUrl;
-    a.download = `shameek-upi-qr-${memberName}.png`;
+    a.download = `shameek-upi-qr.png`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
   };
 
+  // Don't render at all when closed — keeps DOM clean
+  if (!isOpen) return null;
+
   return (
-    // z-[80] — must be higher than nav bar (z-50) and header (z-50)
-    <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center">
-      {/* Backdrop */}
+    /**
+     * Full-screen overlay. z-[100] beats everything (nav z-50, header z-50, panchayat z-[70]).
+     * On mobile: sheet anchored to bottom via `items-end`.
+     * On desktop: centered via `sm:items-center`.
+     */
+    <div
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center"
+      style={{ isolation: "isolate" }}
+    >
+      {/* ── Backdrop ── */}
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-md animate-fade-in"
+        className="absolute inset-0 bg-black/75 backdrop-blur-sm"
         onClick={onClose}
+        aria-hidden="true"
       />
 
-      {/* Sheet — slides up from bottom on mobile, centered on desktop */}
-      {/*
-        On mobile: anchored to bottom, height = 90dvh max, sheet sits ABOVE the
-        nav bar because z-[80] > z-50. We do NOT add bottom padding for the nav
-        bar here — the dialog is full-screen overlay covering the nav bar.
+      {/* ── Sheet ──
+          Key layout rules for mobile scrollable sheet:
+          1. `relative` so z-index is its own stacking context above backdrop.
+          2. `flex flex-col` — header is shrink-0, body is flex-1 with min-h-0.
+          3. min-h-0 on the scroll child is REQUIRED for overflow to work in a flex col.
+          4. max-h uses vh (not dvh) for max compatibility with Android 4.4+.
       */}
-      <div className="relative w-full sm:max-w-md animate-slide-up sm:animate-fade-in-scale flex flex-col"
-        style={{ maxHeight: 'min(90dvh, 720px)' }}
+      <div
+        className="relative w-full sm:max-w-md flex flex-col rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#0d0f17] animate-slide-up sm:animate-fade-in-scale"
+        style={{ maxHeight: "90vh" }}
       >
-        <div className="glass-premium rounded-t-3xl sm:rounded-2xl shadow-2xl shadow-primary/20 relative z-10 flex flex-col overflow-hidden"
-          style={{ maxHeight: 'inherit' }}
-        >
-          {/* Drag handle — mobile only */}
-          <div className="flex justify-center pt-2.5 pb-0 sm:hidden shrink-0">
-            <div className="h-1 w-10 rounded-full bg-white/20" />
-          </div>
-          {/* Gradient top bar */}
-          <div className="h-1 bg-gradient-to-r from-primary via-purple-500 to-primary bg-[length:200%_100%] animate-[border-flow_3s_linear_infinite] shrink-0" />
+        {/* Drag handle */}
+        <div className="flex justify-center pt-3 shrink-0 sm:hidden">
+          <div className="h-1 w-10 rounded-full bg-white/20" />
+        </div>
 
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 py-5 shrink-0 border-b border-white/5 bg-black/10 backdrop-blur-md">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-violet-500/15 border border-primary/25">
-                {currentStatus === "VERIFICATION" ? (
-                  <ShieldCheck className="h-5 w-5 text-primary" />
-                ) : (
-                  <QrCode className="h-5 w-5 text-primary" />
-                )}
-              </div>
-              <div>
-                <h2 className="text-base sm:text-lg font-bold">
-                  {currentStatus === "VERIFICATION" ? "Verify Payment" : "Pay Your Share"}
-                </h2>
-                <p className="text-xs text-muted-foreground font-semibold">{memberName}</p>
-              </div>
+        {/* Purple gradient accent */}
+        <div className="h-0.5 shrink-0 bg-gradient-to-r from-[#7c3aed] via-purple-400 to-[#7c3aed]" />
+
+        {/* ── Fixed Header ── */}
+        <div className="flex items-center justify-between px-5 py-4 shrink-0 border-b border-white/[0.06]">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
+              {currentStatus === "VERIFICATION"
+                ? <ShieldCheck className="h-5 w-5 text-primary" />
+                : <QrCode className="h-5 w-5 text-primary" />
+              }
             </div>
-            <button
-              onClick={onClose}
-              className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-white/5 hover:text-foreground hover:rotate-90 cursor-pointer"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div>
+              <h2 className="text-base font-bold leading-tight">
+                {currentStatus === "VERIFICATION" ? "Verify Payment" : "Pay Your Share"}
+              </h2>
+              <p className="text-xs text-muted-foreground font-semibold">{memberName}</p>
+            </div>
           </div>
-
-          {/* Scrollable body — overscroll-behavior contains iOS rubber band to this element */}
-          <div
-            className="overflow-y-auto flex-1"
-            style={{
-              overscrollBehavior: 'contain',
-              WebkitOverflowScrolling: 'touch' as any,
-            }}
+          <button
+            onClick={onClose}
+            className="h-9 w-9 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-white/5 hover:text-white transition-colors touch-manipulation"
+            aria-label="Close"
           >
-            {step === "done" ? (
-              <div className="flex flex-col items-center gap-4 px-6 pt-12 pb-[calc(3rem+env(safe-area-inset-bottom))] sm:pb-12">
-                <div className="relative">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-success/10 animate-fade-in-scale">
-                    <Check className="h-10 w-10 text-success" />
-                  </div>
-                  <div className="absolute inset-0 rounded-full bg-success/20 animate-ping" style={{ animationDuration: "1.5s" }} />
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* ── Scrollable Body ──
+            `flex-1 min-h-0` is the critical pattern:
+            - flex-1 → take remaining height
+            - min-h-0 → allow shrinking below content natural size (required for overflow)
+            - overflow-y-auto → enable scroll
+        */}
+        <div
+          ref={scrollRef}
+          className="flex-1 min-h-0 overflow-y-auto"
+          style={{ overscrollBehavior: "contain", WebkitOverflowScrolling: "touch" as any }}
+        >
+          {step === "done" ? (
+            /* ── Success Screen ── */
+            <div className="flex flex-col items-center justify-center gap-4 px-6 py-16">
+              <div className="relative">
+                <div className="h-20 w-20 rounded-full bg-success/10 flex items-center justify-center animate-bounce-in">
+                  <Check className="h-10 w-10 text-success" />
                 </div>
-                <p className="text-xl font-bold gradient-text">
-                  {isAdmin ? "Payment Verified!" : "Payment Submitted!"}
-                </p>
-                <p className="text-center text-sm text-muted-foreground max-w-xs font-medium">
-                  {isAdmin
-                    ? "The payment has been marked as paid successfully."
-                    : "Your payment is pending verification by the admin. You'll be notified once confirmed."}
-                </p>
+                <div className="absolute inset-0 rounded-full bg-success/20 animate-ping" style={{ animationDuration: "1.5s" }} />
               </div>
-            ) : (
-              <div className="space-y-5 px-6 pt-5 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:pb-8">
-                {/* Amount Card (Receipt Style) */}
-                <div className="relative rounded-2xl bg-white/[0.02] border border-white/[0.06] p-5 overflow-hidden shadow-inner backdrop-blur-sm">
-                  {/* Decorative Ticket Notch holes on left & right borders */}
-                  <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#0d0f14] border-r border-white/10 z-20" />
-                  <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#0d0f14] border-l border-white/10 z-20" />
-                  
-                  <div className="relative flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Trip Date</p>
-                      <p className="text-sm font-semibold mt-0.5">{formatDate(rideDate)}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Share Due</p>
-                      <p className="text-2xl font-extrabold gradient-text mt-0.5">{formatCurrency(amount)}</p>
-                    </div>
+              <p className="text-xl font-bold gradient-text">
+                {isAdmin ? "Payment Verified!" : "Payment Submitted!"}
+              </p>
+              <p className="text-center text-sm text-muted-foreground max-w-xs">
+                {isAdmin
+                  ? "Marked as paid successfully."
+                  : "Pending admin verification. You'll be notified once confirmed."}
+              </p>
+            </div>
+          ) : (
+            /* ── Payment Content ── */
+            <div className="px-5 pt-4 pb-8 space-y-4">
+
+              {/* Amount receipt card */}
+              <div className="relative rounded-2xl bg-white/[0.03] border border-white/[0.07] p-5 overflow-hidden">
+                <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#0d0f17] border-r border-white/10" />
+                <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-[#0d0f17] border-l border-white/10" />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Trip Date</p>
+                    <p className="text-sm font-semibold mt-0.5">{formatDate(rideDate)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Share Due</p>
+                    <p className="text-2xl font-extrabold gradient-text mt-0.5">{formatCurrency(amount)}</p>
                   </div>
                 </div>
+              </div>
 
-                {/* Payment Options */}
-                <div className="flex flex-col gap-3">
-                  {/* PhonePe */}
-                  <div className="flex gap-2 items-center">
-                    <a
-                      href={phonepeUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl bg-gradient-to-r from-[#5f259f] to-[#4c1d80] px-4 text-sm font-bold text-white shadow-lg shadow-purple-950/20 active:scale-[0.98] transition-transform touch-manipulation"
-                    >
-                      <span>Pay with PhonePe</span>
-                      <ArrowRight className="h-4 w-4" />
-                    </a>
-                    <button
-                      onClick={() => handleCopy(upiPhonePe, "phonepe")}
-                      className="h-14 w-14 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 active:bg-white/10 transition-colors text-muted-foreground touch-manipulation"
-                      title="Copy UPI ID"
-                      type="button"
-                    >
-                      {copiedKey === "phonepe" ? (
-                        <Check className="h-4 w-4 text-success animate-fade-in-scale" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Google Pay */}
-                  <div className="flex gap-2 items-center">
-                    <a
-                      href={gpayUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl bg-gradient-to-r from-[#1a73e8] to-[#1557b0] px-4 text-sm font-bold text-white shadow-lg shadow-blue-950/20 active:scale-[0.98] transition-transform touch-manipulation"
-                    >
-                      <span>Pay with Google Pay</span>
-                      <ArrowRight className="h-4 w-4" />
-                    </a>
-                    <button
-                      onClick={() => handleCopy(upiGPay, "gpay")}
-                      className="h-14 w-14 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 active:bg-white/10 transition-colors text-muted-foreground touch-manipulation"
-                      title="Copy UPI ID"
-                      type="button"
-                    >
-                      {copiedKey === "gpay" ? (
-                        <Check className="h-4 w-4 text-success animate-fade-in-scale" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Paytm */}
-                  <div className="flex gap-2 items-center">
-                    <a
-                      href={paytmUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl bg-gradient-to-r from-[#00baf2] to-[#008fc2] px-4 text-sm font-bold text-white shadow-lg shadow-sky-950/20 active:scale-[0.98] transition-transform touch-manipulation"
-                    >
-                      <span>Pay with Paytm</span>
-                      <ArrowRight className="h-4 w-4" />
-                    </a>
-                    <button
-                      onClick={() => handleCopy(upiPaytm, "paytm")}
-                      className="h-14 w-14 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 active:bg-white/10 transition-colors text-muted-foreground touch-manipulation"
-                      title="Copy UPI ID"
-                      type="button"
-                    >
-                      {copiedKey === "paytm" ? (
-                        <Check className="h-4 w-4 text-success animate-fade-in-scale" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Self-Payment Testing Warning */}
-                  <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-xs flex gap-2">
-                    <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                    <div className="space-y-0.5">
-                      <p className="font-bold text-amber-500">Self-Payment Restriction</p>
-                      <p className="text-muted-foreground leading-normal">
-                        UPI apps block self-payments. If testing using your own phone/UPI apps (paying to your own UPI ID), GPay and PhonePe will fail. It works perfectly for other members paying you!
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Address Verification Info */}
-                  <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-3 text-xs space-y-1.5">
-                    <p className="text-muted-foreground font-semibold text-center text-[10px] uppercase tracking-wider">Configured Payee Addresses</p>
-                    <div className="space-y-1 font-mono text-[11px] text-muted-foreground">
-                      <div className="flex justify-between border-b border-white/5 pb-1 mb-1">
-                        <span className="font-sans text-muted-foreground font-bold">Account Name:</span>
-                        <span className="text-primary font-bold">{payeeNameState}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>PhonePe VPA:</span>
-                        <span className="text-white/80 select-all">{upiPhonePe}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>GPay VPA:</span>
-                        <span className="text-white/80 select-all">{upiGPay}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Paytm VPA:</span>
-                        <span className="text-white/80 select-all">{upiPaytm}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 py-1">
-                    <div className="flex-1 h-px bg-white/5" />
-                    <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-bold">Or Scan QR Code</span>
-                    <div className="flex-1 h-px bg-white/5" />
-                  </div>
-
-                  {/* QR Code */}
-                  <div className="flex flex-col items-center gap-3">
-                  {qrImageUrl ? (
-                    <div className="relative group rounded-2xl border border-white/10 bg-white p-4 shadow-xl transition-all duration-300 overflow-hidden">
-                      <img
-                        src={qrImageUrl}
-                        alt="Payment QR Code"
-                        className="h-48 w-48 object-contain relative z-10"
-                      />
-                      {/* Scanning laser effect */}
-                      <div className="absolute left-4 right-4 top-4 h-[2px] bg-primary/60 shadow-[0_0_8px_rgba(244,63,94,0.8)] z-20 animate-scan pointer-events-none" />
-                      
-                      {/* Custom scanner corner borders */}
-                      <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-primary rounded-tl animate-pulse-soft z-20" />
-                      <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-primary rounded-tr animate-pulse-soft z-20" />
-                      <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-primary rounded-bl animate-pulse-soft z-20" />
-                      <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-primary rounded-br animate-pulse-soft z-20" />
-                    </div>
-                  ) : (
-                    <div className="flex h-48 w-48 items-center justify-center rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02]">
-                      <div className="text-center">
-                        <QrCode className="h-10 w-10 text-muted-foreground/50 mx-auto animate-pulse-soft" />
-                        <p className="mt-2 text-xs text-muted-foreground">No QR configured</p>
-                      </div>
-                    </div>
-                  )}
-                  {qrImageUrl && (
-                    <div className="flex flex-col items-center gap-2">
-                      <p className="text-sm font-semibold text-muted-foreground">
-                        Scan to pay <span className="text-foreground font-extrabold tabular-nums">{formatCurrency(amount)}</span>
-                      </p>
-                      <button
-                        onClick={handleDownloadQr}
-                        type="button"
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-rose-400 transition-colors cursor-pointer bg-primary/10 hover:bg-primary/20 px-3.5 py-1.5 rounded-full border border-primary/20"
-                      >
-                        <Download className="h-3.5 w-3.5" />
-                        Save QR Code
-                      </button>
-                    </div>
-                  )}
-                  </div>
-                </div>
-
-                {/* Screenshot Upload */}
-                {!isAdmin && currentStatus !== "VERIFICATION" && (
-                  <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.01] p-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                      <Upload className="h-4 w-4 text-primary" />
-                      <span className="font-semibold text-foreground">Upload payment screenshot</span>
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-primary/15 file:to-violet-600/15 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-primary hover:file:from-primary/25 hover:file:to-violet-600/25 file:transition-all file:cursor-pointer"
-                    />
-                    <p className="mt-2 text-xs text-muted-foreground font-medium">
-                      Admin will verify within 24 hours
-                    </p>
-                  </div>
-                )}
-
-                {/* Error */}
-                {error && (
-                  <div className="rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive flex items-center gap-2">
-                    <div className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse-soft" />
-                    {error}
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex gap-3">
-                  <button
-                    onClick={onClose}
-                    className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 h-14 text-sm font-semibold active:bg-white/10 transition-colors touch-manipulation"
+              {/* UPI Buttons */}
+              <div className="space-y-2.5">
+                {/* PhonePe */}
+                <div className="flex gap-2">
+                  <a
+                    href={phonepeUrl}
+                    className="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl bg-gradient-to-r from-[#5f259f] to-[#4c1d80] text-sm font-bold text-white shadow-lg active:opacity-80 touch-manipulation"
                   >
-                    Cancel
+                    Pay with PhonePe <ArrowRight className="h-4 w-4" />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(upiPhonePe, "phonepe")}
+                    className="h-14 w-14 shrink-0 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 active:bg-white/15 touch-manipulation"
+                    aria-label="Copy PhonePe UPI ID"
+                  >
+                    {copiedKey === "phonepe" ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4 text-muted-foreground" />}
                   </button>
+                </div>
 
-                  {currentStatus === "VERIFICATION" && isAdmin ? (
-                    <button
-                      onClick={handleVerify}
-                      disabled={isLoading}
-                      className="flex-1 rounded-xl bg-gradient-to-r from-success to-emerald-600 px-4 h-14 text-sm font-bold text-white shadow-lg shadow-success/25 active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-manipulation"
-                    >
-                      {isLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <>
-                          Verify Payment
-                          <ShieldCheck className="h-4 w-4" />
-                        </>
-                      )}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleMarkPaid}
-                      disabled={isLoading}
-                      className="flex-1 rounded-xl bg-gradient-to-r from-primary to-violet-600 px-4 h-14 text-sm font-bold text-white shadow-lg shadow-primary/30 active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-manipulation"
-                    >
-                      {isLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <>
-                          {isAdmin ? "Mark as Paid" : "Mark as Paid"}
-                          <ArrowRight className="h-4 w-4" />
-                        </>
-                      )}
-                    </button>
-                  )}
+                {/* GPay */}
+                <div className="flex gap-2">
+                  <a
+                    href={gpayUrl}
+                    className="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl bg-gradient-to-r from-[#1a73e8] to-[#1557b0] text-sm font-bold text-white shadow-lg active:opacity-80 touch-manipulation"
+                  >
+                    Pay with Google Pay <ArrowRight className="h-4 w-4" />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(upiGPay, "gpay")}
+                    className="h-14 w-14 shrink-0 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 active:bg-white/15 touch-manipulation"
+                    aria-label="Copy GPay UPI ID"
+                  >
+                    {copiedKey === "gpay" ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4 text-muted-foreground" />}
+                  </button>
+                </div>
+
+                {/* Paytm */}
+                <div className="flex gap-2">
+                  <a
+                    href={paytmUrl}
+                    className="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl bg-gradient-to-r from-[#00baf2] to-[#008fc2] text-sm font-bold text-white shadow-lg active:opacity-80 touch-manipulation"
+                  >
+                    Pay with Paytm <ArrowRight className="h-4 w-4" />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(upiPaytm, "paytm")}
+                    className="h-14 w-14 shrink-0 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 active:bg-white/15 touch-manipulation"
+                    aria-label="Copy Paytm UPI ID"
+                  >
+                    {copiedKey === "paytm" ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4 text-muted-foreground" />}
+                  </button>
                 </div>
               </div>
-            )}
-          </div>
+
+              {/* Self-payment warning */}
+              <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-xs flex gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-amber-500">Self-Payment Restriction</p>
+                  <p className="text-muted-foreground mt-0.5 leading-relaxed">
+                    UPI apps block payments to your own UPI ID. This is normal when testing on Shameek's device — works perfectly for other members.
+                  </p>
+                </div>
+              </div>
+
+              {/* Payee addresses info */}
+              <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-3 space-y-1.5 text-xs">
+                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider text-center">Payee</p>
+                <div className="space-y-1 font-mono text-[11px] text-muted-foreground">
+                  <div className="flex justify-between border-b border-white/5 pb-1">
+                    <span className="font-sans font-bold">Name:</span>
+                    <span className="text-primary font-bold">{payeeNameState}</span>
+                  </div>
+                  <div className="flex justify-between"><span>PhonePe:</span><span className="text-white/80 select-all">{upiPhonePe}</span></div>
+                  <div className="flex justify-between"><span>GPay:</span><span className="text-white/80 select-all">{upiGPay}</span></div>
+                  <div className="flex justify-between"><span>Paytm:</span><span className="text-white/80 select-all">{upiPaytm}</span></div>
+                </div>
+              </div>
+
+              {/* QR Code */}
+              <div className="flex flex-col items-center gap-3">
+                <div className="flex items-center gap-2 w-full">
+                  <div className="flex-1 h-px bg-white/5" />
+                  <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-bold">Or Scan QR</span>
+                  <div className="flex-1 h-px bg-white/5" />
+                </div>
+                {qrImageUrl ? (
+                  <>
+                    <div className="relative rounded-2xl border border-white/10 bg-white p-4 shadow-xl overflow-hidden">
+                      <img src={qrImageUrl} alt="Payment QR Code" className="h-44 w-44 object-contain" />
+                      <div className="absolute left-4 right-4 top-4 h-0.5 bg-primary/60 shadow-[0_0_8px_rgba(124,58,237,0.8)] animate-scan pointer-events-none" />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleDownloadQr}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/10 px-4 py-2 rounded-full border border-primary/20 active:bg-primary/20 touch-manipulation"
+                    >
+                      <Download className="h-3.5 w-3.5" /> Save QR Code
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex h-32 w-32 items-center justify-center rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02]">
+                    <div className="text-center">
+                      <QrCode className="h-8 w-8 text-muted-foreground/40 mx-auto" />
+                      <p className="mt-1 text-[10px] text-muted-foreground">No QR set</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Screenshot upload (non-admin, non-verification) */}
+              {!isAdmin && currentStatus !== "VERIFICATION" && (
+                <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.01] p-4">
+                  <div className="flex items-center gap-2 text-sm mb-2">
+                    <Upload className="h-4 w-4 text-primary" />
+                    <span className="font-semibold text-foreground">Upload payment screenshot</span>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-primary touch-manipulation"
+                  />
+                  <p className="mt-2 text-xs text-muted-foreground">Admin will verify within 24 hours</p>
+                </div>
+              )}
+
+              {/* Error */}
+              {error && (
+                <div className="rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-destructive shrink-0" />
+                  {error}
+                </div>
+              )}
+
+              {/* Action buttons — sticky at bottom */}
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 h-14 rounded-xl border border-white/10 bg-white/5 text-sm font-semibold active:bg-white/10 transition-colors touch-manipulation"
+                >
+                  Cancel
+                </button>
+
+                {currentStatus === "VERIFICATION" && isAdmin ? (
+                  <button
+                    type="button"
+                    onClick={handleVerify}
+                    disabled={isLoading}
+                    className="flex-1 h-14 rounded-xl bg-gradient-to-r from-success to-emerald-600 text-sm font-bold text-white shadow-lg active:opacity-80 disabled:opacity-50 flex items-center justify-center gap-2 touch-manipulation"
+                  >
+                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><ShieldCheck className="h-4 w-4" /> Verify</>}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleMarkPaid}
+                    disabled={isLoading}
+                    className="flex-1 h-14 rounded-xl bg-gradient-to-r from-primary to-violet-600 text-sm font-bold text-white shadow-lg active:opacity-80 disabled:opacity-50 flex items-center justify-center gap-2 touch-manipulation"
+                  >
+                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>{isAdmin ? "Mark Paid" : "Mark as Paid"} <ArrowRight className="h-4 w-4" /></>}
+                  </button>
+                )}
+              </div>
+
+            </div>
+          )}
         </div>
       </div>
     </div>

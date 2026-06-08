@@ -58,23 +58,13 @@ export default function AppShell({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // iOS-safe scroll lock — same technique as PaymentDialog
+  // Scroll lock: overflow on <html> — safest approach, no layout shifts
   useEffect(() => {
     if (!isPanchayatOpen) return;
-    const scrollY = window.scrollY;
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.left = "0";
-    document.body.style.right = "0";
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.left = "";
-      document.body.style.right = "";
-      document.body.style.overflow = "";
-      window.scrollTo({ top: scrollY, behavior: "instant" as ScrollBehavior });
-    };
+    const html = document.documentElement;
+    const prev = html.style.overflow;
+    html.style.overflow = "hidden";
+    return () => { html.style.overflow = prev; };
   }, [isPanchayatOpen]);
 
   return (
