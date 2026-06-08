@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
   X, Check, QrCode, Loader2, ArrowRight, ShieldCheck,
-  Download, Copy, Upload,
+  Download, Copy,
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { markPayment, verifyPayment, adminMarkPaid } from "@/app/actions/payment.actions";
@@ -48,8 +48,7 @@ export default function PaymentDialog({
   const [qrImageUrl, setQrImageUrl]     = useState("");
   const [copiedKey, setCopiedKey]       = useState<string | null>(null);
 
-  const [screenshotName, setScreenshotName] = useState<string | null>(null);
-  const [screenshotData, setScreenshotData] = useState<string>("");
+
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -60,8 +59,7 @@ export default function PaymentDialog({
     if (isOpen) {
       setStep("pay");
       setError(null);
-      setScreenshotName(null);
-      setScreenshotData("");
+
     }
   }
 
@@ -73,22 +71,7 @@ export default function PaymentDialog({
     onClose();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setScreenshotName(file.name);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === "string") {
-          setScreenshotData(reader.result);
-        }
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setScreenshotName(null);
-      setScreenshotData("");
-    }
-  };
+
 
   // ── Scroll lock ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -161,8 +144,6 @@ export default function PaymentDialog({
           data: {
             rideId,
             memberName,
-            screenshotName: screenshotName ?? undefined,
-            screenshotData: screenshotData || undefined,
           },
         });
         result = { success: true, isOffline: true };
@@ -172,8 +153,6 @@ export default function PaymentDialog({
           : await markPayment({
               rideId,
               memberName,
-              screenshotName: screenshotName ?? undefined,
-              screenshotData: screenshotData || undefined,
             });
       }
 
@@ -452,41 +431,7 @@ export default function PaymentDialog({
                   )}
                 </div>
 
-                {/* ── Screenshot upload (non-admin only) ── */}
-                {!isAdmin && currentStatus !== "VERIFICATION" && (
-                  <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.01] p-3">
-                    <div className="flex items-center gap-2 text-sm mb-2">
-                      <Upload className="h-4 w-4 text-primary shrink-0" />
-                      <span className="font-semibold">Upload payment screenshot</span>
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-primary touch-manipulation"
-                    />
-                    {screenshotName ? (
-                      <div className="mt-2 flex items-center justify-between rounded-xl bg-success/10 border border-success/20 px-3 py-2 text-xs text-success">
-                        <span className="truncate font-semibold flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5" />
-                          {screenshotName}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setScreenshotName(null);
-                            setScreenshotData("");
-                          }}
-                          className="text-muted-foreground hover:text-white transition-colors"
-                        >
-                          Clear
-                        </button>
-                      </div>
-                    ) : (
-                      <p className="mt-2 text-xs text-muted-foreground">Admin will verify within 24 hours</p>
-                    )}
-                  </div>
-                )}
+
 
                 {/* ── Error ── */}
                 {error && (
