@@ -55,19 +55,26 @@ export default function PaymentDialog({
     setTimeout(() => setCopiedKey(null), 1500);
   };
 
-  // Lock body scroll when dialog is open
+  // ── iOS-safe body scroll lock ──────────────────────────────────────────────
+  // `overflow: hidden` alone doesn't stop iOS Safari rubber-band scroll.
+  // The correct fix is position:fixed + storing the scroll offset, then
+  // restoring it on close so the page doesn't jump to top.
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-      // Support iOS Safari elastic scrolling lock
-      document.body.style.position = "relative";
-    } else {
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-    }
+    if (!isOpen) return;
+    const scrollY = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "";
       document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.overflow = "";
+      // Restore scroll position silently
+      window.scrollTo({ top: scrollY, behavior: "instant" as ScrollBehavior });
     };
   }, [isOpen]);
 
@@ -186,16 +193,30 @@ export default function PaymentDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    // z-[80] — must be higher than nav bar (z-50) and header (z-50)
+    <div className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-md"
+        className="absolute inset-0 bg-black/70 backdrop-blur-md animate-fade-in"
         onClick={onClose}
       />
 
-      {/* Modal */}
-      <div className="relative w-full max-w-md mt-auto sm:mt-0 animate-slide-up sm:animate-fade-in-scale max-h-[100dvh] sm:max-h-[90vh] flex flex-col">
-        <div className="glass-premium rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl shadow-primary/15 relative z-10 flex flex-col max-h-[100dvh] sm:max-h-[90vh]">
+      {/* Sheet — slides up from bottom on mobile, centered on desktop */}
+      {/*
+        On mobile: anchored to bottom, height = 90dvh max, sheet sits ABOVE the
+        nav bar because z-[80] > z-50. We do NOT add bottom padding for the nav
+        bar here — the dialog is full-screen overlay covering the nav bar.
+      */}
+      <div className="relative w-full sm:max-w-md animate-slide-up sm:animate-fade-in-scale flex flex-col"
+        style={{ maxHeight: 'min(90dvh, 720px)' }}
+      >
+        <div className="glass-premium rounded-t-3xl sm:rounded-2xl shadow-2xl shadow-primary/20 relative z-10 flex flex-col overflow-hidden"
+          style={{ maxHeight: 'inherit' }}
+        >
+          {/* Drag handle — mobile only */}
+          <div className="flex justify-center pt-2.5 pb-0 sm:hidden shrink-0">
+            <div className="h-1 w-10 rounded-full bg-white/20" />
+          </div>
           {/* Gradient top bar */}
           <div className="h-1 bg-gradient-to-r from-primary via-purple-500 to-primary bg-[length:200%_100%] animate-[border-flow_3s_linear_infinite] shrink-0" />
 
@@ -224,8 +245,14 @@ export default function PaymentDialog({
             </button>
           </div>
 
-          {/* Scrollable Container */}
-          <div className="overflow-y-auto flex-1 scrollbar-thin">
+          {/* Scrollable body — overscroll-behavior contains iOS rubber band to this element */}
+          <div
+            className="overflow-y-auto flex-1"
+            style={{
+              overscrollBehavior: 'contain',
+              WebkitOverflowScrolling: 'touch' as any,
+            }}
+          >
             {step === "done" ? (
               <div className="flex flex-col items-center gap-4 px-6 pt-12 pb-[calc(3rem+env(safe-area-inset-bottom))] sm:pb-12">
                 <div className="relative">

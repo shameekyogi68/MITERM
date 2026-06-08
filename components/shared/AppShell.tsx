@@ -58,14 +58,23 @@ export default function AppShell({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Lock body scroll when panchayat modal open
+  // iOS-safe scroll lock — same technique as PaymentDialog
   useEffect(() => {
-    if (isPanchayatOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
+    if (!isPanchayatOpen) return;
+    const scrollY = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
       document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
+      window.scrollTo({ top: scrollY, behavior: "instant" as ScrollBehavior });
+    };
   }, [isPanchayatOpen]);
 
   return (
