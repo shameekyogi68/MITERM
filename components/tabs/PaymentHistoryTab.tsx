@@ -154,7 +154,7 @@ export default function PaymentHistoryTab() {
             placeholder="Search..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border bg-card py-3 pl-10 pr-4 text-sm transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+            className="input-premium w-full rounded-xl border bg-card py-3 pl-10 pr-4 text-sm transition-all"
           />
         </div>
         <div className="relative">
@@ -162,7 +162,7 @@ export default function PaymentHistoryTab() {
           <select
             value={memberFilter}
             onChange={(e) => setMemberFilter(e.target.value)}
-            className="rounded-xl border bg-card py-3 pl-9 pr-8 text-sm appearance-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+            className="select-premium rounded-xl border bg-card py-3 pl-9 pr-8 text-sm transition-all"
           >
             <option value="all">All Members</option>
             {ALL_MEMBERS.map((m) => (
@@ -175,7 +175,7 @@ export default function PaymentHistoryTab() {
         <select
           value={dateFilter}
           onChange={(e) => setDateFilter(e.target.value)}
-          className="rounded-xl border bg-card px-4 py-3 text-sm appearance-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+          className="select-premium rounded-xl border bg-card px-4 py-3 text-sm transition-all"
         >
           <option value="all">All Time</option>
           <option value="this-month">This Month</option>
@@ -183,7 +183,7 @@ export default function PaymentHistoryTab() {
         </select>
         <button
           onClick={() => handleExport("csv")}
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-purple-600 px-4 py-3 text-sm font-medium text-white shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:scale-95"
+          className="btn-magnetic inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-purple-600 px-4 py-3 text-sm font-medium text-white shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 active:scale-95"
         >
           <ArrowDownToLine className="h-4 w-4" />
           CSV
@@ -216,7 +216,7 @@ export default function PaymentHistoryTab() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b bg-gradient-to-r from-primary/[0.03] to-purple-500/[0.03]">
+                  <tr className="table-sticky-header border-b bg-gradient-to-r from-primary/[0.03] to-purple-500/[0.03]">
                     <th className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Payment Date</th>
                     <th className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Member</th>
                     <th className="px-5 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Amount</th>
@@ -226,7 +226,7 @@ export default function PaymentHistoryTab() {
                 </thead>
                 <tbody className="divide-y">
                   {filtered.map((p, i) => (
-                    <tr key={`${p.id}-${i}`} className="group hover:bg-muted/20 transition-colors animate-fade-in" style={{ animationDelay: `${i * 0.02}s` }}>
+                    <tr key={`${p.id}-${i}`} className="table-row-hover group transition-colors animate-fade-in" style={{ animationDelay: `${i * 0.02}s` }}>
                       <td className="px-5 py-3.5 text-sm">{formatDateTime(p.paidAt)}</td>
                       <td className="px-5 py-3.5">
                         <span className="font-medium">{p.memberName}</span>
@@ -236,7 +236,7 @@ export default function PaymentHistoryTab() {
                       </td>
                       <td className="px-5 py-3.5 text-sm text-muted-foreground">{formatDate(p.rideDate)}</td>
                       <td className="px-5 py-3.5">
-                        <span className="inline-flex items-center gap-1 rounded-lg bg-success/10 px-2.5 py-1 text-xs font-semibold text-success">
+                        <span className="badge-premium bg-success/10 text-success">
                           <CheckCircle2 className="h-3 w-3" />
                           Paid
                         </span>

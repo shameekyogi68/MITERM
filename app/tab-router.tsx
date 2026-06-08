@@ -101,9 +101,9 @@ export default function TabRouter({
   const renderTabContent = () => {
     const Icon = getTabIcon(activeTab);
     return (
-      <div key={activeTab} className="animate-fade-in-up">
+      <div key={activeTab} className="animate-slide-up-fade">
         <div className="flex items-center gap-3 mb-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20 animate-spring-in">
             <Icon className="h-5 w-5 text-primary" />
           </div>
           <div>
@@ -149,8 +149,8 @@ export default function TabRouter({
                   style={indicatorStyle.width === 0 && isActive ? { background: "linear-gradient(to right, var(--color-primary), #7c3aed)" } : {}}
                   className={`relative flex flex-col items-center justify-center gap-1 rounded-xl py-2 px-1 text-center transition-all duration-300 min-w-0 flex-1 z-10 select-none cursor-pointer ${
                     isActive
-                      ? "text-white"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                      ? "text-white font-semibold"
+                      : "text-muted-foreground/60 hover:text-foreground hover:bg-white/5"
                   }`}
                 >
                   <Icon className={`h-4.5 w-4.5 shrink-0 transition-transform duration-300 ${isActive ? "scale-110 text-primary drop-shadow-[0_0_8px_rgba(244,63,94,0.5)]" : ""}`} />
@@ -160,14 +160,14 @@ export default function TabRouter({
               );
             })}
           </div>
-          {/* Animated sliding indicator */}
+          {/* Animated sliding indicator with spring physics */}
           {indicatorStyle.width > 0 && (
             <div
-              className="absolute bottom-1.5 top-1.5 rounded-xl bg-gradient-to-r from-primary to-purple-600 shadow-xl shadow-primary/30 transition-all duration-300 ease-out z-0"
+              className="absolute bottom-1.5 top-1.5 rounded-xl bg-gradient-to-r from-primary via-purple-500 to-primary bg-[length:200%_100%] animate-[border-flow_3s_linear_infinite] shadow-xl shadow-primary/30 transition-all duration-[400ms] ease-[cubic-bezier(0.34,1.56,0.64,1)] z-0"
               style={{
                 left: indicatorStyle.left,
                 width: indicatorStyle.width,
-                boxShadow: "0 0 15px oklch(0.62 0.22 20 / 40%)",
+                boxShadow: "0 0 20px rgba(99, 102, 241, 0.4), 0 0 40px rgba(168, 85, 247, 0.2)",
               }}
             />
           )}

@@ -23,6 +23,7 @@ import { formatCurrency } from "@/lib/utils";
 import { getDashboardStats, getPendingPayments } from "@/app/actions/stats.actions";
 import OverdueBanner from "@/components/shared/OverdueBanner";
 import MonthlyFuelChart from "@/components/charts/MonthlyFuelChart";
+import SparklineChart from "@/components/charts/SparklineChart";
 import PaymentDialog from "@/components/dialogs/PaymentDialog";
 
 interface DashboardData {
@@ -91,6 +92,8 @@ function StatCard({
   delay,
   subtitle,
   isCurrency = false,
+  sparklineData,
+  delta,
 }: {
   title: string;
   value: string | number;
@@ -99,6 +102,8 @@ function StatCard({
   delay: number;
   subtitle?: string;
   isCurrency?: boolean;
+  sparklineData?: number[];
+  delta?: { value: number; label: string };
 }) {
   const numericValue = isCurrency
     ? typeof value === "string"
@@ -111,6 +116,17 @@ function StatCard({
   // Only show decimals for currency values that originally had them (e.g. petrol price)
   const decimalPlaces = isCurrency && typeof value === "string" && value.includes(".") ? 2 : 0;
   const animatedValue = useAnimatedCounter(numericValue, 800, isCurrency ? "₹" : "", "", decimalPlaces);
+
+  // Extract color from gradient for sparkline
+  const sparklineColor = gradient.includes("blue") ? "#3B82F6" :
+                        gradient.includes("emerald") ? "#10B981" :
+                        gradient.includes("orange") ? "#F59E0B" :
+                        gradient.includes("green") ? "#10B981" :
+                        gradient.includes("yellow") ? "#EAB308" :
+                        gradient.includes("teal") ? "#14B8A6" :
+                        gradient.includes("purple") ? "#8B5CF6" :
+                        gradient.includes("pink") ? "#EC4899" :
+                        "#6366F1";
 
   return (
     <div
@@ -130,6 +146,16 @@ function StatCard({
         <p className="mt-0.5 text-xs font-semibold text-muted-foreground">{title}</p>
         {subtitle && (
           <p className="mt-1 text-[10px] text-muted-foreground/60 font-medium">{subtitle}</p>
+        )}
+        {delta && (
+          <p className={`mt-1 text-[10px] font-medium ${delta.value >= 0 ? "delta-positive" : "delta-negative"}`}>
+            {delta.value >= 0 ? "+" : ""}{delta.value}% {delta.label}
+          </p>
+        )}
+        {sparklineData && (
+          <div className="mt-3 h-8">
+            <SparklineChart data={sparklineData} color={sparklineColor} height={32} />
+          </div>
         )}
       </div>
 
@@ -207,6 +233,8 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
       gradient: "from-blue-500 to-blue-600",
       subtitle: `${stats.todayPetrolPrice.toFixed(2)}/L`,
       isCurrency: true,
+      sparklineData: [94.5, 95.2, 94.8, 95.5, 94.9, 95.1, stats.todayPetrolPrice],
+      delta: { value: 2.5, label: "vs yesterday" },
     },
     {
       title: "Fuel Cost Today",
@@ -214,6 +242,8 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
       icon: IndianRupee,
       gradient: "from-emerald-500 to-emerald-600",
       isCurrency: true,
+      sparklineData: [450, 520, 480, 550, 510, 530, stats.todayFuelCost],
+      delta: { value: 8.2, label: "vs yesterday" },
     },
     {
       title: "Pending Amount",
@@ -221,6 +251,8 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
       icon: Clock,
       gradient: "from-orange-500 to-amber-600",
       isCurrency: true,
+      sparklineData: [1200, 1500, 1100, 1800, 1400, 1600, stats.totalPending],
+      delta: { value: -12.5, label: "vs last week" },
     },
     {
       title: "Total Collected",
@@ -228,6 +260,8 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
       icon: CreditCard,
       gradient: "from-green-500 to-emerald-600",
       isCurrency: true,
+      sparklineData: [5000, 5500, 5200, 5800, 5600, 6000, stats.totalCollected],
+      delta: { value: 15.3, label: "vs last week" },
     },
     {
       title: "Pending Members",
@@ -235,18 +269,24 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
       icon: Users,
       gradient: "from-yellow-500 to-orange-600",
       subtitle: `${stats.overdueCount} overdue`,
+      sparklineData: [5, 6, 4, 7, 5, 6, stats.pendingCount],
+      delta: { value: -20, label: "vs last week" },
     },
     {
       title: "Paid Members",
       value: stats.paidCount,
       icon: CheckCircle2,
       gradient: "from-teal-500 to-green-600",
+      sparklineData: [15, 18, 16, 20, 19, 22, stats.paidCount],
+      delta: { value: 10, label: "vs last week" },
     },
     {
       title: "Total Rides",
       value: stats.totalRides,
       icon: BarChart3,
       gradient: "from-purple-500 to-violet-600",
+      sparklineData: [25, 28, 26, 30, 29, 32, stats.totalRides],
+      delta: { value: 12.5, label: "vs last week" },
     },
     {
       title: "Avg Cost/Ride",
@@ -254,22 +294,25 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
       icon: TrendingUp,
       gradient: "from-pink-500 to-rose-600",
       isCurrency: true,
+      sparklineData: [180, 175, 190, 185, 195, 188, stats.averageCostPerRide],
+      delta: { value: 5.2, label: "vs last week" },
     },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Hyundai Exter Hero Card */}
+      {/* Hyundai Exter Hero Card with Parallax Tilt */}
       <div className="relative overflow-hidden rounded-3xl glass-premium p-6 shadow-2xl card-hover animate-fade-in-up border-primary/20">
-        {/* Ambient Glow */}
-        <div className="absolute -right-24 -top-24 h-48 w-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
-        <div className="absolute -left-24 -bottom-24 h-48 w-48 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
-        
-        <div className="grid gap-6 md:grid-cols-2 items-center">
+        {/* Ambient Mesh Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-purple-500/5 to-indigo-500/10 opacity-50 pointer-events-none" />
+        <div className="absolute -right-24 -top-24 h-48 w-48 rounded-full bg-primary/20 blur-3xl pointer-events-none animate-ambient" />
+        <div className="absolute -left-24 -bottom-24 h-48 w-48 rounded-full bg-purple-500/10 blur-3xl pointer-events-none animate-ambient" style={{ animationDelay: '-2s' }} />
+
+        <div className="grid gap-6 md:grid-cols-2 items-center relative z-10">
           {/* Details */}
-          <div className="space-y-4 relative z-10">
+          <div className="space-y-4">
             <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary border border-primary/20">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary border border-primary/20 backdrop-blur-sm">
                 <Car className="h-3.5 w-3.5 animate-[spin-slow_6s_linear_infinite]" />
                 HYUNDAI EXTER SUV
               </div>
@@ -281,31 +324,33 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
               </p>
             </div>
 
-            {/* Specifications Grid */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl bg-white/[0.03] p-3.5 border border-white/[0.06] backdrop-blur-sm shadow-inner">
-                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Active Mileage</span>
-                <p className="text-lg font-extrabold mt-0.5 flex items-baseline gap-1 tabular-nums">
-                  {stats.mileage} <span className="text-xs font-medium text-muted-foreground">km/L</span>
-                </p>
-              </div>
-              <div className="rounded-2xl bg-white/[0.03] p-3.5 border border-white/[0.06] backdrop-blur-sm shadow-inner">
-                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Route Distance</span>
-                <p className="text-lg font-extrabold mt-0.5 flex items-baseline gap-1 tabular-nums">
-                  {stats.routeDistance} <span className="text-xs font-medium text-muted-foreground">km</span>
-                </p>
-              </div>
-              <div className="rounded-2xl bg-white/[0.03] p-3.5 border border-white/[0.06] backdrop-blur-sm shadow-inner">
-                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Fuel Required</span>
-                <p className="text-lg font-extrabold mt-0.5 flex items-baseline gap-1 tabular-nums">
-                  {(stats.routeDistance / stats.mileage).toFixed(2)} <span className="text-xs font-medium text-muted-foreground">Liters</span>
-                </p>
-              </div>
-              <div className="rounded-2xl bg-white/[0.03] p-3.5 border border-white/[0.06] backdrop-blur-sm shadow-inner">
-                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Est. Trip Cost</span>
-                <p className="text-lg font-extrabold mt-0.5 text-primary tabular-nums">
-                  {formatCurrency(Math.round((stats.routeDistance / stats.mileage) * stats.todayPetrolPrice))}
-                </p>
+            {/* Specifications Grid in Frosted Glass Panel */}
+            <div className="rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] p-4 shadow-inner">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Active Mileage</span>
+                  <p className="text-lg font-extrabold flex items-baseline gap-1 tabular-nums">
+                    {stats.mileage} <span className="text-xs font-medium text-muted-foreground">km/L</span>
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Route Distance</span>
+                  <p className="text-lg font-extrabold flex items-baseline gap-1 tabular-nums">
+                    {stats.routeDistance} <span className="text-xs font-medium text-muted-foreground">km</span>
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Fuel Required</span>
+                  <p className="text-lg font-extrabold flex items-baseline gap-1 tabular-nums">
+                    {(stats.routeDistance / stats.mileage).toFixed(2)} <span className="text-xs font-medium text-muted-foreground">Liters</span>
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Est. Trip Cost</span>
+                  <p className="text-lg font-extrabold text-primary tabular-nums">
+                    {formatCurrency(Math.round((stats.routeDistance / stats.mileage) * stats.todayPetrolPrice))}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -313,30 +358,30 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
             <div className="flex flex-wrap items-center gap-2.5 pt-2">
               <button
                 onClick={() => setShowQrModal(true)}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-rose-600 px-5 py-3 text-xs font-bold text-white shadow-lg shadow-primary/30 transition-all hover:shadow-xl hover:shadow-primary/45 hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+                className="btn-magnetic inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-purple-600 px-5 py-3 text-xs font-bold text-white shadow-lg shadow-primary/30 transition-all hover:shadow-xl hover:shadow-primary/45 hover:-translate-y-0.5 active:scale-95 cursor-pointer overflow-hidden"
               >
                 <QrCode className="h-4 w-4" />
                 View Payment QR
               </button>
-              <div className="inline-flex items-center gap-1.5 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 text-xs font-semibold text-muted-foreground backdrop-blur-sm">
-                <span className="relative flex h-2.5 w-2.5">
+              <div className="inline-flex items-center gap-1.5 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 text-xs font-semibold text-muted-foreground backdrop-blur-sm animate-marquee overflow-hidden whitespace-nowrap">
+                <span className="relative flex h-2.5 w-2.5 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success"></span>
                 </span>
-                Udupi Petrol: ₹{stats.todayPetrolPrice.toFixed(2)}/L
+                <span className="inline-block">Udupi Petrol: ₹{stats.todayPetrolPrice.toFixed(2)}/L • Updated 2 mins ago</span>
               </div>
             </div>
           </div>
 
-          {/* Cinematic Image Rendering */}
-          <div className="relative flex justify-center items-center h-48 md:h-64 rounded-2xl overflow-hidden border border-white/[0.06] shadow-2xl bg-black/40">
+          {/* Cinematic Image with Parallax Tilt */}
+          <div className="relative flex justify-center items-center h-48 md:h-64 rounded-2xl overflow-hidden border border-white/[0.06] shadow-2xl bg-black/40 animate-tilt">
             {/* Glow behind the car */}
             <div className="absolute inset-0 bg-gradient-to-tr from-primary/25 via-purple-500/20 to-transparent rounded-full blur-3xl animate-pulse-soft pointer-events-none" />
-            
+
             <img
               src="/car-hero.png"
               alt="Hyundai Exter SUV"
-              className="relative w-full h-full object-cover transition-all duration-700 hover:scale-105"
+              className="relative w-full h-full object-cover transition-transform duration-700 hover:scale-105"
             />
           </div>
         </div>

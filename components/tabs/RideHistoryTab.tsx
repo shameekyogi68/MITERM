@@ -18,6 +18,7 @@ import {
   Users,
   ExternalLink,
   AlertTriangle,
+  PlusCircle,
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { getRides, deleteRide, duplicateRide } from "@/app/actions/ride.actions";
@@ -167,54 +168,76 @@ export default function RideHistoryTab({
           </div>
         </div>
       ) : rides.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/30 mb-4">
-            <CalendarDays className="h-8 w-8" />
+        <div className="relative flex flex-col items-center justify-center py-20 text-muted-foreground overflow-hidden rounded-2xl border border-dashed bg-gradient-to-br from-muted/30 to-muted/10">
+          <div className="absolute inset-0 dot-grid opacity-20" />
+          <div className="relative flex flex-col items-center gap-4">
+            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-muted/30 border border-muted animate-fade-in-scale">
+              <CalendarDays className="h-10 w-10 text-muted-foreground/40" />
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-semibold gradient-text">No rides yet</p>
+              <p className="text-sm text-muted-foreground mt-1">Create your first ride to see history</p>
+            </div>
           </div>
-          <p className="text-lg font-semibold">No rides yet</p>
-          <p className="text-sm">Create your first ride to see history</p>
+          {isAdmin && (
+            <button
+              onClick={() => {
+                const tabEvent = new CustomEvent("tabchange", { detail: "create" });
+                window.dispatchEvent(tabEvent);
+              }}
+              className="fab animate-bounce-in"
+            >
+              <PlusCircle className="h-6 w-6 text-white" />
+            </button>
+          )}
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="relative space-y-6">
+          {/* Timeline connector */}
+          <div className="absolute left-6 top-8 bottom-0 w-0.5 bg-gradient-to-b from-primary/30 via-primary/10 to-transparent" />
+          
           {rides.map((ride, rideIndex) => {
             const isExpanded = expandedId === ride.id;
             return (
               <div
                 key={ride.id}
-                className="group overflow-hidden rounded-2xl border bg-card transition-all duration-300 hover:shadow-lg animate-fade-in-up"
+                className="group relative pl-14 animate-fade-in-up"
                 style={{ animationDelay: `${rideIndex * 0.05}s` }}
               >
-                {/* Header */}
-                <button
-                  onClick={() => setExpandedId(isExpanded ? null : ride.id)}
-                  className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-muted/20"
-                >
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/[0.08] to-purple-500/[0.08] border border-primary/10">
-                      <CalendarDays className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-base font-semibold">{formatDate(ride.date)}</span>
-                        {getStatusBadge(ride.status)}
+                {/* Timeline dot */}
+                <div className="absolute left-2 top-4 h-8 w-8 rounded-full bg-gradient-to-br from-primary to-purple-600 border-4 border-card shadow-lg shadow-primary/20 z-10" />
+                
+                <div className="group overflow-hidden rounded-2xl border bg-card transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
+                  <button
+                    onClick={() => setExpandedId(isExpanded ? null : ride.id)}
+                    className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-muted/20"
+                  >
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/[0.08] to-purple-500/[0.08] border border-primary/10">
+                        <CalendarDays className="h-5 w-5 text-primary" />
                       </div>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Users className="h-3 w-3" /> {ride.attendees.length}
-                        </span>
-                        <span className="text-xs text-muted-foreground">·</span>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <IndianRupee className="h-3 w-3" /> {formatCurrency(ride.totalCost)}
-                        </span>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-base font-semibold">{formatDate(ride.date)}</span>
+                          {getStatusBadge(ride.status)}
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Users className="h-3 w-3" /> {ride.attendees.length}
+                          </span>
+                          <span className="text-xs text-muted-foreground">·</span>
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <IndianRupee className="h-3 w-3" /> {formatCurrency(ride.totalCost)}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className={`transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}>
-                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                </button>
+                    <div className={`transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`}>
+                      <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  </button>
 
-                {/* Expanded Content */}
+                  {/* Expanded Content */}
                 {isExpanded && (
                   <div className="border-t animate-slide-down">
                     <div className="p-5">

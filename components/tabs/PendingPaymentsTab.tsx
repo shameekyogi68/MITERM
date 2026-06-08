@@ -134,51 +134,135 @@ export default function PendingPaymentsTab({
 
   return (
     <div className="space-y-5 animate-fade-in">
-      {/* Summary Stat Cards */}
+      {/* Summary Stat Cards with Circular Progress */}
       <div className="grid grid-cols-3 gap-4">
         <div className="group relative rounded-2xl border bg-card p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 card-hover animate-fade-in-up" style={{ animationDelay: "0.05s" }}>
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-500/5 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="relative">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 shadow-lg transition-transform duration-300 group-hover:scale-110">
-              <Clock className="h-5 w-5 text-white" />
+          <div className="relative flex items-center gap-4">
+            {/* Circular Progress */}
+            <div className="relative h-16 w-16 shrink-0">
+              <svg className="progress-ring h-16 w-16" viewBox="0 0 100 100">
+                <circle
+                  className="text-muted/20"
+                  strokeWidth="8"
+                  stroke="currentColor"
+                  fill="transparent"
+                  r="45"
+                  cx="50"
+                  cy="50"
+                />
+                <circle
+                  className="progress-ring-circle text-orange-500"
+                  strokeWidth="8"
+                  strokeDasharray="283"
+                  strokeDashoffset={283 - (283 * (pending.length / (pending.length + overdue.length + uniqueMembers) || 0))}
+                  strokeLinecap="round"
+                  stroke="currentColor"
+                  fill="transparent"
+                  r="45"
+                  cx="50"
+                  cy="50"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Clock className="h-5 w-5 text-orange-500" />
+              </div>
             </div>
-            <p className="mt-3 text-2xl font-bold tracking-tight tabular-nums stat-number">
-              {pending.length}
-            </p>
-            <p className="text-xs font-medium text-muted-foreground">Pending</p>
-            <p className="text-[10px] text-muted-foreground/60">{formatCurrency(totalPendingAmount)}</p>
+            <div>
+              <p className="text-2xl font-bold tracking-tight tabular-nums stat-number">
+                {pending.length}
+              </p>
+              <p className="text-xs font-medium text-muted-foreground">Pending</p>
+              <p className="text-[10px] text-muted-foreground/60">{formatCurrency(totalPendingAmount)}</p>
+            </div>
           </div>
           <div className="absolute top-0 right-0 h-16 w-16 rounded-bl-full bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
 
         <div className="group relative rounded-2xl border bg-card p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 card-hover animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-red-500/5 to-rose-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="relative">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg transition-transform duration-300 group-hover:scale-110">
-              <AlertTriangle className="h-5 w-5 text-white" />
+          <div className="relative flex items-center gap-4">
+            {/* Circular Progress */}
+            <div className="relative h-16 w-16 shrink-0">
+              <svg className="progress-ring h-16 w-16" viewBox="0 0 100 100">
+                <circle
+                  className="text-muted/20"
+                  strokeWidth="8"
+                  stroke="currentColor"
+                  fill="transparent"
+                  r="45"
+                  cx="50"
+                  cy="50"
+                />
+                <circle
+                  className="progress-ring-circle text-red-500"
+                  strokeWidth="8"
+                  strokeDasharray="283"
+                  strokeDashoffset={283 - (283 * (overdue.length / (pending.length + overdue.length + uniqueMembers) || 0))}
+                  strokeLinecap="round"
+                  stroke="currentColor"
+                  fill="transparent"
+                  r="45"
+                  cx="50"
+                  cy="50"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <AlertTriangle className="h-5 w-5 text-red-500" />
+              </div>
             </div>
-            <p className="mt-3 text-2xl font-bold tracking-tight text-destructive tabular-nums stat-number">
-              {overdue.length}
-            </p>
-            <p className="text-xs font-medium text-destructive">Overdue</p>
-            <p className="text-[10px] text-destructive/60">{formatCurrency(totalOverdueAmount)}</p>
+            <div>
+              <p className="text-2xl font-bold tracking-tight text-destructive tabular-nums stat-number">
+                {overdue.length}
+              </p>
+              <p className="text-xs font-medium text-destructive">Overdue</p>
+              <p className="text-[10px] text-destructive/60">{formatCurrency(totalOverdueAmount)}</p>
+            </div>
           </div>
           <div className="absolute top-0 right-0 h-16 w-16 rounded-bl-full bg-gradient-to-br from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
 
         <div className="group relative rounded-2xl border bg-card p-5 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 card-hover animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/5 to-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="relative">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 shadow-lg transition-transform duration-300 group-hover:scale-110">
-              <Users className="h-5 w-5 text-white" />
+          <div className="relative flex items-center gap-4">
+            {/* Circular Progress */}
+            <div className="relative h-16 w-16 shrink-0">
+              <svg className="progress-ring h-16 w-16" viewBox="0 0 100 100">
+                <circle
+                  className="text-muted/20"
+                  strokeWidth="8"
+                  stroke="currentColor"
+                  fill="transparent"
+                  r="45"
+                  cx="50"
+                  cy="50"
+                />
+                <circle
+                  className="progress-ring-circle text-purple-500"
+                  strokeWidth="8"
+                  strokeDasharray="283"
+                  strokeDashoffset={283 - (283 * (uniqueMembers / (pending.length + overdue.length + uniqueMembers) || 0))}
+                  strokeLinecap="round"
+                  stroke="currentColor"
+                  fill="transparent"
+                  r="45"
+                  cx="50"
+                  cy="50"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Users className="h-5 w-5 text-purple-500" />
+              </div>
             </div>
-            <p className="mt-3 text-2xl font-bold tracking-tight tabular-nums stat-number">
-              {uniqueMembers}
-            </p>
-            <p className="text-xs font-medium text-muted-foreground">Members</p>
-            <p className="text-[10px] text-muted-foreground/60">
-              {verification.length} verifying
-            </p>
+            <div>
+              <p className="text-2xl font-bold tracking-tight tabular-nums stat-number">
+                {uniqueMembers}
+              </p>
+              <p className="text-xs font-medium text-muted-foreground">Members</p>
+              <p className="text-[10px] text-muted-foreground/60">
+                {verification.length} verifying
+              </p>
+            </div>
           </div>
           <div className="absolute top-0 right-0 h-16 w-16 rounded-bl-full bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
@@ -211,7 +295,7 @@ export default function PendingPaymentsTab({
             placeholder="Search by member name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-xl border bg-card py-3 pl-10 pr-4 text-sm transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+            className="input-premium w-full rounded-xl border bg-card py-3 pl-10 pr-4 text-sm transition-all"
           />
         </div>
         <div className="relative">
@@ -219,7 +303,7 @@ export default function PendingPaymentsTab({
           <select
             value={memberFilter}
             onChange={(e) => setMemberFilter(e.target.value)}
-            className="rounded-xl border bg-card py-3 pl-9 pr-8 text-sm appearance-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
+            className="select-premium rounded-xl border bg-card py-3 pl-9 pr-8 text-sm transition-all"
           >
             <option value="all">All Members</option>
             {members.map((m) => (
