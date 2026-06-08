@@ -113,14 +113,19 @@ export default function PaymentDialog({
     setStep("pay");
   }, [isOpen]);
 
-  const handleUpiClick = (url: string) => {
-    if (!url) return;
+  const handleUpiPayment = async (appName: string, upiId: string, appScheme: string) => {
     try {
-      // Use window.location.href instead of window.open to bypass mobile popup blockers
-      // and ensure the native app launches instantly without refreshing the page.
-      window.location.href = url;
+      await navigator.clipboard.writeText(upiId);
+      addToast("success", `${appName} ID copied! Open app and paste to pay.`);
+      
+      // Delay redirect slightly so user sees the success toast
+      setTimeout(() => {
+        window.location.href = appScheme;
+      }, 600);
     } catch (err) {
-      console.error("UPI redirect failed:", err);
+      console.error("UPI copy failed:", err);
+      // Fallback: just redirect
+      window.location.href = appScheme;
     }
   };
 
@@ -219,14 +224,6 @@ export default function PaymentDialog({
     a.click();
     document.body.removeChild(a);
   };
-
-  const amountStr = amount.toFixed(2);
-  const payeeName = "SHAMEEK YOGI";
-  const enc = encodeURIComponent(payeeName);
-
-  const phonepeUrl = `phonepe://pay?pa=${upiPhonePe}&pn=${enc}&am=${amountStr}&cu=INR`;
-  const gpayUrl    = `tez://upi/pay?pa=${upiGPay}&pn=${enc}&am=${amountStr}&cu=INR`;
-  const paytmUrl   = `paytmmp://upi/pay?pa=${upiPaytm}&pn=${enc}&am=${amountStr}&cu=INR`;
 
   if (!isOpen || !mounted) return null;
 
@@ -382,7 +379,7 @@ export default function PaymentDialog({
                   {/* PhonePe */}
                   <button
                     type="button"
-                    onClick={() => handleUpiClick(phonepeUrl)}
+                    onClick={() => handleUpiPayment("PhonePe", upiPhonePe, "phonepe://")}
                     className="flex flex-col items-center justify-center h-12 rounded-xl text-xs font-bold text-white shadow-md active:opacity-75 touch-manipulation select-none cursor-pointer"
                     style={{ background: "linear-gradient(135deg, #5f259f, #4c1d80)" }}
                   >
@@ -392,7 +389,7 @@ export default function PaymentDialog({
                   {/* GPay */}
                   <button
                     type="button"
-                    onClick={() => handleUpiClick(gpayUrl)}
+                    onClick={() => handleUpiPayment("GPay", upiGPay, "tez://")}
                     className="flex flex-col items-center justify-center h-12 rounded-xl text-xs font-bold text-white shadow-md active:opacity-75 touch-manipulation select-none cursor-pointer"
                     style={{ background: "linear-gradient(135deg, #1a73e8, #1557b0)" }}
                   >
@@ -402,13 +399,19 @@ export default function PaymentDialog({
                   {/* Paytm */}
                   <button
                     type="button"
-                    onClick={() => handleUpiClick(paytmUrl)}
+                    onClick={() => handleUpiPayment("Paytm", upiPaytm, "paytm://")}
                     className="flex flex-col items-center justify-center h-12 rounded-xl text-xs font-bold text-white shadow-md active:opacity-75 touch-manipulation select-none cursor-pointer"
                     style={{ background: "linear-gradient(135deg, #00baf2, #008fc2)" }}
                   >
                     Paytm
                   </button>
                 </div>
+
+                {/* Explanation text to assist the user */}
+                <p className="text-center text-[10px] text-muted-foreground/60 leading-normal px-2">
+                  NPCI regulations block direct browser redirects for personal UPI transfers. 
+                  Tapping copies the UPI ID and opens the app so you can easily paste it.
+                </p>
 
                 {/* ── QR Code ── */}
                 <div className="flex flex-col items-center gap-2.5">
