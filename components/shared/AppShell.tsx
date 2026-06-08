@@ -72,7 +72,7 @@ export default function AppShell({
       <main className="relative z-10 container mx-auto max-w-6xl px-4 py-6">{children}</main>
 
       {/* Premium Footer */}
-      <footer className="relative z-10 border-t mt-12">
+      <footer className="relative z-10 border-t mt-12 pb-[calc(7.5rem+env(safe-area-inset-bottom))] md:pb-0">
         <div className="container mx-auto max-w-6xl px-4 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">

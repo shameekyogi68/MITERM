@@ -53,14 +53,26 @@ export default function TabRouter({
     }
 
     const handleTabChange = (e: CustomEvent) => {
-      setActiveTab(e.detail);
+      const changeState = () => setActiveTab(e.detail);
+      if (typeof document !== "undefined" && "startViewTransition" in document) {
+        (document as any).startViewTransition(changeState);
+      } else {
+        changeState();
+      }
     };
     window.addEventListener("tabchange", handleTabChange as EventListener);
 
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
       const tab = params.get("tab");
-      if (tab) setActiveTab(tab);
+      if (tab) {
+        const changeState = () => setActiveTab(tab);
+        if (typeof document !== "undefined" && "startViewTransition" in document) {
+          (document as any).startViewTransition(changeState);
+        } else {
+          changeState();
+        }
+      }
     };
     window.addEventListener("popstate", handlePopState);
 
@@ -96,10 +108,18 @@ export default function TabRouter({
   const visibleTabs = tabs.filter((t) => !t.adminOnly || isAdmin);
 
   const switchTab = (tabId: string) => {
-    setActiveTab(tabId);
-    const url = new URL(window.location.href);
-    url.searchParams.set("tab", tabId);
-    window.history.pushState({}, "", url.toString());
+    const changeState = () => {
+      setActiveTab(tabId);
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", tabId);
+      window.history.pushState({}, "", url.toString());
+    };
+
+    if (typeof document !== "undefined" && "startViewTransition" in document) {
+      (document as any).startViewTransition(changeState);
+    } else {
+      changeState();
+    }
   };
 
   const getTabIcon = (tabId: string) => {
