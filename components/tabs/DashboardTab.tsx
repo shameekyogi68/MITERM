@@ -305,7 +305,7 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#7c3aed]/10 pointer-events-none z-10" />
 
             <img
-              src="/car-hero.png"
+              src="/car-hero-removebg-preview.png"
               alt="Hyundai Exter SUV"
               className="w-full h-full object-contain object-center transition-transform duration-700 hover:scale-[1.03]"
               style={{
