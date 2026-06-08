@@ -368,12 +368,12 @@ nav, [role="tablist"] {
 
 /* ===== Tab content entry animation ===== */
 @keyframes tabContentEnter {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 .tab-content-enter {
-  animation: tabContentEnter 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: opacity, transform;
+  animation: tabContentEnter 0.2s ease-out;
+  will-change: opacity;
 }
 
 /* ===== Slide up from bottom (for mobile sheet modals) ===== */

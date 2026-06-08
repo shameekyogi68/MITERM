@@ -388,101 +388,65 @@ export default function PaymentDialog({
                 </div>
 
                 {/* ── UPI payment buttons ── */}
-                <div className="space-y-2.5">
+                <div className="grid grid-cols-3 gap-2 shrink-0">
                   {/* PhonePe */}
-                  <div className="flex gap-2">
-                    <a
-                      href={phonepeUrl}
-                      className="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl text-sm font-bold text-white shadow-lg active:opacity-75 touch-manipulation select-none"
-                      style={{ background: "linear-gradient(135deg, #5f259f, #4c1d80)" }}
-                    >
-                      Pay with PhonePe <ArrowRight className="h-4 w-4 shrink-0" />
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => handleCopy(upiPhonePe, "phonepe")}
-                      className="h-14 w-14 shrink-0 flex items-center justify-center rounded-xl bg-white/[0.05] border border-white/[0.10] hover:bg-white/[0.08] active:bg-white/[0.12] transition-colors touch-manipulation"
-                      aria-label="Copy PhonePe UPI ID"
-                    >
-                      {copiedKey === "phonepe"
-                        ? <Check className="h-4 w-4 text-success" />
-                        : <Copy className="h-4 w-4 text-muted-foreground" />}
-                    </button>
-                  </div>
+                  <a
+                    href={phonepeUrl}
+                    className="flex flex-col items-center justify-center h-12 rounded-xl text-xs font-bold text-white shadow-md active:opacity-75 touch-manipulation select-none"
+                    style={{ background: "linear-gradient(135deg, #5f259f, #4c1d80)" }}
+                  >
+                    PhonePe
+                  </a>
 
                   {/* GPay */}
-                  <div className="flex gap-2">
-                    <a
-                      href={gpayUrl}
-                      className="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl text-sm font-bold text-white shadow-lg active:opacity-75 touch-manipulation select-none"
-                      style={{ background: "linear-gradient(135deg, #1a73e8, #1557b0)" }}
-                    >
-                      Pay with Google Pay <ArrowRight className="h-4 w-4 shrink-0" />
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => handleCopy(upiGPay, "gpay")}
-                      className="h-14 w-14 shrink-0 flex items-center justify-center rounded-xl bg-white/[0.05] border border-white/[0.10] hover:bg-white/[0.08] active:bg-white/[0.12] transition-colors touch-manipulation"
-                      aria-label="Copy GPay UPI ID"
-                    >
-                      {copiedKey === "gpay"
-                        ? <Check className="h-4 w-4 text-success" />
-                        : <Copy className="h-4 w-4 text-muted-foreground" />}
-                    </button>
-                  </div>
+                  <a
+                    href={gpayUrl}
+                    className="flex flex-col items-center justify-center h-12 rounded-xl text-xs font-bold text-white shadow-md active:opacity-75 touch-manipulation select-none"
+                    style={{ background: "linear-gradient(135deg, #1a73e8, #1557b0)" }}
+                  >
+                    GPay
+                  </a>
 
                   {/* Paytm */}
-                  <div className="flex gap-2">
-                    <a
-                      href={paytmUrl}
-                      className="flex-1 flex items-center justify-center gap-2 h-14 rounded-xl text-sm font-bold text-white shadow-lg active:opacity-75 touch-manipulation select-none"
-                      style={{ background: "linear-gradient(135deg, #00baf2, #008fc2)" }}
-                    >
-                      Pay with Paytm <ArrowRight className="h-4 w-4 shrink-0" />
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => handleCopy(upiPaytm, "paytm")}
-                      className="h-14 w-14 shrink-0 flex items-center justify-center rounded-xl bg-white/[0.05] border border-white/[0.10] hover:bg-white/[0.08] active:bg-white/[0.12] transition-colors touch-manipulation"
-                      aria-label="Copy Paytm UPI ID"
-                    >
-                      {copiedKey === "paytm"
-                        ? <Check className="h-4 w-4 text-success" />
-                        : <Copy className="h-4 w-4 text-muted-foreground" />}
-                    </button>
-                  </div>
+                  <a
+                    href={paytmUrl}
+                    className="flex flex-col items-center justify-center h-12 rounded-xl text-xs font-bold text-white shadow-md active:opacity-75 touch-manipulation select-none"
+                    style={{ background: "linear-gradient(135deg, #00baf2, #008fc2)" }}
+                  >
+                    Paytm
+                  </a>
                 </div>
 
                 {/* ── QR Code ── */}
-                <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-col items-center gap-2.5">
                   <div className="flex items-center gap-2 w-full">
                     <div className="flex-1 h-px bg-white/[0.06]" />
-                    <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest font-bold px-1">Or Scan QR</span>
+                    <span className="text-[9px] text-muted-foreground/60 uppercase tracking-widest font-bold px-1">Or Scan QR</span>
                     <div className="flex-1 h-px bg-white/[0.06]" />
                   </div>
                   {qrImageUrl ? (
                     <>
-                      <div className="relative rounded-2xl border border-white/10 bg-white p-4 shadow-xl overflow-hidden">
+                      <div className="relative rounded-2xl border border-white/10 bg-white p-3 shadow-xl overflow-hidden">
                         <img
                           src={qrImageUrl}
                           alt="Payment QR Code"
-                          className="h-44 w-44 object-contain"
+                          className="h-36 w-36 object-contain"
                         />
-                        <div className="absolute left-4 right-4 top-4 h-0.5 bg-primary/60 shadow-[0_0_8px_rgba(124,58,237,0.8)] animate-scan pointer-events-none" />
+                        <div className="absolute left-3 right-3 top-3 h-0.5 bg-primary/60 shadow-[0_0_8px_rgba(124,58,237,0.8)] animate-scan pointer-events-none" />
                       </div>
                       <button
                         type="button"
                         onClick={handleDownloadQr}
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/10 px-4 py-2 rounded-full border border-primary/20 active:bg-primary/20 touch-manipulation"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20 active:bg-primary/20 touch-manipulation"
                       >
-                        <Download className="h-3.5 w-3.5" /> Save QR Code
+                        <Download className="h-3 w-3" /> Save QR Code
                       </button>
                     </>
                   ) : (
-                    <div className="flex h-32 w-32 items-center justify-center rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02]">
+                    <div className="flex h-28 w-28 items-center justify-center rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.02]">
                       <div className="text-center">
-                        <QrCode className="h-8 w-8 text-muted-foreground/40 mx-auto" />
-                        <p className="mt-1 text-[10px] text-muted-foreground">No QR set</p>
+                        <QrCode className="h-6 w-6 text-muted-foreground/40 mx-auto" />
+                        <p className="mt-1 text-[9px] text-muted-foreground">No QR set</p>
                       </div>
                     </div>
                   )}
@@ -490,7 +454,7 @@ export default function PaymentDialog({
 
                 {/* ── Screenshot upload (non-admin only) ── */}
                 {!isAdmin && currentStatus !== "VERIFICATION" && (
-                  <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.01] p-4">
+                  <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.01] p-3">
                     <div className="flex items-center gap-2 text-sm mb-2">
                       <Upload className="h-4 w-4 text-primary shrink-0" />
                       <span className="font-semibold">Upload payment screenshot</span>
