@@ -88,40 +88,24 @@ export default function PaymentDialog({
         setQrImageUrl(qrSetting);
       }
 
-      const ua = navigator.userAgent.toLowerCase();
-      const isAndroid = /android/.test(ua);
-      const isIOS = /iphone|ipad|ipod/.test(ua);
       const encodedPayeeName = encodeURIComponent(activePayeeName);
 
       // PhonePe Deep Link
+      // Using phonepe:// custom scheme — opens the app with the user's full session
+      // intent:// bypasses the session and causes "Add bank account" prompt
       const phonepeQuery = `pa=${activePhonePe}&pn=${encodedPayeeName}&am=${amountStr}&cu=INR`;
-      if (isAndroid) {
-        setPhonepeUrl(`intent://pay?${phonepeQuery}#Intent;scheme=upi;package=com.phonepe.app;end`);
-      } else if (isIOS) {
-        setPhonepeUrl(`phonepe://upi/pay?${phonepeQuery}`);
-      } else {
-        setPhonepeUrl(`upi://pay?${phonepeQuery}`);
-      }
+      setPhonepeUrl(`phonepe://pay?${phonepeQuery}`);
 
       // Google Pay Deep Link
+      // GPay's internal scheme is "tez" (from Google Tez era) — opens with bank account intact
+      // intent://...nbu.paisa.user opens in isolated mode causing "Could not load banking name"
       const gpayQuery = `pa=${activeGPay}&pn=${encodedPayeeName}&am=${amountStr}&cu=INR`;
-      if (isAndroid) {
-        setGpayUrl(`intent://pay?${gpayQuery}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end`);
-      } else if (isIOS) {
-        setGpayUrl(`gpay://upi/pay?${gpayQuery}`);
-      } else {
-        setGpayUrl(`upi://pay?${gpayQuery}`);
-      }
+      setGpayUrl(`tez://upi/pay?${gpayQuery}`);
 
       // Paytm Deep Link
+      // paytmmp:// is the correct scheme for Paytm UPI payments
       const paytmQuery = `pa=${activePaytm}&pn=${encodedPayeeName}&am=${amountStr}&cu=INR`;
-      if (isAndroid) {
-        setPaytmUrl(`intent://pay?${paytmQuery}#Intent;scheme=upi;package=net.one97.paytm;end`);
-      } else if (isIOS) {
-        setPaytmUrl(`paytmmp://upi/pay?${paytmQuery}`);
-      } else {
-        setPaytmUrl(`upi://pay?${paytmQuery}`);
-      }
+      setPaytmUrl(`paytmmp://upi/pay?${paytmQuery}`);
     };
 
     loadSettingsAndBuildLinks();
