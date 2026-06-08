@@ -260,9 +260,9 @@ export default function PaymentDialog({
         className="
           relative w-full mt-auto
           sm:mt-0 sm:max-w-md sm:mx-auto sm:mx-4
-          grid grid-rows-[auto_1fr_auto]
+          flex flex-col
           rounded-t-[28px] sm:rounded-2xl
-          overflow-hidden
+          overflow-y-auto overscroll-contain
           border border-white/[0.10]
           bg-[#0d0f17]
           shadow-[0_-8px_60px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.06)]
@@ -271,11 +271,12 @@ export default function PaymentDialog({
         "
         style={{
           maxHeight: "min(92dvh, 92vh)",
+          WebkitOverflowScrolling: "touch",
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── Header Container ── */}
-        <div className="flex flex-col shrink-0">
+        <div className="sticky top-0 z-20 flex flex-col shrink-0 bg-[#0d0f17]">
           {/* Drag handle (mobile only) */}
           <div className="flex justify-center pt-3 pb-1 sm:hidden" aria-hidden="true">
             <div className="h-[5px] w-10 rounded-full bg-white/20" />
@@ -337,12 +338,8 @@ export default function PaymentDialog({
           </div>
         ) : (
           <>
-            {/* Scrollable content area */}
-            <div
-              className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
-              style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}
-            >
-              <div className="px-5 pt-4 pb-5 space-y-4">
+            {/* Body content area (scrolls with parent wrapper) */}
+            <div className="flex-1 px-5 pt-4 pb-5 space-y-4 min-h-0">
 
                 {/* ── Amount receipt ticket ── */}
                 <div className="relative rounded-2xl bg-white/[0.03] border border-white/[0.08] px-5 py-4 overflow-hidden">
@@ -437,17 +434,16 @@ export default function PaymentDialog({
                   </div>
                 )}
 
-              </div>
             </div>
 
             {/*
              * ── Sticky action footer ──
-             * Lives OUTSIDE the scroll area so it's always visible.
+             * Stuck to the bottom of the container.
              * safe-area-inset-bottom ensures buttons clear the home indicator
              * on iPhones and notched Android devices.
              */}
             <div
-              className="shrink-0 px-5 pt-3 pb-4 border-t border-white/[0.07] bg-[#0d0f17]"
+              className="sticky bottom-0 z-20 shrink-0 px-5 pt-3 pb-4 border-t border-white/[0.07] bg-[#0d0f17]"
               style={{ paddingBottom: "max(1rem, calc(env(safe-area-inset-bottom) + 0.75rem))" }}
             >
               <div className="flex gap-3">
