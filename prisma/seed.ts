@@ -36,13 +36,6 @@ async function main() {
     });
   }
 
-  const petrolDate = new Date('2026-01-01T00:00:00.000Z');
-  await prisma.petrolPrice.upsert({
-    where: { date: petrolDate },
-    update: {},
-    create: { price: 110.23, date: petrolDate, source: 'MANUAL' },
-  });
-
   console.log('✅ Database seeded successfully!');
   console.log(`   - ${members.length} members`);
   console.log(`   - ${settings.length} settings`);

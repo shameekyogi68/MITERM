@@ -87,8 +87,6 @@ function StatCard({
   accentBg,
   delay,
   isCurrency = false,
-  sparklineData,
-  delta,
 }: {
   title: string;
   value: string | number;
@@ -97,8 +95,6 @@ function StatCard({
   accentBg: string;
   delay: number;
   isCurrency?: boolean;
-  sparklineData?: number[];
-  delta?: { value: number; label: string };
 }) {
   const numericValue = isCurrency
     ? typeof value === "string"
@@ -148,33 +144,6 @@ function StatCard({
         {title}
       </p>
  
-      {/* Trend badge */}
-      {delta && (
-        <div className="mt-1.5 sm:mt-2">
-          <span
-            className={`inline-flex items-center gap-0.5 sm:gap-1 rounded-full px-2 py-0.5 text-[9px] sm:text-[10px] font-bold ${
-              delta.value >= 0
-                ? "bg-success/15 text-success"
-                : "bg-destructive/15 text-destructive"
-            }`}
-          >
-            {delta.value >= 0 ? (
-              <ArrowUpRight className="h-2.5 sm:h-3 w-2.5 sm:w-3" />
-            ) : (
-              <ArrowDownRight className="h-2.5 sm:h-3 w-2.5 sm:w-3" />
-            )}
-            {Math.abs(delta.value)}% {delta.label}
-          </span>
-        </div>
-      )}
- 
-      {/* Sparkline */}
-      {sparklineData && (
-        <div className="mt-2.5 sm:mt-3 h-7 sm:h-8">
-          <SparklineChart data={sparklineData} color={accentColor} height={28} />
-        </div>
-      )}
- 
       {/* Bottom accent line */}
       <div
         className="absolute bottom-0 left-4 right-4 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -206,7 +175,7 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
     rideDate: Date;
     status?: string;
   }>({ open: false, rideId: "", memberName: "", amount: 0, rideDate: new Date() });
-
+ 
   const fetchData = useCallback(async () => {
     const [s, p] = await Promise.all([getDashboardStats(), getPendingPayments()]);
     setStats(s as DashboardData);
@@ -221,7 +190,7 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
       })),
     );
   }, []);
-
+ 
   useEffect(() => {
     fetchData();
     const interval = setInterval(() => {
@@ -230,7 +199,7 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
     }, 30000);
     return () => clearInterval(interval);
   }, [fetchData, router]);
-
+ 
   if (!stats) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -240,11 +209,11 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
       </div>
     );
   }
-
+ 
   const collectionRate = stats.totalPending + stats.totalCollected > 0
     ? Math.round((stats.totalCollected / (stats.totalPending + stats.totalCollected)) * 100)
     : 0;
-
+ 
   const statCards = [
     {
       title: "Today's Fuel Cost",
@@ -253,8 +222,6 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
       accentColor: "#7c3aed",
       accentBg: "rgba(124,58,237,0.1)",
       isCurrency: true,
-      sparklineData: [450, 520, 480, 550, 510, 530, stats.todayFuelCost],
-      delta: { value: 8.2, label: "vs yesterday" },
     },
     {
       title: "Total Pending",
@@ -263,8 +230,6 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
       accentColor: "#f59e0b",
       accentBg: "rgba(245,158,11,0.1)",
       isCurrency: true,
-      sparklineData: [1200, 1500, 1100, 1800, 1400, 1600, stats.totalPending],
-      delta: { value: -12.5, label: "vs last week" },
     },
     {
       title: "Total Collected",
@@ -273,8 +238,6 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
       accentColor: "#06b6d4",
       accentBg: "rgba(6,182,212,0.1)",
       isCurrency: true,
-      sparklineData: [5000, 5500, 5200, 5800, 5600, 6000, stats.totalCollected],
-      delta: { value: 15.3, label: "vs last week" },
     },
     {
       title: "Collection Rate",
@@ -283,8 +246,6 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
       accentColor: "#10b981",
       accentBg: "rgba(16,185,129,0.1)",
       isCurrency: false,
-      sparklineData: [72, 68, 75, 80, 78, 82, collectionRate],
-      delta: { value: 5.2, label: "vs last week" },
     },
   ];
 

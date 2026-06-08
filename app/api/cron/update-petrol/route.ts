@@ -38,12 +38,12 @@ export async function GET(request: Request) {
     const yesterday = await prisma.petrolPrice.findFirst({
       orderBy: { date: "desc" },
     });
-    price = yesterday?.price ?? 110;
+    price = yesterday?.price ?? 0;
     source = "CACHE";
   }
 
   if (price === null) {
-    price = 110;
+    price = 0;
     source = "CACHE";
   }
 
