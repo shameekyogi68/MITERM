@@ -13,7 +13,8 @@ export async function createRide(
   raw: CreateRideInput & { forceDuplicate?: boolean },
 ): Promise<{ success: boolean; rideId?: string; error?: string }> {
   try {
-    const parsed = createRideSchema.safeParse(raw);
+    const { forceDuplicate, ...schemaInput } = raw;
+    const parsed = createRideSchema.safeParse(schemaInput);
     if (!parsed.success) {
       const firstError = parsed.error.issues[0];
       return { success: false, error: firstError?.message ?? "Invalid input." };
@@ -27,7 +28,7 @@ export async function createRide(
     const endOfDay = new Date(data.date);
     endOfDay.setHours(23, 59, 59, 999);
 
-    if (!raw.forceDuplicate) {
+    if (!forceDuplicate) {
       const existing = await prisma.ride.findFirst({
         where: { date: { gte: startOfDay, lte: endOfDay } },
       });
