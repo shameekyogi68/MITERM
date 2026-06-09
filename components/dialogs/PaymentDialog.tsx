@@ -51,6 +51,7 @@ export default function PaymentDialog({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -113,6 +114,7 @@ export default function PaymentDialog({
   // ── Reset step and error on open ────────────────────────────────────────────
   useEffect(() => {
     if (!isOpen) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setError(null);
     setStep("pay");
   }, [isOpen]);
@@ -512,7 +514,7 @@ export default function PaymentDialog({
                         3
                       </div>
                       <p className="text-muted-foreground leading-normal text-[11px]">
-                        After making the payment, return here and tap <span className="text-success font-medium">"Mark as Paid"</span> at the bottom.
+                        After making the payment, return here and tap <span className="text-success font-medium">&quot;Mark as Paid&quot;</span> at the bottom.
                       </p>
                     </div>
                   </div>
@@ -533,7 +535,7 @@ export default function PaymentDialog({
                   {/* GPay */}
                   <button
                     type="button"
-                    onClick={() => handleUpiPayment("GPay", upiGPay, "tez://")}
+                    onClick={() => handleUpiPayment("GPay", upiGPay, "gpay://")}
                     className="flex flex-col items-center justify-center h-12 rounded-xl text-xs font-bold text-white shadow-md active:opacity-75 touch-manipulation select-none cursor-pointer"
                     style={{ background: "linear-gradient(135deg, #1a73e8, #1557b0)" }}
                   >
@@ -543,7 +545,7 @@ export default function PaymentDialog({
                   {/* Paytm */}
                   <button
                     type="button"
-                    onClick={() => handleUpiPayment("Paytm", upiPaytm, "paytm://")}
+                    onClick={() => handleUpiPayment("Paytm", upiPaytm, "paytmmp://")}
                     className="flex flex-col items-center justify-center h-12 rounded-xl text-xs font-bold text-white shadow-md active:opacity-75 touch-manipulation select-none cursor-pointer"
                     style={{ background: "linear-gradient(135deg, #00baf2, #008fc2)" }}
                   >
