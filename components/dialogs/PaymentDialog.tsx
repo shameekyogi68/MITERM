@@ -380,7 +380,7 @@ export default function PaymentDialog({
                         1
                       </div>
                       <p className="text-muted-foreground leading-normal text-[11px]">
-                        Tap any app below to <span className="text-white font-medium">copy the UPI ID</span> to your clipboard.
+                        Tap any app below to <span className="text-white font-medium">copy the UPI ID</span> and launch the app instantly.
                       </p>
                     </div>
                     <div className="flex gap-2.5 items-start">
@@ -388,7 +388,7 @@ export default function PaymentDialog({
                         2
                       </div>
                       <p className="text-muted-foreground leading-normal text-[11px]">
-                        The app will open. Search and <span className="text-white font-medium">paste the UPI ID</span> inside, then pay exactly <span className="text-primary font-bold">{formatCurrency(amount)}</span>.
+                        Inside the app, <span className="text-white font-medium">paste the UPI ID</span> (under Pay to UPI ID) and pay exactly <span className="text-primary font-bold">{formatCurrency(amount)}</span>.
                       </p>
                     </div>
                     <div className="flex gap-2.5 items-start">
@@ -396,7 +396,7 @@ export default function PaymentDialog({
                         3
                       </div>
                       <p className="text-muted-foreground leading-normal text-[11px]">
-                        After making the payment, return here and tap <span className="text-success font-medium">&quot;Mark as Paid&quot;</span> at the bottom.
+                        Return here and tap <span className="text-success font-medium">&quot;Mark as Paid&quot;</span> at the bottom.
                       </p>
                     </div>
                   </div>
