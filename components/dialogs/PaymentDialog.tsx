@@ -108,17 +108,20 @@ export default function PaymentDialog({
     setStep("pay");
   }, [isOpen]);
 
-  const handleUpiPayment = async (appName: string, upiId: string, appScheme: string) => {
+  const handleUpiPayment = (appName: string, upiId: string, appScheme: string) => {
     try {
-      await navigator.clipboard.writeText(upiId);
-      addToast("success", `Copied UPI ID for ${appName}!`);
+      navigator.clipboard.writeText(upiId).then(() => {
+        addToast("success", `Copied UPI ID for ${appName}!`);
+      }).catch((err) => {
+        console.error("UPI copy failed:", err);
+      });
     } catch (err) {
       console.error("UPI copy failed:", err);
     }
 
     let launchUrl = appScheme;
     if (appName === "GPay") {
-      launchUrl = "tez://";
+      launchUrl = "gpay://";
     } else if (appName === "PhonePe") {
       launchUrl = "phonepe://";
     } else if (appName === "Paytm") {
