@@ -220,7 +220,7 @@ export default function SettingsTab() {
                 <input
                   type="number"
                   step="0.01"
-                  value={(settings.petrolPrice as number) ?? 102.41}
+                  value={(settings.petrolPrice as number) ?? 110.80}
                   onChange={(e) => handleSaveSetting("petrolPrice", Number(e.target.value))}
                   className="w-20 rounded-xl border bg-card px-3 py-2 text-sm text-right transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />

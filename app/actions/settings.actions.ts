@@ -65,8 +65,18 @@ export async function updateSetting(
 // ── GET TODAY'S PETROL PRICE ─────────────────────────────────────────────────
 export async function getTodayPetrolPrice() {
   try {
-    const priceSetting = await prisma.setting.findUnique({ where: { key: "petrolPrice" } });
-    const price = priceSetting?.value && typeof priceSetting.value === "number" ? priceSetting.value : 102.41;
+    let priceSetting = await prisma.setting.findUnique({ where: { key: "petrolPrice" } });
+    let price = priceSetting?.value && typeof priceSetting.value === "number" ? priceSetting.value : 110.80;
+
+    // Force update database to 110.80 if it is 102.41 or less (so it automatically updates the old default)
+    if (!priceSetting || price === 102.41) {
+      price = 110.80;
+      priceSetting = await prisma.setting.upsert({
+        where: { key: "petrolPrice" },
+        update: { value: 110.80 },
+        create: { key: "petrolPrice", value: 110.80 },
+      });
+    }
 
     return {
       price,
@@ -76,7 +86,7 @@ export async function getTodayPetrolPrice() {
   } catch (error) {
     console.error("getTodayPetrolPrice error:", error);
     return {
-      price: 102.41,
+      price: 110.80,
       source: "ERROR",
       lastUpdated: new Date(),
     };

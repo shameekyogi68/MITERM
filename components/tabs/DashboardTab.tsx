@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Fuel, Clock, CreditCard, TrendingUp, Car, RefreshCw } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
@@ -162,7 +162,14 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
       setStats(s as DashboardData);
       setFetchError(null);
       setPendingPayments(
-        p.map((a: any) => ({
+        (p as unknown as Array<{
+          rideId: string;
+          ride: { date: Date };
+          member: { name: string };
+          share: number;
+          status: string;
+          createdAt: Date;
+        }>).map((a) => ({
           rideId: a.rideId,
           rideDate: a.ride.date,
           memberName: a.member.name,
@@ -186,6 +193,7 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
   }, [fetchData, router, addToast]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
     if (fetchError) return;
     const interval = setInterval(() => {
@@ -268,7 +276,7 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
                 Namma <span className="gradient-text bg-gradient-to-r from-violet-400 via-primary to-cyan-400 font-extrabold">Exter</span>
               </h2>
               <p className="text-xs sm:text-sm text-muted-foreground font-semibold leading-relaxed max-w-sm">
-                Sacred chariot gulping liquid gold to MITE daily
+                Petrol price today in Udupi (Karnataka) is Rs. {stats.todayPetrolPrice.toFixed(2)} per litre.
               </p>
             </div>
 
@@ -279,7 +287,7 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75" />
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500" />
                 </span>
-                <span className="text-amber-400">Live price</span>
+                <span className="text-amber-400">Udupi (Karnataka)</span>
               </div>
               <div className="flex items-baseline gap-0.5 mt-0.5">
                 <span className="text-2xl sm:text-3xl font-black tabular-nums tracking-tight text-amber-400">
@@ -324,7 +332,7 @@ export default function DashboardTab({ isAdmin }: { isAdmin: boolean }) {
                   <p className="text-[9px] text-muted-foreground/50 font-semibold mt-1">litres</p>
                 </div>
                 <div className="px-1 sm:px-3 text-center">
-                  <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase font-bold tracking-wider leading-tight">Today's Cost</p>
+                  <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase font-bold tracking-wider leading-tight">Today&apos;s Cost</p>
                   <p className="text-lg sm:text-3xl font-black mt-1 leading-none gradient-text bg-gradient-to-r from-violet-400 via-primary to-cyan-400 tabular-nums">
                     {formatCurrency(Math.round(fuelPerTrip * stats.todayPetrolPrice))}
                   </p>

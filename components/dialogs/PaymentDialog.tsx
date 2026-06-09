@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
   X, Check, QrCode, Loader2, ArrowRight, ShieldCheck,
-  Download, Copy,
+  Download,
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { markPayment, verifyPayment, adminMarkPaid } from "@/app/actions/payment.actions";
@@ -44,9 +44,6 @@ export default function PaymentDialog({
   const [upiGPay, setUpiGPay]           = useState("shameekyogiofficial@oksbi");
   const [upiPaytm, setUpiPaytm]         = useState("7338603959@ptyes");
   const [qrImageUrl, setQrImageUrl]     = useState("");
-  const [copiedKey, setCopiedKey]       = useState<string | null>(null);
-  const [redirectingApp, setRedirectingApp] = useState<{ name: string; upiId: string; scheme: string } | null>(null);
-  const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -71,11 +68,6 @@ export default function PaymentDialog({
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
-    if (redirectTimeoutRef.current) {
-      clearTimeout(redirectTimeoutRef.current);
-      redirectTimeoutRef.current = null;
-    }
-    setRedirectingApp(null);
     onClose();
   };
 
@@ -84,9 +76,6 @@ export default function PaymentDialog({
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
-      }
-      if (redirectTimeoutRef.current) {
-        clearTimeout(redirectTimeoutRef.current);
       }
     };
   }, []);
@@ -120,40 +109,26 @@ export default function PaymentDialog({
   }, [isOpen]);
 
   const handleUpiPayment = async (appName: string, upiId: string, appScheme: string) => {
-    if (redirectTimeoutRef.current) {
-      clearTimeout(redirectTimeoutRef.current);
-    }
     try {
       await navigator.clipboard.writeText(upiId);
       addToast("success", `Copied UPI ID for ${appName}!`);
-      
-      setRedirectingApp({ name: appName, upiId, scheme: appScheme });
-      
-      redirectTimeoutRef.current = setTimeout(() => {
-        window.location.href = appScheme;
-      }, 1200);
     } catch (err) {
       console.error("UPI copy failed:", err);
-      setRedirectingApp({ name: appName, upiId, scheme: appScheme });
-      redirectTimeoutRef.current = setTimeout(() => {
-        window.location.href = appScheme;
-      }, 1200);
     }
+
+    let launchUrl = appScheme;
+    if (appName === "GPay") {
+      launchUrl = "tez://";
+    } else if (appName === "PhonePe") {
+      launchUrl = "phonepe://";
+    } else if (appName === "Paytm") {
+      launchUrl = "paytmmp://";
+    }
+
+    window.location.href = launchUrl;
   };
 
-  const handleCancelRedirect = () => {
-    if (redirectTimeoutRef.current) {
-      clearTimeout(redirectTimeoutRef.current);
-      redirectTimeoutRef.current = null;
-    }
-    setRedirectingApp(null);
-  };
 
-  const handleCopy = (text: string, key: string) => {
-    navigator.clipboard.writeText(text).catch(() => {});
-    setCopiedKey(key);
-    setTimeout(() => setCopiedKey(null), 1500);
-  };
 
   const handleMarkPaid = async () => {
     setIsLoading(true);
@@ -306,99 +281,6 @@ export default function PaymentDialog({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {redirectingApp && (
-          <div className="absolute inset-0 z-50 bg-[#0d0f17]/95 backdrop-blur-md flex flex-col justify-between p-6 animate-fade-in">
-            <div className="flex-1 flex flex-col items-center justify-center text-center space-y-5">
-              {/* App Logo Indicator */}
-              <div 
-                className="h-14 w-14 rounded-2xl flex items-center justify-center text-white font-extrabold text-lg shadow-lg animate-bounce-in"
-                style={{ 
-                  background: redirectingApp.name === "PhonePe" 
-                    ? "linear-gradient(135deg, #5f259f, #4c1d80)" 
-                    : redirectingApp.name === "GPay" 
-                    ? "linear-gradient(135deg, #1a73e8, #1557b0)" 
-                    : "linear-gradient(135deg, #00baf2, #008fc2)"
-                }}
-              >
-                {redirectingApp.name[0]}
-              </div>
-
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-white">UPI ID Copied!</h3>
-                <p className="text-[11px] text-muted-foreground max-w-xs leading-relaxed">
-                  UPI ID for <span className="text-white font-semibold">{redirectingApp.name}</span> copied to clipboard. 
-                  Due to bank regulations, you must pay manually.
-                </p>
-              </div>
-
-              {/* Paste Instructions Box */}
-              <div className="w-full max-w-xs rounded-xl bg-white/[0.03] border border-white/[0.08] p-4 text-left space-y-3">
-                <div>
-                  <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider font-semibold">Copied ID</p>
-                  <div className="flex items-center justify-between mt-1 gap-2">
-                    <code className="text-xs font-mono text-primary font-bold truncate max-w-[170px]">
-                      {redirectingApp.upiId}
-                    </code>
-                    <span className="text-[9px] shrink-0 bg-success/15 border border-success/30 text-success px-2 py-0.5 rounded-full font-bold">
-                      Copied
-                    </span>
-                  </div>
-                </div>
-
-                <div className="h-px bg-white/[0.06]" />
-
-                <div>
-                  <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider font-semibold">Amount to Pay</p>
-                  <p className="text-base font-bold text-white mt-0.5 tabular-nums">
-                    {formatCurrency(amount)}
-                  </p>
-                </div>
-
-                <div className="h-px bg-white/[0.06]" />
-
-                <div className="text-[10px] text-muted-foreground/90 space-y-1.5 leading-relaxed">
-                  <p className="flex items-start gap-1">
-                    <span className="text-primary font-bold">1.</span> Paste the copied ID inside {redirectingApp.name} (under Pay to UPI ID).
-                  </p>
-                  <p className="flex items-start gap-1">
-                    <span className="text-primary font-bold">2.</span> Pay exactly {formatCurrency(amount)}.
-                  </p>
-                  <p className="flex items-start gap-1">
-                    <span className="text-primary font-bold">3.</span> Return here and mark as paid.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Footer Buttons */}
-            <div className="space-y-2.5">
-              <button
-                type="button"
-                onClick={() => {
-                  window.location.href = redirectingApp.scheme;
-                }}
-                className="w-full h-11 rounded-xl text-xs font-bold text-white shadow-lg flex items-center justify-center gap-2 touch-manipulation hover:opacity-90 active:opacity-80 transition-opacity"
-                style={{ 
-                  background: redirectingApp.name === "PhonePe" 
-                    ? "linear-gradient(135deg, #5f259f, #4c1d80)" 
-                    : redirectingApp.name === "GPay" 
-                    ? "linear-gradient(135deg, #1a73e8, #1557b0)" 
-                    : "linear-gradient(135deg, #00baf2, #008fc2)"
-                }}
-              >
-                Open {redirectingApp.name} Now
-              </button>
-              
-              <button
-                type="button"
-                onClick={handleCancelRedirect}
-                className="w-full h-10 rounded-xl border border-white/[0.08] bg-white/[0.02] text-[11px] font-semibold text-muted-foreground hover:text-white hover:bg-white/[0.05] transition-all touch-manipulation"
-              >
-                Go Back / Check QR Code
-              </button>
-            </div>
-          </div>
-        )}
         {/* ── Header Container ── */}
         <div className="flex flex-col shrink-0">
           {/* Drag handle (mobile only) */}

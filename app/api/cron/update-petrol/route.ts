@@ -9,7 +9,7 @@ export async function GET(request: Request) {
 
   try {
     const priceSetting = await prisma.setting.findUnique({ where: { key: "petrolPrice" } });
-    const price = priceSetting?.value && typeof priceSetting.value === "number" ? priceSetting.value : 102.41;
+    const price = priceSetting?.value && typeof priceSetting.value === "number" ? priceSetting.value : 110.80;
 
     return NextResponse.json({
       success: true,
