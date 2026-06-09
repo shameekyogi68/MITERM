@@ -6,9 +6,7 @@ import {
   settingKeySchema,
   memberDistanceSchema,
   petrolPriceSchema,
-  exportFormatSchema,
 } from "@/lib/validations";
-import { getTodayIST } from "@/lib/utils";
 
 // ── GET SETTING ──────────────────────────────────────────────────────────────
 export async function getSetting(key: string) {
@@ -36,12 +34,12 @@ export async function updateSetting(
     }
 
     // Type-safe value validation for known settings
-    const numericSettings = ["mileage", "routeDistance", "petrolPriceOffset"];
+    const numericSettings = ["mileage", "routeDistance", "petrolPrice"];
     if (numericSettings.includes(key)) {
       const num = Number(value);
-      if (key === "petrolPriceOffset") {
-        if (isNaN(num) || num < -100 || num > 100) {
-          return { success: false, error: "Petrol price offset must be between -100 and 100." };
+      if (key === "petrolPrice") {
+        if (isNaN(num) || num <= 0 || num > 500) {
+          return { success: false, error: "Petrol price must be between 0 and 500." };
         }
       } else if (isNaN(num) || num <= 0 || num > 10000) {
         return { success: false, error: "Invalid numeric value for this setting." };
@@ -51,7 +49,9 @@ export async function updateSetting(
 
     await prisma.setting.upsert({
       where: { key },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       update: { value: value as any },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       create: { key, value: value as any },
     });
     revalidatePath("/");
@@ -65,65 +65,18 @@ export async function updateSetting(
 // ── GET TODAY'S PETROL PRICE ─────────────────────────────────────────────────
 export async function getTodayPetrolPrice() {
   try {
-    const today = getTodayIST();
+    const priceSetting = await prisma.setting.findUnique({ where: { key: "petrolPrice" } });
+    const price = priceSetting?.value && typeof priceSetting.value === "number" ? priceSetting.value : 102.41;
 
-    // Check if we already have today's price cached in the database
-    let todayRecord = await prisma.petrolPrice.findUnique({
-      where: { date: today },
-    });
-
-    const offsetSetting = await prisma.setting.findUnique({ where: { key: "petrolPriceOffset" } });
-    const offset = offsetSetting?.value && typeof offsetSetting.value === "number" ? offsetSetting.value : 0;
-
-    if (!todayRecord) {
-      // If not cached today, attempt to fetch fresh from IndianAPI
-      try {
-        const apiKey = process.env.PETROL_API_KEY;
-        if (apiKey) {
-          const res = await fetch(
-            "https://fuel.indianapi.in/live_fuel_price?fuel_type=petrol&location_type=city",
-            {
-              headers: {
-                "x-api-key": apiKey,
-              },
-              next: { revalidate: 3600 } // cache for 1 hour in Next.js
-            }
-          );
-          if (res.ok) {
-            const data = await res.json();
-            const udupiData = data.find((item: any) => item.city?.toLowerCase() === "udupi");
-            if (udupiData && udupiData.price) {
-              const priceVal = parseFloat(udupiData.price);
-              todayRecord = await prisma.petrolPrice.upsert({
-                where: { date: today },
-                update: { price: priceVal, source: "API" },
-                create: { price: priceVal, date: today, source: "API" },
-              });
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Failed to fetch fresh price from IndianAPI:", err);
-      }
-    }
-
-    // Fallback to the latest available historical record in the database if API call failed
-    if (!todayRecord) {
-      todayRecord = await prisma.petrolPrice.findFirst({
-        orderBy: { date: "desc" },
-      });
-    }
-
-    const basePrice = todayRecord?.price ?? 0;
     return {
-      price: basePrice > 0 ? basePrice + offset : 0,
-      source: (todayRecord?.source ?? "ERROR") as string,
-      lastUpdated: todayRecord?.date ?? new Date(),
+      price,
+      source: "MANUAL" as string,
+      lastUpdated: priceSetting?.updatedAt ?? new Date(),
     };
   } catch (error) {
     console.error("getTodayPetrolPrice error:", error);
     return {
-      price: 0,
+      price: 102.41,
       source: "ERROR",
       lastUpdated: new Date(),
     };
@@ -141,12 +94,10 @@ export async function updatePetrolPrice(
       return { success: false, error: firstError?.message ?? "Invalid price." };
     }
 
-    const today = getTodayIST();
-
-    await prisma.petrolPrice.upsert({
-      where: { date: today },
-      update: { price: parsed.data.price, source: "MANUAL" },
-      create: { price: parsed.data.price, date: today, source: "MANUAL" },
+    await prisma.setting.upsert({
+      where: { key: "petrolPrice" },
+      update: { value: parsed.data.price },
+      create: { key: "petrolPrice", value: parsed.data.price },
     });
     revalidatePath("/");
     return { success: true };

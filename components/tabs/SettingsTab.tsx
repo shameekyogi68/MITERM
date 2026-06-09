@@ -34,6 +34,20 @@ interface Member {
   distance: number;
 }
 
+const SettingCard = ({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
+  <div className="overflow-hidden rounded-2xl border bg-card transition-all hover:shadow-md">
+    <div className="flex items-center gap-3 border-b bg-gradient-to-r from-primary/[0.03] to-purple-500/[0.03] px-4 sm:px-6 py-3 sm:py-4">
+      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20 shrink-0">
+        <Icon className="h-4 w-4 text-primary" />
+      </div>
+      <h3 className="text-sm font-semibold">{title}</h3>
+    </div>
+    <div className="p-4 sm:p-6">
+      {children}
+    </div>
+  </div>
+);
+
 export default function SettingsTab() {
   const [settings, setSettings] = useState<Record<string, unknown>>({});
   const [members, setMembers] = useState<Member[]>([]);
@@ -137,19 +151,7 @@ export default function SettingsTab() {
     );
   }
 
-  const SettingCard = ({ icon: Icon, title, children }: { icon: React.ElementType; title: string; children: React.ReactNode }) => (
-    <div className="overflow-hidden rounded-2xl border bg-card transition-all hover:shadow-md">
-      <div className="flex items-center gap-3 border-b bg-gradient-to-r from-primary/[0.03] to-purple-500/[0.03] px-4 sm:px-6 py-3 sm:py-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-primary/20 shrink-0">
-          <Icon className="h-4 w-4 text-primary" />
-        </div>
-        <h3 className="text-sm font-semibold">{title}</h3>
-      </div>
-      <div className="p-4 sm:p-6">
-        {children}
-      </div>
-    </div>
-  );
+
 
   return (
     <div className="space-y-4 sm:space-y-5 animate-fade-in">
@@ -210,16 +212,16 @@ export default function SettingsTab() {
               <div className="flex items-center gap-3 min-w-0">
                 <IndianRupee className="h-4 w-4 text-muted-foreground shrink-0" />
                 <div>
-                  <p className="text-sm font-medium">Petrol Price Offset</p>
-                  <p className="text-[10px] text-muted-foreground">Manual correction to API price</p>
+                  <p className="text-sm font-medium">Petrol Price</p>
+                  <p className="text-[10px] text-muted-foreground">Live price per liter (₹/L)</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <input
                   type="number"
                   step="0.01"
-                  value={(settings.petrolPriceOffset as number) ?? 0}
-                  onChange={(e) => handleSaveSetting("petrolPriceOffset", Number(e.target.value))}
+                  value={(settings.petrolPrice as number) ?? 102.41}
+                  onChange={(e) => handleSaveSetting("petrolPrice", Number(e.target.value))}
                   className="w-20 rounded-xl border bg-card px-3 py-2 text-sm text-right transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
                 />
                 <span className="text-xs text-muted-foreground w-4">₹</span>
@@ -357,7 +359,7 @@ export default function SettingsTab() {
               className="rounded-xl border bg-card px-3.5 py-2 text-sm transition-all focus:border-primary focus:ring-2 focus:ring-primary/10"
               placeholder="7338603959"
             />
-            <p className="text-[10px] text-muted-foreground">Used for the WhatsApp "Ask to Review" link when members verify payments.</p>
+            <p className="text-[10px] text-muted-foreground">Used for the WhatsApp &quot;Ask to Review&quot; link when members verify payments.</p>
           </div>
         </div>
       </SettingCard>

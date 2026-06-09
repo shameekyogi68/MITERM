@@ -25,7 +25,7 @@ async function main() {
     { key: 'qrImageUrl', value: '/qr-code.jpeg' },
     { key: 'adminSecretUrl', value: 'shameekyogi68' },
     { key: 'roundingRule', value: 'ADJUST_TO_ADMIN' },
-    { key: 'petrolPriceOffset', value: 0 },
+    { key: 'petrolPrice', value: 102.41 },
     { key: 'upiPhonePe', value: '7338603959@ybl' },
     { key: 'upiGPay', value: 'shameekyogiofficial@oksbi' },
     { key: 'upiPaytm', value: '7338603959@ptyes' },
